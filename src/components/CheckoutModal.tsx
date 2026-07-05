@@ -30,9 +30,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   };
 
   const handleCopyDetails = () => {
-    navigator.clipboard.writeText(getCopyableText());
-    setCopiedDetails(true);
-    setTimeout(() => setCopiedDetails(false), 2000);
+    const text = getCopyableText();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          setCopiedDetails(true);
+          setTimeout(() => setCopiedDetails(false), 2000);
+        })
+        .catch(err => {
+          console.error("Clipboard copy failed:", err);
+          fallbackCopyText(text);
+        });
+    } else {
+      fallbackCopyText(text);
+    }
+  };
+
+  const fallbackCopyText = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setCopiedDetails(true);
+      setTimeout(() => setCopiedDetails(false), 2000);
+    } catch (err) {
+      console.error("Fallback copy failed:", err);
+    }
   };
 
   const upiId = "sarkardiganta04-2@oksbi";
