@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { BackgroundParticles } from "@/components/BackgroundParticles";
 import { Footer } from "@/components/Footer";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { 
   Lock, LayoutDashboard, CheckSquare, Terminal, Settings, 
   TrendingUp, Clock, CheckCircle2, ShieldAlert, Copy, Check, LogOut,
@@ -114,12 +115,39 @@ export default function AdminPage() {
     sessionStorage.setItem("bongcraft_audit_logs", JSON.stringify(updated));
   };
 
-  const loadOrders = () => {
-    try {
-      const data = JSON.parse(localStorage.getItem("bongcraft_orders") || "[]");
-      setOrders(data);
-    } catch (e) {
-      console.error(e);
+  const loadOrders = async () => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from("orders")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Map database schema to Order interface
+        const mappedOrders: Order[] = data.map((o: any) => ({
+          id: o.order_id,
+          ign: o.ign,
+          items: Array.isArray(o.items)
+            ? o.items.map((item: any) => `${item.name} (x${item.quantity})`)
+            : [],
+          total: o.total,
+          status: o.status,
+          timestamp: new Date(o.created_at).toLocaleString()
+        }));
+
+        setOrders(mappedOrders);
+      } catch (e) {
+        console.error("Failed to load orders from Supabase:", e);
+      }
+    } else {
+      try {
+        const data = JSON.parse(localStorage.getItem("bongcraft_orders") || "[]");
+        setOrders(data);
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -153,27 +181,62 @@ export default function AdminPage() {
     addAuditLog("Operator logged out of console session", "info");
   };
 
-  const handleApprove = (orderId: string) => {
-    const updated = orders.map(o => {
-      if (o.id === orderId) {
-        const approvedOrder: Order = { ...o, status: "Completed" };
-        setSelectedOrder(approvedOrder);
-        addAuditLog(`Order ${orderId} verified and approved`, "success");
-        return approvedOrder;
+  const handleApprove = async (orderId: string) => {
+    if (isSupabaseConfigured) {
+      try {
+        const { error } = await supabase
+          .from("orders")
+          .update({ status: "Completed" })
+          .eq("order_id", orderId);
+
+        if (error) throw error;
+
+        addAuditLog(`Order ${orderId} verified and approved in database`, "success");
+        loadOrders();
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder(prev => prev ? { ...prev, status: "Completed" } : null);
+        }
+      } catch (e) {
+        console.error("Failed to approve order in Supabase:", e);
       }
-      return o;
-    });
-    setOrders(updated);
-    localStorage.setItem("bongcraft_orders", JSON.stringify(updated));
+    } else {
+      const updated = orders.map(o => {
+        if (o.id === orderId) {
+          const approvedOrder: Order = { ...o, status: "Completed" };
+          setSelectedOrder(approvedOrder);
+          addAuditLog(`Order ${orderId} verified and approved`, "success");
+          return approvedOrder;
+        }
+        return o;
+      });
+      setOrders(updated);
+      localStorage.setItem("bongcraft_orders", JSON.stringify(updated));
+    }
   };
 
-  const handleDelete = (orderId: string) => {
+  const handleDelete = async (orderId: string) => {
     if (confirm("Are you sure you want to delete this order?")) {
-      const filtered = orders.filter(o => o.id !== orderId);
-      setOrders(filtered);
-      localStorage.setItem("bongcraft_orders", JSON.stringify(filtered));
-      addAuditLog(`Order log ${orderId} deleted from database`, "warning");
-      if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      if (isSupabaseConfigured) {
+        try {
+          const { error } = await supabase
+            .from("orders")
+            .delete()
+            .eq("order_id", orderId);
+
+          if (error) throw error;
+          addAuditLog(`Order ${orderId} deleted from database`, "warning");
+          loadOrders();
+          if (selectedOrder?.id === orderId) setSelectedOrder(null);
+        } catch (e) {
+          console.error("Failed to delete order in Supabase:", e);
+        }
+      } else {
+        const filtered = orders.filter(o => o.id !== orderId);
+        setOrders(filtered);
+        localStorage.setItem("bongcraft_orders", JSON.stringify(filtered));
+        addAuditLog(`Order log ${orderId} deleted from database`, "warning");
+        if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      }
     }
   };
 

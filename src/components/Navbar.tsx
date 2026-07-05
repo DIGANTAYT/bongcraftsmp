@@ -5,10 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart, Menu, X, Copy, Check } from "lucide-react";
+import { ShoppingCart, Menu, X, Copy, Check, LogOut, User, LogIn } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export const Navbar: React.FC = () => {
   const { cartCount, setIsCartOpen } = useCart();
+  const { user, profile, signOut } = useAuth();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -16,6 +18,7 @@ export const Navbar: React.FC = () => {
   const [playerCount, setPlayerCount] = useState(0);
   const [serverOnline, setServerOnline] = useState(true);
   const [maintenance, setMaintenance] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const checkMaint = () => {
@@ -163,8 +166,8 @@ export const Navbar: React.FC = () => {
             )}
           </button>
         </div>
-
-        {/* Right side CTA actions (Cart & Discord) */}
+        
+        {/* Right side CTA actions (Cart, Auth & Discord) */}
         <div className="flex items-center gap-3">
           {/* Discord CTA */}
           <a
@@ -193,6 +196,60 @@ export const Navbar: React.FC = () => {
             )}
           </button>
 
+          {/* User Sign In / Profile dropdown */}
+          <div className="relative hidden lg:block">
+            {user ? (
+              <>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-[#171923]/60 border border-border-custom hover:border-primary-accent/40 rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  <div className="relative w-6 h-6 rounded-md overflow-hidden bg-primary-bg border border-primary-accent/30">
+                    <img
+                      src={`https://mc-heads.net/avatar/${profile?.minecraft_username || "Steve"}`}
+                      alt={profile?.minecraft_username || "player"}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="font-inter text-xs text-white-text font-bold truncate max-w-[90px]">
+                    {profile?.minecraft_username}
+                  </span>
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-[#09090B] border border-border-custom rounded-2xl shadow-xl p-2.5 z-55 flex flex-col gap-1">
+                    <div className="px-3 py-2 border-b border-border-custom/50">
+                      <div className="text-[10px] text-secondary-text/60 font-inter font-bold uppercase tracking-wider">
+                        Active IGN
+                      </div>
+                      <div className="text-xs text-white-text font-inter font-bold truncate">
+                        {profile?.minecraft_username}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setDropdownOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-xs font-inter text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer w-full text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 px-4.5 py-2.5 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 hover:shadow-[0_0_12px_rgba(124,58,237,0.3)]"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </Link>
+            )}
+          </div>
+
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -219,6 +276,50 @@ export const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
+          </div>
+
+          {/* Mobile User Auth Section */}
+          <div className="flex flex-col gap-2.5 pb-2 border-b border-border-custom/50">
+            {user ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2.5 px-2">
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-primary-bg border border-primary-accent/30 shrink-0">
+                    <img
+                      src={`https://mc-heads.net/avatar/${profile?.minecraft_username || "Steve"}`}
+                      alt={profile?.minecraft_username || "player"}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <span className="font-inter text-[9px] text-secondary-text/60 font-bold uppercase tracking-wider block">
+                      Active Profile (IGN)
+                    </span>
+                    <span className="font-inter text-sm text-white-text font-bold leading-tight block">
+                      {profile?.minecraft_username}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    signOut();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/35 text-red-400 font-inter font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full py-3 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all hover:shadow-[0_0_12px_rgba(124,58,237,0.3)]"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Mobile Server Status & IP Copy */}

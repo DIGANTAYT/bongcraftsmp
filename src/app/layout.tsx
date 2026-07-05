@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Inter } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -38,9 +39,11 @@ export default function RootLayout({
       className={`${cinzel.variable} ${inter.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full bg-[#09090B] text-[#F8FAFC] antialiased overflow-x-hidden">
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

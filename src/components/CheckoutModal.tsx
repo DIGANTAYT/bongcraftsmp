@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { X, ShieldCheck, CheckCircle2, Loader2, Sparkles, Copy, Check, MessageSquare } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import confetti from "canvas-confetti";
 
 interface CheckoutModalProps {
@@ -13,9 +16,12 @@ interface CheckoutModalProps {
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
   const { cart, cartTotal, minecraftUsername, clearCart } = useCart();
+  const { user, profile } = useAuth();
   const [step, setStep] = useState<"summary" | "processing" | "success">("summary");
   const [copied, setCopied] = useState(false);
   const [orderId, setOrderId] = useState("");
+
+  const activeIgn = profile?.minecraft_username || minecraftUsername || "GuestPlayer";
 
   const upiId = "sarkardiganta04-2@oksbi";
 
@@ -38,19 +44,34 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     // Create new order record
     const newOrder = {
       id: orderId,
-      ign: minecraftUsername,
+      ign: activeIgn,
       items: cart.map(item => `${item.name} (x${item.quantity})`),
       total: cartTotal,
-      status: "Pending Verification",
+      status: "Pending Verification" as const,
       timestamp: new Date().toLocaleString()
     };
     
-    // Save to local storage for admin panel access
-    try {
-      const existingOrders = JSON.parse(localStorage.getItem("bongcraft_orders") || "[]");
-      localStorage.setItem("bongcraft_orders", JSON.stringify([newOrder, ...existingOrders]));
-    } catch (e) {
-      console.error("Failed to save order to localStorage:", e);
+    // Save to database or local fallback
+    if (isSupabaseConfigured && user) {
+      supabase.from("orders").insert([{
+        user_id: user.id,
+        order_id: orderId,
+        ign: activeIgn,
+        items: cart.map(item => ({ name: item.name, quantity: item.quantity, price: item.price })),
+        total: cartTotal,
+        status: "Pending Verification"
+      }]).then((res: any) => {
+        if (res.error) {
+          console.error("Failed to save order to Supabase:", res.error);
+        }
+      });
+    } else {
+      try {
+        const existingOrders = JSON.parse(localStorage.getItem("bongcraft_orders") || "[]");
+        localStorage.setItem("bongcraft_orders", JSON.stringify([newOrder, ...existingOrders]));
+      } catch (e) {
+        console.error("Failed to save order to localStorage:", e);
+      }
     }
 
     // Dispatch optional Discord Webhook notification if webhook is configured
@@ -66,7 +87,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 title: "🟢 NEW STORE CLAIM SUBMITTED",
                 color: 16507396, // gold accent
                 fields: [
-                  { name: "Minecraft IGN", value: minecraftUsername, inline: true },
+                  { name: "Minecraft IGN", value: activeIgn, inline: true },
                   { name: "Order ID", value: orderId, inline: true },
                   { name: "Grand Total", value: `₹${cartTotal}`, inline: true },
                   {
@@ -137,15 +158,43 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
         {/* Content Box */}
         <div className="p-6 md:p-8 overflow-y-auto space-y-6">
-          {step === "summary" && (
+          {isSupabaseConfigured && !user ? (
+            <div className="text-center py-10 space-y-4">
+              <span className="font-inter text-xs text-primary-accent font-extrabold uppercase tracking-widest block">
+                Verification Required
+              </span>
+              <h4 className="font-cinzel text-lg font-bold text-white-text">
+                Please Sign In to Checkout
+              </h4>
+              <p className="font-inter text-xs text-secondary-text max-w-sm mx-auto leading-relaxed">
+                You must have an account linked to your Minecraft Username to complete this purchase and track order delivery.
+              </p>
+              <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/login"
+                  onClick={onClose}
+                  className="px-6 py-3 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={onClose}
+                  className="px-6 py-3 border border-border-custom hover:bg-card-bg text-secondary-text hover:text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all"
+                >
+                  Register
+                </Link>
+              </div>
+            </div>
+          ) : step === "summary" && (
             <div className="space-y-6">
               
               {/* Delivery Account Summary */}
               <div className="flex items-center gap-4 bg-secondary-bg/60 border border-border-custom p-4 rounded-2xl">
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-primary-bg border border-primary-accent/30 p-0.5 shrink-0">
                   <img
-                    src={`https://mc-heads.net/avatar/${minecraftUsername}`}
-                    alt={minecraftUsername}
+                    src={`https://mc-heads.net/avatar/${activeIgn}`}
+                    alt={activeIgn}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -154,7 +203,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                     Target Username (IGN)
                   </div>
                   <h4 className="font-inter text-base font-bold text-white-text leading-tight">
-                    {minecraftUsername}
+                    {activeIgn}
                   </h4>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />

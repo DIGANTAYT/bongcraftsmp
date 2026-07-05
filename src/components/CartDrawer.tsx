@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 
 interface CartDrawerProps {
@@ -21,10 +23,24 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
     setMinecraftUsername,
   } = useCart();
 
+  const { user, profile } = useAuth();
   const [usernameInput, setUsernameInput] = useState(minecraftUsername);
   const [isUsernameValid, setIsUsernameValid] = useState(minecraftUsername.length >= 3);
 
+  // Sync inputs dynamically on auth changes
+  useEffect(() => {
+    if (isSupabaseConfigured && user && profile?.minecraft_username) {
+      setUsernameInput(profile.minecraft_username);
+      setMinecraftUsername(profile.minecraft_username);
+      setIsUsernameValid(true);
+    } else {
+      setUsernameInput(minecraftUsername);
+      setIsUsernameValid(minecraftUsername.length >= 3);
+    }
+  }, [minecraftUsername, profile, user]);
+
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isSupabaseConfigured && user) return; // Read-only if logged in
     const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, ""); // Minecraft username limits
     setUsernameInput(value);
     setMinecraftUsername(value);
@@ -68,9 +84,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
 
           {/* Minecraft Username Input Section */}
           <div className="px-6 py-4 bg-secondary-bg/50 border-b border-border-custom">
-            <label className="block font-inter text-xs text-secondary-text font-bold uppercase tracking-wider mb-2">
-              Minecraft Username
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block font-inter text-xs text-secondary-text font-bold uppercase tracking-wider">
+                Minecraft Username
+              </label>
+              {isSupabaseConfigured && user && (
+                <span className="flex items-center gap-0.5 text-[9px] text-emerald-500 font-inter font-bold uppercase tracking-wider">
+                  <ShieldCheck className="w-3 h-3" />
+                  Synced Account
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-3">
               <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-border-custom bg-primary-bg flex-shrink-0">
                 {usernameInput.length >= 3 ? (
@@ -89,13 +113,23 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                 type="text"
                 value={usernameInput}
                 onChange={handleUsernameChange}
+                disabled={!!(isSupabaseConfigured && user)}
                 placeholder="Enter Minecraft IGN..."
-                className="flex-1 px-3 py-2 bg-primary-bg/75 border border-border-custom hover:border-primary-accent/40 focus:border-primary-accent rounded-xl text-white-text font-inter text-sm outline-none transition-colors duration-300"
+                className={`flex-1 px-3 py-2 border rounded-xl font-inter text-sm outline-none transition-colors duration-300 ${
+                  isSupabaseConfigured && user
+                    ? "bg-secondary-bg/80 border-border-custom text-secondary-text/80 cursor-not-allowed"
+                    : "bg-primary-bg/75 border-border-custom hover:border-primary-accent/40 focus:border-primary-accent text-white-text"
+                }`}
               />
             </div>
             {!isUsernameValid && (
               <p className="text-[10px] text-red-400 mt-1">
                 * Please enter a valid Minecraft username to continue.
+              </p>
+            )}
+            {isSupabaseConfigured && !user && (
+              <p className="text-[9px] text-amber-500/70 mt-1.5 leading-tight">
+                💡 Tip: **[Sign In](/login)** to automatically link your characters and view order history.
               </p>
             )}
           </div>
