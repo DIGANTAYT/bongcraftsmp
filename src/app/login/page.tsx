@@ -11,7 +11,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
-  const { signIn, user } = useAuth();
+  const { signIn, signInWithDiscord, user } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -21,7 +21,7 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   React.useEffect(() => {
-    if (user) {
+    if (user && !user.needsProfileSetup) {
       router.push("/");
     }
   }, [user, router]);
@@ -42,6 +42,16 @@ export default function LoginPage() {
       setError(err.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDiscordSignIn = async () => {
+    setError(null);
+    try {
+      const { error: err } = await signInWithDiscord();
+      if (err) setError(err.message);
+    } catch (e: any) {
+      setError(e.message || "An unexpected error occurred.");
     }
   };
 
@@ -89,6 +99,36 @@ export default function LoginPage() {
               Log into your BongCraft SMP account to access your purchase history and store wallet.
             </p>
           </div>
+
+          {/* Social Logins */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="space-y-4 mb-6"
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={handleDiscordSignIn}
+              className="w-full py-3 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white font-inter font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(88,101,242,0.35)] cursor-pointer"
+            >
+              <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 127.14 96.36">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,52.54,6.83,77.19,77.19,0,0,0,49.24,0,105.15,105.15,0,0,0,18.8,8.07C-3.41,40.83-1,72.9,9.58,88.42A105.65,105.65,0,0,0,41,96.36a77.7,77.7,0,0,0,8.66-14A68.69,68.69,0,0,1,38,76.58c1.1-.81,2.16-1.67,3.17-2.56a75.76,75.76,0,0,0,9.91,5.12c5.84,2.5,12.06,4.24,18.52,5.12a81.76,81.76,0,0,0,32-.14,75.46,75.46,0,0,0,18.28-5.1A72,72,0,0,0,119.82,74c1,1,2.06,1.86,3.17,2.56a68.69,68.69,0,0,1-11.64,5.78,77.7,77.7,0,0,0,8.66,14,105.65,105.65,0,0,0,31.42-7.94C128.84,72.9,131.25,40.83,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.88,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.12,46,96.12,53,91,65.69,84.69,65.69Z" />
+              </svg>
+              Sign In with Discord
+            </motion.button>
+
+            {/* OR Divider */}
+            <div className="flex items-center gap-3">
+              <span className="flex-1 h-[1px] bg-border-custom/50" />
+              <span className="font-inter text-[9px] text-secondary-text/40 font-bold uppercase tracking-widest">
+                or sign in with email
+              </span>
+              <span className="flex-1 h-[1px] bg-border-custom/50" />
+            </div>
+          </motion.div>
 
           {/* Form */}
           <motion.form

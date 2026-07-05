@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { useRouter, usePathname } from "next/navigation";
 
 interface Profile {
   id: string;
@@ -14,8 +15,11 @@ interface AuthContextType {
   profile: Profile | null;
   isLoading: boolean;
   isConfigured: boolean;
+  needsProfileSetup: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, minecraftUsername: string) => Promise<{ error: any }>;
+  signInWithDiscord: () => Promise<{ error: any }>;
+  linkMinecraftUsername: (minecraftUsername: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -24,7 +28,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [needsProfileSetup, setNeedsProfileSetup] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Redirect if profile setup is required
+  useEffect(() => {
+    if (needsProfileSetup && pathname !== "/profile-setup") {
+      router.push("/profile-setup");
+    }
+  }, [needsProfileSetup, pathname, router]);
 
   // Load auth state
   useEffect(() => {
@@ -36,6 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const session = JSON.parse(mockSession);
           setUser(session.user);
           setProfile(session.profile);
+          if (session.user && !session.profile) {
+            setNeedsProfileSetup(true);
+          }
         } catch (e) {
           console.error(e);
         }
@@ -64,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setUser(null);
           setProfile(null);
+          setNeedsProfileSetup(false);
           setIsLoading(false);
         }
       }
@@ -82,8 +101,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq("id", userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === "PGRST116") {
+          // Profile row not found (Discord first login)
+          setNeedsProfileSetup(true);
+        }
+        throw error;
+      }
       setProfile(data);
+      setNeedsProfileSetup(false);
     } catch (e) {
       console.error("Error loading profile:", e);
     } finally {
@@ -105,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("bongcraft_mock_session", JSON.stringify(session));
         setUser(mockUser);
         setProfile(mockProfile);
+        setNeedsProfileSetup(false);
         return { error: null };
       }
       return { error: { message: "Invalid credentials (use password >= 6 characters)." } };
@@ -129,6 +156,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("bongcraft_mock_session", JSON.stringify(session));
         setUser(mockUser);
         setProfile(mockProfile);
+        setNeedsProfileSetup(false);
         return { error: null };
       }
       return { error: { message: "Invalid credentials or username." } };
@@ -153,7 +181,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error: null };
   };
 
+  const signInWithDiscord = async () => {
+    if (!isSupabaseConfigured) {
+      // Mock social auth login
+      const mockUser = { id: "mock-discord-uid-456", email: "discordplayer@example.com" };
+      setUser(mockUser);
+      setProfile(null);
+      setNeedsProfileSetup(true);
+      
+      const tempSession = { user: mockUser, profile: null };
+      localStorage.setItem("bongcraft_mock_session", JSON.stringify(tempSession));
+      return { error: null };
+    }
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+
+    return { error };
+  };
+
+  const linkMinecraftUsername = async (minecraftUsername: string) => {
+    if (!user) return { error: { message: "No active session." } };
+
+    if (!isSupabaseConfigured) {
+      const updatedProfile = {
+        id: user.id,
+        minecraft_username: minecraftUsername,
+        created_at: new Date().toISOString()
+      };
+      setProfile(updatedProfile);
+      setNeedsProfileSetup(false);
+      localStorage.setItem("bongcraft_mock_session", JSON.stringify({ user, profile: updatedProfile }));
+      return { error: null };
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .insert([{ id: user.id, minecraft_username: minecraftUsername }]);
+    
+    if (!error) {
+      setProfile({
+        id: user.id,
+        minecraft_username: minecraftUsername,
+        created_at: new Date().toISOString()
+      });
+      setNeedsProfileSetup(false);
+    }
+
+    return { error };
+  };
+
   const signOut = async () => {
+    setNeedsProfileSetup(false);
     if (!isSupabaseConfigured) {
       localStorage.removeItem("bongcraft_mock_session");
       setUser(null);
@@ -172,8 +255,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         isLoading,
         isConfigured: isSupabaseConfigured,
+        needsProfileSetup,
         signIn,
         signUp,
+        signInWithDiscord,
+        linkMinecraftUsername,
         signOut
       }}
     >
