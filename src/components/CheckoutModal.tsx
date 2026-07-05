@@ -19,9 +19,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const { user, profile } = useAuth();
   const [step, setStep] = useState<"summary" | "processing" | "success">("summary");
   const [copied, setCopied] = useState(false);
+  const [copiedDetails, setCopiedDetails] = useState(false);
   const [orderId, setOrderId] = useState("");
 
   const activeIgn = profile?.minecraft_username || minecraftUsername || "GuestPlayer";
+
+  const getCopyableText = () => {
+    const itemsText = cart.map(item => `  • ${item.name} (x${item.quantity})`).join("\n");
+    return `🛒 **BongCraft SMP Store Order**\n- **Order ID:** ${orderId}\n- **Minecraft IGN:** ${activeIgn}\n- **Items:**\n${itemsText}\n- **Total Paid:** ₹${cartTotal}`;
+  };
+
+  const handleCopyDetails = () => {
+    navigator.clipboard.writeText(getCopyableText());
+    setCopiedDetails(true);
+    setTimeout(() => setCopiedDetails(false), 2000);
+  };
 
   const upiId = "sarkardiganta04-2@oksbi";
 
@@ -362,6 +374,28 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
               {/* Details card */}
               <div className="w-full bg-[#111217]/80 border border-border-custom rounded-2xl p-5 space-y-4 text-left">
+                <div className="flex justify-between items-center pb-1 border-b border-border-custom/50">
+                  <span className="font-inter text-[10px] font-bold text-primary-accent uppercase tracking-wider">
+                    Order Verification Details
+                  </span>
+                  <button
+                    onClick={handleCopyDetails}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-accent/10 hover:bg-primary-accent/20 border border-primary-accent/30 text-primary-accent hover:text-white rounded-lg transition-colors text-[10px] font-inter font-bold uppercase tracking-wider cursor-pointer"
+                  >
+                    {copiedDetails ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        Copy Ticket Info
+                      </>
+                    )}
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 font-inter text-xs">
                   <div>
                     <span className="text-secondary-text block">Order Reference</span>
@@ -369,7 +403,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   </div>
                   <div>
                     <span className="text-secondary-text block">Minecraft IGN</span>
-                    <span className="text-white-text font-bold">{minecraftUsername}</span>
+                    <span className="text-white-text font-bold">{activeIgn}</span>
                   </div>
                 </div>
 
@@ -382,8 +416,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   <ul className="font-inter text-xs text-secondary-text list-disc list-inside space-y-1.5 leading-relaxed">
                     <li>Locate the ticket channel created for you on Discord.</li>
                     <li>Upload your <strong className="text-white-text">UPI Transaction Screenshot</strong>.</li>
-                    <li>Provide your order ID: <strong className="text-gold-accent font-mono">{orderId}</strong>.</li>
-                    <li>Provide your Minecraft username: <strong className="text-white-text">{minecraftUsername}</strong>.</li>
+                    <li>Click the copy button above and paste the details into your ticket!</li>
                     <li>A staff moderator will review the receipt and run delivery console commands instantly!</li>
                   </ul>
                 </div>
