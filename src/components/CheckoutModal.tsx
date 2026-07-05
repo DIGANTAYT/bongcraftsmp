@@ -315,18 +315,35 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
               </div>
 
               {/* Actions */}
-              <div className="space-y-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleSubmitClaim}
-                  className="w-full flex items-center justify-center gap-2.5 py-4.5 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-inter font-bold text-sm tracking-wider uppercase rounded-xl hover:shadow-[0_0_25px_rgba(88,101,242,0.4)] transition-all duration-300 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-inter font-bold text-sm tracking-wider uppercase rounded-xl hover:shadow-[0_0_20px_rgba(88,101,242,0.35)] transition-all duration-300 cursor-pointer"
                 >
                   <MessageSquare className="w-4.5 h-4.5 fill-current" />
                   Submit Claim on Discord
                 </button>
-                <div className="flex items-center justify-center gap-2 text-secondary-text text-[10px] uppercase font-bold tracking-wider">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  100% Encrypted Manual Verification System
-                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyDetails}
+                  className="px-6 py-4 bg-primary-accent/10 hover:bg-primary-accent/20 border border-primary-accent/30 text-primary-accent hover:text-white flex items-center justify-center gap-2 font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  {copiedDetails ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copy Details
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-secondary-text text-[10px] uppercase font-bold tracking-wider pt-1">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                100% Encrypted Manual Verification System
               </div>
             </div>
           )}
