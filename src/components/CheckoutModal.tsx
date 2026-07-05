@@ -108,6 +108,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       console.error(err);
     }
 
+    // Dispatch Email Notification to Admin
+    fetch("/api/order-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId,
+        activeIgn,
+        cartTotal,
+        cart
+      })
+    }).catch(err => console.error("Email notification dispatch failed:", err));
+
     // Simulate short buffering check
     setTimeout(() => {
       setStep("success");
