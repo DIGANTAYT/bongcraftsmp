@@ -8,6 +8,7 @@ import { BackgroundParticles } from "@/components/BackgroundParticles";
 import { Footer } from "@/components/Footer";
 import { Mail, Lock, Loader2, LogIn, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const { signIn, user } = useAuth();
@@ -44,13 +45,37 @@ export default function LoginPage() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { type: "spring" as const, stiffness: 120, damping: 15 } 
+    },
+  };
+
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
       <BackgroundParticles />
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center pt-32 pb-16 px-4 z-10 relative">
-        <div className="w-full max-w-md glass-panel p-8 rounded-3xl border border-border-custom shadow-2xl relative overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md glass-panel p-8 rounded-3xl border border-border-custom shadow-2xl relative overflow-hidden"
+        >
           {/* Backlight Glow */}
           <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-primary-accent/15 filter blur-3xl -z-1" />
           <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-gold-accent/10 filter blur-3xl -z-1" />
@@ -66,16 +91,25 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <motion.form
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
             {error && (
-              <div className="flex items-start gap-2.5 p-3.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-inter leading-relaxed">
+              <motion.div 
+                variants={itemVariants}
+                className="flex items-start gap-2.5 p-3.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-inter leading-relaxed"
+              >
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
-              </div>
+              </motion.div>
             )}
 
             {/* Email Field */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className="font-inter text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
                 Email Address
               </label>
@@ -92,10 +126,10 @@ export default function LoginPage() {
                   className="w-full bg-[#111217]/60 border border-border-custom focus:border-primary-accent/65 pl-10 pr-4 py-3 rounded-xl font-inter text-xs text-white-text placeholder-secondary-text/30 outline-none transition-all duration-300"
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Password Field */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className="font-inter text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
                 Password
               </label>
@@ -112,10 +146,13 @@ export default function LoginPage() {
                   className="w-full bg-[#111217]/60 border border-border-custom focus:border-primary-accent/65 pl-10 pr-4 py-3 rounded-xl font-inter text-xs text-white-text placeholder-secondary-text/30 outline-none transition-all duration-300"
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Action Buttons */}
-            <button
+            <motion.button
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
               className="w-full py-3.5 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:shadow-[0_0_20px_rgba(124,58,237,0.35)] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -131,8 +168,8 @@ export default function LoginPage() {
                   Sign In
                 </>
               )}
-            </button>
-          </form>
+            </motion.button>
+          </motion.form>
 
           {/* Footer Link */}
           <div className="mt-6 text-center text-xs font-inter text-secondary-text">
@@ -144,7 +181,7 @@ export default function LoginPage() {
               Create Account
             </Link>
           </div>
-        </div>
+        </motion.div>
       </main>
 
       <Footer />
