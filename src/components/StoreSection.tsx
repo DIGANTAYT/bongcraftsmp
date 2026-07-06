@@ -305,14 +305,23 @@ export const StoreSection: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id as Category)}
-                className={`flex items-center gap-2.5 px-5 py-3 rounded-xl font-inter text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer whitespace-nowrap ${
+                className={`relative flex items-center gap-2.5 px-5 py-3 rounded-xl font-inter text-xs font-bold uppercase tracking-wider transition-colors duration-300 cursor-pointer whitespace-nowrap ${
                   activeCategory === cat.id
-                    ? "bg-primary-accent text-white-text shadow-lg shadow-primary-accent/25"
-                    : "text-secondary-text hover:text-white-text hover:bg-card-bg/60"
+                    ? "text-white-text"
+                    : "text-secondary-text hover:text-white-text"
                 }`}
               >
-                {cat.icon}
-                {cat.label}
+                {activeCategory === cat.id && (
+                  <motion.span
+                    layoutId="activeStoreCategory"
+                    className="absolute inset-0 bg-primary-accent rounded-xl -z-1 shadow-lg shadow-primary-accent/25"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  {cat.icon}
+                  {cat.label}
+                </span>
               </button>
             ))}
           </div>

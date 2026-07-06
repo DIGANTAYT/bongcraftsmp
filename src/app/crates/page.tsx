@@ -520,28 +520,42 @@ export default function CratesPage() {
               </div>
 
               {/* Tab Navigation */}
-              <div className="flex border-b border-border-custom px-6 bg-secondary-bg/10 select-none shrink-0">
+              <div className="flex border-b border-border-custom px-6 bg-secondary-bg/10 select-none shrink-0 gap-4">
                 <button
                   type="button"
                   onClick={() => setActiveModalTab("drops")}
-                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                  className={`relative px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider transition-colors cursor-pointer ${
                     activeModalTab === "drops"
-                      ? "border-primary-accent text-white-text"
-                      : "border-transparent text-secondary-text hover:text-white-text"
+                      ? "text-white-text"
+                      : "text-secondary-text hover:text-white-text"
                   }`}
                 >
-                  ✨ Drops Grid
+                  <span className="relative z-10">✨ Drops Grid</span>
+                  {activeModalTab === "drops" && (
+                    <motion.div
+                      layoutId="activeCrateTabBorder"
+                      className="absolute bottom-0 inset-x-0 h-[2px] bg-primary-accent"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveModalTab("screenshot")}
-                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                  className={`relative px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider transition-colors cursor-pointer ${
                     activeModalTab === "screenshot"
-                      ? "border-primary-accent text-white-text"
-                      : "border-transparent text-secondary-text hover:text-white-text"
+                      ? "text-white-text"
+                      : "text-secondary-text hover:text-white-text"
                   }`}
                 >
-                  📸 GUI Screenshot
+                  <span className="relative z-10">📸 GUI Screenshot</span>
+                  {activeModalTab === "screenshot" && (
+                    <motion.div
+                      layoutId="activeCrateTabBorder"
+                      className="absolute bottom-0 inset-x-0 h-[2px] bg-primary-accent"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </button>
               </div>
 

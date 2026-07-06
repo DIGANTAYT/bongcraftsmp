@@ -523,28 +523,42 @@ export default function RanksPage() {
               </div>
 
               {/* Tab Navigation */}
-              <div className="flex border-b border-border-custom px-6 bg-secondary-bg/10 select-none shrink-0">
+              <div className="flex border-b border-border-custom px-6 bg-secondary-bg/10 select-none shrink-0 gap-4">
                 <button
                   type="button"
                   onClick={() => setActiveModalTab("perks")}
-                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                  className={`relative px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider transition-colors cursor-pointer ${
                     activeModalTab === "perks"
-                      ? "border-primary-accent text-white-text"
-                      : "border-transparent text-secondary-text hover:text-white-text"
+                      ? "text-white-text"
+                      : "text-secondary-text hover:text-white-text"
                   }`}
                 >
-                  ✨ Perks & Commands
+                  <span className="relative z-10">✨ Perks & Commands</span>
+                  {activeModalTab === "perks" && (
+                    <motion.div
+                      layoutId="activeRankTabBorder"
+                      className="absolute bottom-0 inset-x-0 h-[2px] bg-primary-accent"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveModalTab("kit")}
-                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                  className={`relative px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider transition-colors cursor-pointer ${
                     activeModalTab === "kit"
-                      ? "border-primary-accent text-white-text"
-                      : "border-transparent text-secondary-text hover:text-white-text"
+                      ? "text-white-text"
+                      : "text-secondary-text hover:text-white-text"
                   }`}
                 >
-                  🎒 Kit Preview
+                  <span className="relative z-10">🎒 Kit Preview</span>
+                  {activeModalTab === "kit" && (
+                    <motion.div
+                      layoutId="activeRankTabBorder"
+                      className="absolute bottom-0 inset-x-0 h-[2px] bg-primary-accent"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </button>
               </div>
 

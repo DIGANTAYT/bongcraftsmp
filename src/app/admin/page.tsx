@@ -10,6 +10,7 @@ import {
   TrendingUp, Clock, CheckCircle2, ShieldAlert, Copy, Check, LogOut,
   RefreshCw, Server, Trash2, Edit3, DollarSign, FileText
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Order {
   id: string;
@@ -588,62 +589,107 @@ export default function AdminPage() {
                 <div className="lg:col-span-3 space-y-3">
                   <button
                     onClick={() => setActiveTab("dashboard")}
-                    className={`w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                    className={`relative w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
                       activeTab === "dashboard"
-                        ? "bg-primary-accent/10 border-primary-accent text-primary-accent font-bold"
-                        : "bg-card-bg/40 border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
+                        ? "border-primary-accent text-primary-accent font-bold"
+                        : "border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
                     }`}
                   >
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span className="font-inter text-xs uppercase tracking-wider font-semibold">Console Overview</span>
+                    {activeTab === "dashboard" && (
+                      <motion.span
+                        layoutId="activeAdminTabBackground"
+                        className="absolute inset-0 bg-primary-accent/10 rounded-2xl -z-1"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3 w-full">
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span className="font-inter text-xs uppercase tracking-wider font-semibold">Console Overview</span>
+                    </span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("orders")}
-                    className={`w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                    className={`relative w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
                       activeTab === "orders"
-                        ? "bg-primary-accent/10 border-primary-accent text-primary-accent font-bold"
-                        : "bg-card-bg/40 border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
+                        ? "border-primary-accent text-primary-accent font-bold"
+                        : "border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
                     }`}
                   >
-                    <CheckSquare className="w-4 h-4" />
-                    <span className="font-inter text-xs uppercase tracking-wider font-semibold">Verify Claims</span>
+                    {activeTab === "orders" && (
+                      <motion.span
+                        layoutId="activeAdminTabBackground"
+                        className="absolute inset-0 bg-primary-accent/10 rounded-2xl -z-1"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3 w-full">
+                      <CheckSquare className="w-4 h-4" />
+                      <span className="font-inter text-xs uppercase tracking-wider font-semibold">Verify Claims</span>
+                    </span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("pricing")}
-                    className={`w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                    className={`relative w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
                       activeTab === "pricing"
-                        ? "bg-primary-accent/10 border-primary-accent text-primary-accent font-bold"
-                        : "bg-card-bg/40 border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
+                        ? "border-primary-accent text-primary-accent font-bold"
+                        : "border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
                     }`}
                   >
-                    <Edit3 className="w-4 h-4" />
-                    <span className="font-inter text-xs uppercase tracking-wider font-semibold">Catalog Pricing</span>
+                    {activeTab === "pricing" && (
+                      <motion.span
+                        layoutId="activeAdminTabBackground"
+                        className="absolute inset-0 bg-primary-accent/10 rounded-2xl -z-1"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3 w-full">
+                      <Edit3 className="w-4 h-4" />
+                      <span className="font-inter text-xs uppercase tracking-wider font-semibold">Catalog Pricing</span>
+                    </span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("sandbox")}
-                    className={`w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                    className={`relative w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
                       activeTab === "sandbox"
-                        ? "bg-primary-accent/10 border-primary-accent text-primary-accent font-bold"
-                        : "bg-card-bg/40 border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
+                        ? "border-primary-accent text-primary-accent font-bold"
+                        : "border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
                     }`}
                   >
-                    <Terminal className="w-4 h-4" />
-                    <span className="font-inter text-xs uppercase tracking-wider font-semibold">Command Console</span>
+                    {activeTab === "sandbox" && (
+                      <motion.span
+                        layoutId="activeAdminTabBackground"
+                        className="absolute inset-0 bg-primary-accent/10 rounded-2xl -z-1"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3 w-full">
+                      <Terminal className="w-4 h-4" />
+                      <span className="font-inter text-xs uppercase tracking-wider font-semibold">Command Console</span>
+                    </span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("system")}
-                    className={`w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                    className={`relative w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
                       activeTab === "system"
-                        ? "bg-primary-accent/10 border-primary-accent text-primary-accent font-bold"
-                        : "bg-card-bg/40 border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
+                        ? "border-primary-accent text-primary-accent font-bold"
+                        : "border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
                     }`}
                   >
-                    <Settings className="w-4 h-4" />
-                    <span className="font-inter text-xs uppercase tracking-wider font-semibold">System Settings</span>
+                    {activeTab === "system" && (
+                      <motion.span
+                        layoutId="activeAdminTabBackground"
+                        className="absolute inset-0 bg-primary-accent/10 rounded-2xl -z-1"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3 w-full">
+                      <Settings className="w-4 h-4" />
+                      <span className="font-inter text-xs uppercase tracking-wider font-semibold">System Settings</span>
+                    </span>
                   </button>
                 </div>
 
