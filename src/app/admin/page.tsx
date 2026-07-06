@@ -240,6 +240,8 @@ export default function AdminPage() {
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
 
+    setSelectedOrder(order);
+
     let rconLogOutput = "";
     let rconSuccess = true;
 
@@ -279,13 +281,14 @@ export default function AdminPage() {
             alert(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}\n\nPlease verify commands manually.`);
             addAuditLog(`RCON Delivery failed for some commands on Order ${orderId}`, "warning");
           }
+        } else {
+          alert(`Order ${orderId} has been successfully verified and marked as Completed!`);
         }
         loadOrders();
-        if (selectedOrder?.id === orderId) {
-          setSelectedOrder(prev => prev ? { ...prev, status: "Completed" } : null);
-        }
-      } catch (e) {
+        setSelectedOrder(prev => prev ? { ...prev, status: "Completed" } : null);
+      } catch (e: any) {
         console.error("Failed to approve order in Supabase:", e);
+        alert(`Error verifying claim: ${e.message || JSON.stringify(e)}`);
       }
     } else {
       const updated = orders.map(o => {
@@ -299,6 +302,8 @@ export default function AdminPage() {
             } else {
               alert(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}`);
             }
+          } else {
+            alert(`Order ${orderId} has been successfully verified and marked as Completed!`);
           }
           return approvedOrder;
         }
@@ -319,16 +324,19 @@ export default function AdminPage() {
             .eq("order_id", orderId);
 
           if (error) throw error;
+          alert(`Order ${orderId} has been deleted successfully.`);
           addAuditLog(`Order ${orderId} deleted from database`, "warning");
           loadOrders();
           if (selectedOrder?.id === orderId) setSelectedOrder(null);
-        } catch (e) {
+        } catch (e: any) {
           console.error("Failed to delete order in Supabase:", e);
+          alert(`Failed to delete order from database: ${e.message || JSON.stringify(e)}`);
         }
       } else {
         const filtered = orders.filter(o => o.id !== orderId);
         setOrders(filtered);
         localStorage.setItem("bongcraft_orders", JSON.stringify(filtered));
+        alert(`Order ${orderId} has been deleted successfully.`);
         addAuditLog(`Order log ${orderId} deleted from database`, "warning");
         if (selectedOrder?.id === orderId) setSelectedOrder(null);
       }
@@ -836,7 +844,13 @@ export default function AdminPage() {
                               </thead>
                               <tbody className="divide-y divide-border-custom/50">
                                 {orders.map((order) => (
-                                  <tr key={order.id} className="hover:bg-card-bg/20 transition-colors">
+                                  <tr 
+                                    key={order.id} 
+                                    onClick={() => setSelectedOrder(order)}
+                                    className={`hover:bg-card-bg/20 transition-colors cursor-pointer ${
+                                      selectedOrder?.id === order.id ? "bg-card-bg/40 border-l-2 border-primary-accent" : ""
+                                    }`}
+                                  >
                                     <td className="py-3 px-2 font-mono font-bold text-white-text">{order.id}</td>
                                     <td className="py-3 font-semibold text-white-text flex items-center gap-2">
                                       <img
@@ -858,14 +872,22 @@ export default function AdminPage() {
                                     </td>
                                     <td className="py-3 text-secondary-text">{order.timestamp}</td>
                                     <td className="py-3 text-right space-x-1">
+                                      {order.status === "Pending Verification" && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleApprove(order.id);
+                                          }}
+                                          className="px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white-text font-bold uppercase text-[9px] rounded-lg cursor-pointer transition-colors"
+                                        >
+                                          Verify
+                                        </button>
+                                      )}
                                       <button
-                                        onClick={() => handleApprove(order.id)}
-                                        className="px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white-text font-bold uppercase text-[9px] rounded-lg cursor-pointer transition-colors"
-                                      >
-                                        Verify
-                                      </button>
-                                      <button
-                                        onClick={() => handleDelete(order.id)}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDelete(order.id);
+                                        }}
                                         className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-lg cursor-pointer transition-colors inline-flex items-center"
                                         title="Delete order logs"
                                       >
