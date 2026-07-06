@@ -42,22 +42,14 @@ export default function VotePage() {
       url: "https://minecraftservers.org/vote/689703",
       color: "border-primary-accent/30 hover:border-primary-accent/70",
       btnBg: "bg-primary-accent/15 hover:bg-primary-accent text-primary-accent hover:text-white-text",
-      rewards: [
-        "🔑 1x Common Crate Key",
-        "🪙 500 Coins balance",
-        "🗺️ +50 Claim Blocks"
-      ]
+      rewards: "Receive a randomized reward (Crate Keys, Coins, or Claim Blocks) in-game!"
     },
     {
       name: "MinecraftIPList.com",
       url: "https://www.minecraftiplist.com/server/TheBongCraftSMP-43167",
       color: "border-gold-accent/30 hover:border-gold-accent/70",
       btnBg: "bg-gold-accent/15 hover:bg-gold-accent text-gold-accent hover:text-[#09090B]",
-      rewards: [
-        "🔑 1x Common Crate Key",
-        "🪙 500 Coins balance",
-        "🗺️ +50 Claim Blocks"
-      ]
+      rewards: "Receive a randomized reward (Crate Keys, Coins, or Claim Blocks) in-game!"
     }
   ];
 
@@ -200,14 +192,10 @@ export default function VotePage() {
                       <Gift className="w-3.5 h-3.5" />
                       Vote Rewards:
                     </span>
-                    <ul className="space-y-1.5">
-                      {site.rewards.map((reward) => (
-                        <li key={reward} className="font-inter text-xs text-white-text/85 font-medium flex items-center gap-1.5">
-                          <Sparkles className="w-3 h-3 text-gold-accent shrink-0" />
-                          {reward}
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="font-inter text-xs text-white-text/85 font-medium flex items-center gap-2 leading-relaxed">
+                      <Sparkles className="w-3.5 h-3.5 text-gold-accent shrink-0" />
+                      {site.rewards}
+                    </p>
                   </div>
                 </div>
 
