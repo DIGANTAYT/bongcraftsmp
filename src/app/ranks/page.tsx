@@ -29,12 +29,102 @@ interface RankType {
   featured?: boolean;
 }
 
+const kitItemsMap: Record<string, { name: string; qty: number; rarity: 'common' | 'rare' | 'epic' | 'legendary' }[]> = {
+  'rank-knight': [
+    { name: "Diamond Sword", qty: 1, rarity: "rare" },
+    { name: "Diamond Pickaxe", qty: 1, rarity: "rare" },
+    { name: "Diamond Axe", qty: 1, rarity: "rare" },
+    { name: "Diamond Shovel", qty: 1, rarity: "rare" },
+    { name: "Iron Helmet", qty: 1, rarity: "common" },
+    { name: "Iron Chestplate", qty: 1, rarity: "common" },
+    { name: "Iron Leggings", qty: 1, rarity: "common" },
+    { name: "Iron Boots", qty: 1, rarity: "common" },
+    { name: "Cooked Beef", qty: 16, rarity: "common" },
+    { name: "Oak Log", qty: 64, rarity: "common" },
+    { name: "Iron Ingot", qty: 32, rarity: "common" },
+    { name: "Gold Ingot", qty: 16, rarity: "common" },
+    { name: "Diamond", qty: 4, rarity: "rare" },
+    { name: "Netherite Ingot", qty: 1, rarity: "epic" }
+  ],
+  'rank-lord': [
+    { name: "Diamond Sword", qty: 1, rarity: "rare" },
+    { name: "Diamond Pickaxe", qty: 1, rarity: "rare" },
+    { name: "Diamond Axe", qty: 1, rarity: "rare" },
+    { name: "Diamond Shovel", qty: 1, rarity: "rare" },
+    { name: "Diamond Helmet", qty: 1, rarity: "rare" },
+    { name: "Iron Chestplate", qty: 1, rarity: "common" },
+    { name: "Iron Leggings", qty: 1, rarity: "common" },
+    { name: "Diamond Boots", qty: 1, rarity: "rare" },
+    { name: "Cooked Beef", qty: 32, rarity: "common" },
+    { name: "Oak Log", qty: 64, rarity: "common" },
+    { name: "Gold Ingot", qty: 32, rarity: "common" },
+    { name: "Diamond", qty: 6, rarity: "rare" }
+  ],
+  'rank-paladin': [
+    { name: "Netherite Sword", qty: 1, rarity: "epic" },
+    { name: "Netherite Pickaxe", qty: 1, rarity: "epic" },
+    { name: "Diamond Axe", qty: 1, rarity: "rare" },
+    { name: "Diamond Shovel", qty: 1, rarity: "rare" },
+    { name: "Diamond Helmet", qty: 1, rarity: "rare" },
+    { name: "Diamond Chestplate", qty: 1, rarity: "rare" },
+    { name: "Diamond Leggings", qty: 1, rarity: "rare" },
+    { name: "Diamond Boots", qty: 1, rarity: "rare" },
+    { name: "Cooked Beef", qty: 48, rarity: "common" },
+    { name: "Golden Apple", qty: 4, rarity: "epic" },
+    { name: "Oak Log", qty: 64, rarity: "common" },
+    { name: "Oak Log", qty: 64, rarity: "common" },
+    { name: "Gold Ingot", qty: 64, rarity: "common" },
+    { name: "Diamond", qty: 8, rarity: "rare" },
+    { name: "Shulker Box", qty: 4, rarity: "epic" }
+  ],
+  'rank-duke': [
+    { name: "Netherite Sword", qty: 1, rarity: "epic" },
+    { name: "Netherite Pickaxe", qty: 1, rarity: "epic" },
+    { name: "Netherite Axe", qty: 1, rarity: "epic" },
+    { name: "Diamond Shovel", qty: 1, rarity: "rare" },
+    { name: "Netherite Helmet", qty: 1, rarity: "epic" },
+    { name: "Diamond Chestplate", qty: 1, rarity: "rare" },
+    { name: "Diamond Leggings", qty: 1, rarity: "rare" },
+    { name: "Netherite Boots", qty: 1, rarity: "epic" },
+    { name: "Cooked Beef", qty: 48, rarity: "common" },
+    { name: "Golden Apple", qty: 8, rarity: "epic" },
+    { name: "Gold Ingot", qty: 64, rarity: "common" },
+    { name: "Diamond", qty: 12, rarity: "rare" },
+    { name: "Netherite Ingot", qty: 2, rarity: "epic" },
+    { name: "Shulker Box", qty: 4, rarity: "epic" }
+  ],
+  'rank-king': [
+    { name: "Netherite Sword", qty: 1, rarity: "epic" },
+    { name: "Netherite Pickaxe", qty: 1, rarity: "epic" },
+    { name: "Netherite Axe", qty: 1, rarity: "epic" },
+    { name: "Netherite Shovel", qty: 1, rarity: "epic" },
+    { name: "Netherite Helmet", qty: 1, rarity: "epic" },
+    { name: "Netherite Chestplate", qty: 1, rarity: "epic" },
+    { name: "Netherite Leggings", qty: 1, rarity: "epic" },
+    { name: "Netherite Boots", qty: 1, rarity: "epic" },
+    { name: "Cooked Beef", qty: 48, rarity: "common" },
+    { name: "Golden Apple", qty: 1, rarity: "epic" },
+    { name: "Gold Ingot", qty: 64, rarity: "common" },
+    { name: "Diamond", qty: 16, rarity: "rare" },
+    { name: "Netherite Ingot", qty: 3, rarity: "epic" },
+    { name: "Shulker Box", qty: 4, rarity: "epic" },
+    { name: "Nether Star", qty: 1, rarity: "legendary" }
+  ]
+};
+
 export default function RanksPage() {
   const { addToCart, cart } = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedRank, setSelectedRank] = useState<RankType | null>(null);
+  const [activeModalTab, setActiveModalTab] = useState<"perks" | "kit">("perks");
 
   const [ranks, setRanks] = useState<RankType[]>([]);
+
+  useEffect(() => {
+    if (selectedRank) {
+      setActiveModalTab("perks");
+    }
+  }, [selectedRank]);
 
   useEffect(() => {
     // Get custom prices if set in localStorage
@@ -432,87 +522,177 @@ export default function RanksPage() {
                 </button>
               </div>
 
-              {/* Body */}
-              <div className="p-6 md:p-8 overflow-y-auto space-y-6">
-                
-                {/* Visual Chat prefix preview simulator */}
-                <div className="space-y-2.5">
-                  <span className="font-cinzel text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
-                    In-Game Chat Prefix Simulation
-                  </span>
-                  <div className="bg-primary-bg/70 border border-border-custom rounded-2xl p-4 font-mono text-xs space-y-2 select-none">
-                    <div className="flex items-start gap-1">
-                      <span className="text-secondary-text/50">[21:45:08]</span>
-                      <div className="flex-1 flex flex-wrap gap-1 leading-normal">
-                        <span
-                          className={`font-extrabold px-1.5 py-0.5 rounded bg-white/5 border border-white/10 ${selectedRank.chatColor}`}
-                        >
-                          {selectedRank.name.toUpperCase()}
-                        </span>
-                        <span className="text-slate-300 font-bold">Neeeeeel:</span>
-                        <span className="text-white">Bengal's Ultimate Survival Experience! 🔥</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tabbed Perks Breakdown */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Commands */}
-                  <div className="space-y-3">
-                    <span className="font-cinzel text-[10px] font-bold text-primary-accent uppercase tracking-widest block border-b border-primary-accent/20 pb-1.5">
-                      🛡️ Commands Unlocked
-                    </span>
-                    <div className="space-y-2.5">
-                      {selectedRank.detailedPerks.commands.length > 0 ? (
-                        selectedRank.detailedPerks.commands.map((cmd, i) => (
-                          <div key={i} className="space-y-0.5">
-                            <span className="font-mono text-xs font-bold text-gold-accent">{cmd.cmd}</span>
-                            <p className="font-inter text-xs text-secondary-text leading-tight">{cmd.desc}</p>
-                          </div>
-                        ))
-                      ) : (
-                        <span className="font-inter text-xs text-secondary-text italic block">
-                          No specialized commands unlocked for this basic starter tier.
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Economy & Storage */}
-                  <div className="space-y-5">
-                    <div className="space-y-3">
-                      <span className="font-cinzel text-[10px] font-bold text-primary-accent uppercase tracking-widest block border-b border-primary-accent/20 pb-1.5">
-                        📦 Storage & Economy
-                      </span>
-                      <div className="space-y-1.5">
-                        {selectedRank.detailedPerks.economy.map((eco, i) => (
-                          <div key={i} className="flex items-start gap-2 text-xs text-secondary-text">
-                            <Check className="w-3.5 h-3.5 mt-0.5 text-emerald-500 flex-shrink-0" />
-                            <span className="font-inter leading-tight">{eco}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Keys & Bonuses */}
-                    <div className="space-y-3">
-                      <span className="font-cinzel text-[10px] font-bold text-primary-accent uppercase tracking-widest block border-b border-primary-accent/20 pb-1.5">
-                        🪙 Crate & Coin Bonuses
-                      </span>
-                      <div className="space-y-1.5">
-                        {selectedRank.detailedPerks.bonuses.map((bonus, i) => (
-                          <div key={i} className="flex items-start gap-2 text-xs text-secondary-text">
-                            <Check className="w-3.5 h-3.5 mt-0.5 text-emerald-500 flex-shrink-0" />
-                            <span className="font-inter leading-tight">{bonus}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
+              {/* Tab Navigation */}
+              <div className="flex border-b border-border-custom px-6 bg-secondary-bg/10 select-none shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveModalTab("perks")}
+                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                    activeModalTab === "perks"
+                      ? "border-primary-accent text-white-text"
+                      : "border-transparent text-secondary-text hover:text-white-text"
+                  }`}
+                >
+                  ✨ Perks & Commands
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveModalTab("kit")}
+                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                    activeModalTab === "kit"
+                      ? "border-primary-accent text-white-text"
+                      : "border-transparent text-secondary-text hover:text-white-text"
+                  }`}
+                >
+                  🎒 Kit Preview
+                </button>
               </div>
+
+              {/* Body */}
+              {activeModalTab === "perks" ? (
+                <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1">
+                  {/* Visual Chat prefix preview simulator */}
+                  <div className="space-y-2.5">
+                    <span className="font-cinzel text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
+                      In-Game Chat Prefix Simulation
+                    </span>
+                    <div className="bg-primary-bg/70 border border-border-custom rounded-2xl p-4 font-mono text-xs space-y-2 select-none">
+                      <div className="flex items-start gap-1">
+                        <span className="text-secondary-text/50">[21:45:08]</span>
+                        <div className="flex-1 flex flex-wrap gap-1 leading-normal">
+                          <span
+                            className={`font-extrabold px-1.5 py-0.5 rounded bg-white/5 border border-white/10 ${selectedRank.chatColor}`}
+                          >
+                            {selectedRank.name.toUpperCase()}
+                          </span>
+                          <span className="text-slate-300 font-bold">Neeeeeel:</span>
+                          <span className="text-white">Bengal's Ultimate Survival Experience! 🔥</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tabbed Perks Breakdown */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Commands */}
+                    <div className="space-y-3">
+                      <span className="font-cinzel text-[10px] font-bold text-primary-accent uppercase tracking-widest block border-b border-primary-accent/20 pb-1.5">
+                        🛡️ Commands Unlocked
+                      </span>
+                      <div className="space-y-2.5">
+                        {selectedRank.detailedPerks.commands.length > 0 ? (
+                          selectedRank.detailedPerks.commands.map((cmd, i) => (
+                            <div key={i} className="space-y-0.5">
+                              <span className="font-mono text-xs font-bold text-gold-accent">{cmd.cmd}</span>
+                              <p className="font-inter text-xs text-secondary-text leading-tight">{cmd.desc}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="font-inter text-xs text-secondary-text italic block">
+                            No specialized commands unlocked for this basic starter tier.
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Economy & Storage */}
+                    <div className="space-y-5">
+                      <div className="space-y-3">
+                        <span className="font-cinzel text-[10px] font-bold text-primary-accent uppercase tracking-widest block border-b border-primary-accent/20 pb-1.5">
+                          📦 Storage & Economy
+                        </span>
+                        <div className="space-y-1.5">
+                          {selectedRank.detailedPerks.economy.map((eco, i) => (
+                            <div key={i} className="flex items-start gap-2 text-xs text-secondary-text">
+                              <Check className="w-3.5 h-3.5 mt-0.5 text-emerald-500 flex-shrink-0" />
+                              <span className="font-inter leading-tight">{eco}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Keys & Bonuses */}
+                      <div className="space-y-3">
+                        <span className="font-cinzel text-[10px] font-bold text-primary-accent uppercase tracking-widest block border-b border-primary-accent/20 pb-1.5">
+                          🪙 Crate & Coin Bonuses
+                        </span>
+                        <div className="space-y-1.5">
+                          {selectedRank.detailedPerks.bonuses.map((bonus, i) => (
+                            <div key={i} className="flex items-start gap-2 text-xs text-secondary-text">
+                              <Check className="w-3.5 h-3.5 mt-0.5 text-emerald-500 flex-shrink-0" />
+                              <span className="font-inter leading-tight">{bonus}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1">
+                  <div className="space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                      <span className="font-cinzel text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
+                        Kit {selectedRank.name} Showcase
+                      </span>
+                      <span className="font-inter text-[10px] text-gold-accent font-bold uppercase tracking-wider">
+                        Available Weekly in-game
+                      </span>
+                    </div>
+
+                    {/* Screenshot image (if available) */}
+                    {["rank-knight", "rank-paladin", "rank-king"].includes(selectedRank.id) ? (
+                      <div className="relative border border-border-custom/80 rounded-2xl overflow-hidden bg-primary-bg/40 p-2 group/kit-img shadow-inner shadow-black">
+                        <img
+                          src={`/images/kits/${selectedRank.id.replace("rank-", "")}_kit.png`}
+                          alt={`${selectedRank.name} Kit Preview`}
+                          className="w-full h-auto object-contain rounded-xl group-hover/kit-img:scale-[1.01] transition-transform duration-500 filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                        />
+                      </div>
+                    ) : (
+                      <div className="bg-primary-bg/30 border border-border-custom/50 rounded-2xl p-8 text-center space-y-2">
+                        <Crown className="w-8 h-8 mx-auto text-secondary-text/40 animate-pulse" />
+                        <p className="font-inter text-xs text-secondary-text">
+                          No screenshot preview available for this rank's kit. Please review the item grid below.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Item Grid */}
+                    <div className="space-y-3">
+                      <span className="font-cinzel text-[10px] font-bold text-primary-accent uppercase tracking-widest block border-b border-primary-accent/20 pb-1.5">
+                        📦 Included Kit Items
+                      </span>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[220px] overflow-y-auto pr-1">
+                        {kitItemsMap[selectedRank.id]?.map((item, i) => (
+                          <div 
+                            key={i} 
+                            className="flex items-center justify-between px-3 py-2 bg-secondary-bg/40 border border-border-custom/60 rounded-xl text-xs hover:border-primary-accent/40 transition-colors"
+                          >
+                            <span className="text-white-text font-inter truncate max-w-[120px]" title={item.name}>
+                              {item.name}
+                            </span>
+                            <span 
+                              className={`font-mono font-bold text-[10px] px-1.5 py-0.5 rounded ${
+                                item.rarity === "legendary" 
+                                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                  : item.rarity === "epic"
+                                  ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                  : item.rarity === "rare"
+                                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                  : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                              }`}
+                            >
+                              x{item.qty}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Footer Checkout Actions */}
               <div className="px-6 py-5 border-t border-border-custom bg-secondary-bg/25 flex flex-col sm:flex-row items-center justify-between gap-4">
