@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { User, Mail, Calendar, Coins, History, Copy, Check, ExternalLink, Loader2, Sparkles, ShoppingBag } from "lucide-react";
+import { User, Mail, Calendar, Coins, History, Copy, Check, ExternalLink, Loader2, Sparkles, ShoppingBag, Clock } from "lucide-react";
 
 interface ProfileOrderType {
   id: string;
@@ -30,6 +30,73 @@ export default function ProfilePage() {
   const [orders, setOrders] = useState<ProfileOrderType[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [copiedText, setCopiedText] = useState<string | null>(null);
+  
+  const [activeRank, setActiveRank] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [expiryStr, setExpiryStr] = useState<string>("");
+
+  useEffect(() => {
+    // Find the latest completed order that contains a rank
+    const rankOrder = orders.find(o => 
+      o.status === "Completed" && 
+      (Array.isArray(o.items) ? o.items : []).some((item: any) => {
+        const name = typeof item === "string" ? item : (item.name || "");
+        const lower = name.toLowerCase();
+        return lower.includes("knight") || lower.includes("lord") || lower.includes("paladin") || lower.includes("duke") || lower.includes("king");
+      })
+    );
+
+    let targetDate: Date;
+    let rankName = "Premium Trial Pass";
+
+    if (rankOrder) {
+      // Find which rank name it is
+      const itemWithRank = (rankOrder.items as any[]).find((item: any) => {
+        const name = typeof item === "string" ? item : (item.name || "");
+        const lower = name.toLowerCase();
+        return lower.includes("knight") || lower.includes("lord") || lower.includes("paladin") || lower.includes("duke") || lower.includes("king");
+      });
+      const nameStr = typeof itemWithRank === "string" ? itemWithRank : (itemWithRank?.name || "Rank");
+      rankName = nameStr.split(" (")[0] + " Rank"; // Clean up e.g. "Knight (x1)" -> "Knight Rank"
+      
+      const purchaseTime = rankOrder.created_at ? new Date(rankOrder.created_at) : new Date();
+      targetDate = new Date(purchaseTime.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days validity
+    } else {
+      // Mock seasonal pass valid for 30 days from joining profile registration
+      const joinTime = profile?.created_at ? new Date(profile.created_at) : new Date();
+      targetDate = new Date(joinTime.getTime() + 30 * 24 * 60 * 60 * 1000);
+      rankName = "BongCraft Trial Access";
+    }
+
+    setActiveRank(rankName);
+    setExpiryStr(targetDate.toLocaleDateString("en-IN", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }));
+
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const difference = targetDate.getTime() - now;
+
+      if (difference <= 0) {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      } else {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        setCountdown({ days, hours, minutes, seconds });
+      }
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(timer);
+  }, [orders, profile]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -191,6 +258,85 @@ export default function ProfilePage() {
                         {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" }) : "July 2026"}
                       </span>
                     </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Countdown / Active Rank Validity Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="glass-panel p-6 rounded-3xl border border-border-custom relative overflow-hidden flex flex-col w-full space-y-4.5"
+              >
+                {/* Backlight glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-gold-accent/5 filter blur-3xl -z-1 pointer-events-none" />
+
+                <div className="flex items-center gap-3 border-b border-border-custom/50 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
+                    <Clock className="w-4 h-4 text-glow-gold" />
+                  </div>
+                  <div>
+                    <h3 className="font-cinzel text-xs font-bold text-white-text tracking-wider uppercase">
+                      Rank Status & Expiry
+                    </h3>
+                    <span className="font-inter text-[9px] text-secondary-text/60">
+                      30-Day Seasonal Status
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-secondary-text">Active Tier:</span>
+                    <span className="font-cinzel font-bold text-gold-accent text-glow-gold flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 fill-current animate-pulse text-gold-accent" />
+                      {activeRank}
+                    </span>
+                  </div>
+
+                  {/* Countdown Numbers Grid */}
+                  <div className="grid grid-cols-4 gap-2.5 pt-1.5 select-none">
+                    <div className="bg-[#111217]/90 border border-border-custom rounded-xl p-2 md:p-2.5 flex flex-col items-center shadow-lg shadow-black/20">
+                      <span className="font-cinzel text-base md:text-lg font-bold text-white-text block leading-none mb-1">
+                        {String(countdown.days).padStart(2, "0")}
+                      </span>
+                      <span className="text-[7.5px] text-secondary-text/80 font-bold uppercase tracking-wider block">
+                        Days
+                      </span>
+                    </div>
+
+                    <div className="bg-[#111217]/90 border border-border-custom rounded-xl p-2 md:p-2.5 flex flex-col items-center shadow-lg shadow-black/20">
+                      <span className="font-cinzel text-base md:text-lg font-bold text-white-text block leading-none mb-1">
+                        {String(countdown.hours).padStart(2, "0")}
+                      </span>
+                      <span className="text-[7.5px] text-secondary-text/80 font-bold uppercase tracking-wider block">
+                        Hours
+                      </span>
+                    </div>
+
+                    <div className="bg-[#111217]/90 border border-border-custom rounded-xl p-2 md:p-2.5 flex flex-col items-center shadow-lg shadow-black/20">
+                      <span className="font-cinzel text-base md:text-lg font-bold text-white-text block leading-none mb-1">
+                        {String(countdown.minutes).padStart(2, "0")}
+                      </span>
+                      <span className="text-[7.5px] text-secondary-text/80 font-bold uppercase tracking-wider block">
+                        Mins
+                      </span>
+                    </div>
+
+                    <div className="bg-[#111217]/90 border border-border-custom rounded-xl p-2 md:p-2.5 flex flex-col items-center shadow-lg shadow-black/20">
+                      <span className="font-cinzel text-base md:text-lg font-bold text-gold-accent text-glow-gold block leading-none mb-1">
+                        {String(countdown.seconds).padStart(2, "0")}
+                      </span>
+                      <span className="text-[7.5px] text-secondary-text/80 font-bold uppercase tracking-wider block">
+                        Secs
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-[10px] text-secondary-text/60 border-t border-border-custom/50 pt-3">
+                    <span>Expiration Date:</span>
+                    <span className="font-mono text-white-text/80 font-semibold">{expiryStr}</span>
                   </div>
                 </div>
               </motion.div>

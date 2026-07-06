@@ -265,12 +265,19 @@ export default function AdminPage() {
 
     if (isSupabaseConfigured) {
       try {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("orders")
           .update({ status: "Completed" })
-          .eq("order_id", orderId);
+          .eq("order_id", orderId)
+          .select();
 
         if (error) throw error;
+
+        if (!data || data.length === 0) {
+          alert(`Warning: The order was NOT updated. This is likely due to Supabase Row Level Security (RLS) policies blocking anonymous updates on the 'orders' table. Please check your Supabase dashboard and add a policy allowing updates.`);
+          addAuditLog(`RLS policy blocked verification for Order ${orderId}`, "warning");
+          return;
+        }
 
         addAuditLog(`Order ${orderId} approved in database`, "success");
         if (rconEnabled) {
@@ -318,12 +325,19 @@ export default function AdminPage() {
     if (confirm("Are you sure you want to delete this order?")) {
       if (isSupabaseConfigured) {
         try {
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from("orders")
             .delete()
-            .eq("order_id", orderId);
+            .eq("order_id", orderId)
+            .select();
 
           if (error) throw error;
+
+          if (!data || data.length === 0) {
+            alert(`Warning: The order was NOT deleted. This is likely due to Supabase Row Level Security (RLS) policies blocking anonymous deletes on the 'orders' table. Please check your Supabase dashboard.`);
+            return;
+          }
+
           alert(`Order ${orderId} has been deleted successfully.`);
           addAuditLog(`Order ${orderId} deleted from database`, "warning");
           loadOrders();
