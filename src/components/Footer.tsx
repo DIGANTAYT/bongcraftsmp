@@ -8,7 +8,7 @@ export const Footer: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   const copyIp = () => {
-    navigator.clipboard.writeText("bongcraftsmp.pdhost.in:25571");
+    navigator.clipboard.writeText("play.bongcraftsmp.in");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -76,7 +76,7 @@ export const Footer: React.FC = () => {
 
           {/* IP Copy Widget */}
           <div className="inline-flex items-center gap-3 bg-[#111217] border border-border-custom p-1.5 px-3.5 rounded-xl">
-            <span className="font-mono text-[10px] text-secondary-text">bongcraftsmp.pdhost.in:25571</span>
+            <span className="font-mono text-[10px] text-secondary-text">play.bongcraftsmp.in</span>
             <button
               onClick={copyIp}
               className="p-1.5 hover:bg-card-bg text-secondary-text hover:text-gold-accent rounded-lg cursor-pointer transition-colors duration-300"

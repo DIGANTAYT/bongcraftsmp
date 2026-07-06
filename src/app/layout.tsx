@@ -18,11 +18,11 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "BongCraft SMP | Bengal's Ultimate Survival Experience",
-  description: "Welcome to BongCraft SMP - Bengal's Ultimate Survival Minecraft Server. Explore custom ranks, keys, coins, cosmetics, and bundles in our premium store. Join bongcraftsmp.pdhost.in:25571 today!",
+  description: "Welcome to BongCraft SMP - Bengal's Ultimate Survival Minecraft Server. Explore custom ranks, keys, coins, cosmetics, and bundles in our premium store. Join play.bongcraftsmp.in today!",
   keywords: ["BongCraft", "BongCraft SMP", "Minecraft Server India", "Bengal Minecraft", "Minecraft Store", "Survival Minecraft", "Indian Minecraft Server"],
   openGraph: {
     title: "BongCraft SMP | Bengal's Ultimate Survival Experience",
-    description: "Welcome to BongCraft SMP - Bengal's Ultimate Survival Minecraft Server. Explore custom ranks, keys, coins, cosmetics, and bundles in our premium store. Join bongcraftsmp.pdhost.in:25571 today!",
+    description: "Welcome to BongCraft SMP - Bengal's Ultimate Survival Minecraft Server. Explore custom ranks, keys, coins, cosmetics, and bundles in our premium store. Join play.bongcraftsmp.in today!",
     type: "website",
     url: "https://bongcraft.in",
   },

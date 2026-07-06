@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     const fetchServerStatus = async () => {
       try {
-        const res = await fetch("https://api.mcsrvstat.us/3/bongcraftsmp.pdhost.in:25571");
+        const res = await fetch("https://api.mcsrvstat.us/3/play.bongcraftsmp.in");
         if (res.ok) {
           const data = await res.json();
           if (data.online) {
@@ -71,7 +71,7 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const copyIp = () => {
-    navigator.clipboard.writeText("bongcraftsmp.pdhost.in:25571");
+    navigator.clipboard.writeText("play.bongcraftsmp.in");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -159,7 +159,7 @@ export const Navbar: React.FC = () => {
             onClick={copyIp}
             className="flex items-center gap-1.5 font-inter text-[10px] text-secondary-text hover:text-gold-accent transition-colors duration-300 font-semibold uppercase tracking-wider cursor-pointer"
           >
-            bongcraftsmp.pdhost.in:25571
+            play.bongcraftsmp.in
             {copied ? (
               <Check className="w-3.5 h-3.5 text-gold-accent" />
             ) : (
@@ -372,7 +372,7 @@ export const Navbar: React.FC = () => {
               onClick={copyIp}
               className="flex items-center gap-1.5 font-inter text-[10px] text-gold-accent font-semibold uppercase tracking-wider cursor-pointer max-w-[170px] truncate"
             >
-              bongcraftsmp.pdhost.in:25571
+              play.bongcraftsmp.in
               {copied ? <Check className="w-3.5 h-3.5 flex-shrink-0" /> : <Copy className="w-3.5 h-3.5 flex-shrink-0" />}
             </button>
           </div>

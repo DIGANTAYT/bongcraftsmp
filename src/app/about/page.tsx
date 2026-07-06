@@ -14,7 +14,7 @@ export default function AboutPage() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const copyIp = () => {
-    navigator.clipboard.writeText("bongcraftsmp.pdhost.in");
+    navigator.clipboard.writeText("play.bongcraftsmp.in");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -105,7 +105,7 @@ export default function AboutPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 pt-4">
                 <div className="flex items-center gap-3 bg-[#111217] border border-border-custom px-4 py-2.5 rounded-xl w-full sm:w-auto justify-between">
                   <span className="font-mono text-sm text-white-text tracking-wider select-all">
-                    bongcraftsmp.pdhost.in
+                    play.bongcraftsmp.in
                   </span>
                   <button
                     onClick={copyIp}
@@ -200,13 +200,13 @@ export default function AboutPage() {
                   <div className="flex justify-between items-center gap-2">
                     <span className="text-secondary-text">Java IP Address</span>
                     <span className="font-mono font-bold text-white-text text-right select-all">
-                      bongcraftsmp.pdhost.in
+                      play.bongcraftsmp.in
                     </span>
                   </div>
                   <div className="flex justify-between items-center gap-2">
                     <span className="text-secondary-text">Bedrock Port</span>
                     <span className="font-mono font-bold text-white-text text-right">
-                      25571
+                      19138
                     </span>
                   </div>
                   <div className="flex justify-between items-center gap-2">

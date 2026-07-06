@@ -78,7 +78,7 @@ export default function AdminPage() {
   const [webhookInput, setWebhookInput] = useState("");
 
   // RCON Config state
-  const [rconHost, setRconHost] = useState("bongcraftsmp.pdhost.in");
+  const [rconHost, setRconHost] = useState("play.bongcraftsmp.in");
   const [rconPort, setRconPort] = useState("25575");
   const [rconPassword, setRconPassword] = useState("");
   const [rconEnabled, setRconEnabled] = useState(false);
@@ -102,7 +102,7 @@ export default function AdminPage() {
     setWebhookInput(webhook);
 
     // Load RCON configuration
-    const savedHost = localStorage.getItem("bongcraft_rcon_host") || "bongcraftsmp.pdhost.in";
+    const savedHost = localStorage.getItem("bongcraft_rcon_host") || "play.bongcraftsmp.in";
     const savedPort = localStorage.getItem("bongcraft_rcon_port") || "25575";
     const savedPass = localStorage.getItem("bongcraft_rcon_pass") || "";
     const savedEnabled = localStorage.getItem("bongcraft_rcon_enabled") === "true";

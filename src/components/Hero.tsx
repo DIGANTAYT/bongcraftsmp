@@ -13,7 +13,7 @@ export const Hero: React.FC = () => {
   useEffect(() => {
     const fetchServerStatus = async () => {
       try {
-        const res = await fetch("https://api.mcsrvstat.us/3/bongcraftsmp.pdhost.in:25571");
+        const res = await fetch("https://api.mcsrvstat.us/3/play.bongcraftsmp.in");
         if (res.ok) {
           const data = await res.json();
           if (data.online) {
@@ -132,7 +132,7 @@ export const Hero: React.FC = () => {
               </span>
               <div className="space-y-1">
                 <div className="font-mono text-sm md:text-base text-white-text font-bold select-all tracking-wider">
-                  bongcraftsmp.pdhost.in
+                  play.bongcraftsmp.in
                 </div>
                 <div className="font-inter text-[10px] text-secondary-text/60 font-semibold uppercase tracking-wider">
                   Default Port: 25565
@@ -140,7 +140,7 @@ export const Hero: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={() => copyIpText("bongcraftsmp.pdhost.in", "java")}
+              onClick={() => copyIpText("play.bongcraftsmp.in", "java")}
               className="mt-5 flex items-center gap-1.5 px-4.5 py-2.5 bg-primary-accent/15 hover:bg-primary-accent border border-primary-accent/30 hover:border-primary-accent text-primary-accent hover:text-white-text rounded-xl font-inter text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer w-full justify-center"
             >
               {copiedJava ? (
@@ -165,7 +165,7 @@ export const Hero: React.FC = () => {
               </span>
               <div className="space-y-1">
                 <div className="font-mono text-sm md:text-base text-white-text font-bold select-all tracking-wider">
-                  bongcraftsmp.pdhost.in
+                  play.bongcraftsmp.in
                 </div>
                 <div className="font-inter text-[10px] text-secondary-text/80">
                   Port: <span className="font-mono text-xs text-white-text font-bold select-all">19138</span>
@@ -173,7 +173,7 @@ export const Hero: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={() => copyIpText("bongcraftsmp.pdhost.in:19138", "bedrock")}
+              onClick={() => copyIpText("play.bongcraftsmp.in:19138", "bedrock")}
               className="mt-5 flex items-center gap-1.5 px-4.5 py-2.5 bg-gold-accent/15 hover:bg-gold-accent border border-gold-accent/30 hover:border-gold-accent text-gold-accent hover:text-[#09090B] rounded-xl font-inter text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer w-full justify-center"
             >
               {copiedBedrock ? (
