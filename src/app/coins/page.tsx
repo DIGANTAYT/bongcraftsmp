@@ -30,10 +30,11 @@ export default function CoinsPage() {
     // Get custom prices if set in localStorage
     const savedPricesStr = localStorage.getItem("bongcraft_prices");
     let customPrices = {
-      coins500: 99,
-      coins1200: 249,
-      coins2500: 499,
-      coins6000: 999
+      coins500: 49,
+      coins1200: 99,
+      coins2500: 199,
+      coins6000: 399,
+      coins12000: 699
     };
     if (savedPricesStr) {
       try {
@@ -68,7 +69,7 @@ export default function CoinsPage() {
         price: customPrices.coins2500,
         accentColor: "#10B981",
         glowClass: "hover:border-emerald-500/40 hover:shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]",
-        desc: "Most Popular Currency Booster",
+        desc: "Popular Value Pack",
         perks: ["Buy premium shop enchants", "Unlock custom pets", "Dominate server auctions"],
         featured: true,
       },
@@ -80,6 +81,15 @@ export default function CoinsPage() {
         glowClass: "hover:border-cyan-500/40 hover:shadow-[0_0_20px_-5px_rgba(6,182,212,0.3)]",
         desc: "The Wealthy Lord Treasury",
         perks: ["Unlimited claims expansion", "Buy top-tier gear sets", "Unlock elite server items"],
+      },
+      {
+        id: "coins-12000",
+        name: "12,000 Coins Pack",
+        price: customPrices.coins12000,
+        accentColor: "#EC4899",
+        glowClass: "hover:border-pink-500/40 hover:shadow-[0_0_20px_-5px_rgba(236,72,153,0.3)]",
+        desc: "The Sovereign King Vault",
+        perks: ["Perfect for claim scaling", "Buy multiple elite spawner cores", "Bypass auction bid wars"],
       }
     ];
 
@@ -108,7 +118,7 @@ export default function CoinsPage() {
           </div>
 
           {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
             {coins.map((item) => {
               const isItemInCart = cart.some((cartItem) => cartItem.id === item.id);
 

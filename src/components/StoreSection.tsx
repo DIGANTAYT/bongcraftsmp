@@ -20,7 +20,12 @@ export const StoreSection: React.FC = () => {
     common_crate: 20,
     rare_crate: 30,
     epic_crate: 50,
-    superior_crate: 75
+    superior_crate: 75,
+    coins500: 49,
+    coins1200: 99,
+    coins2500: 199,
+    coins6000: 399,
+    coins12000: 699
   });
 
   useEffect(() => {
@@ -169,31 +174,38 @@ export const StoreSection: React.FC = () => {
     {
       id: "coins-500",
       name: "500 Coins Pack",
-      price: 99,
+      price: customPrices.coins500,
       desc: "Handy pocket currency pack",
       perks: ["Buy basic shop items", "Rent claims", "Trade in player markets"],
     },
     {
       id: "coins-1200",
       name: "1,200 Coins Pack",
-      price: 249,
+      price: customPrices.coins1200,
       desc: "A solid wallet balance boost",
       perks: ["Buy claims & boosters", "Unlock custom prefixes", "Purchase spawners"],
     },
     {
       id: "coins-2500",
       name: "2,500 Coins Pack",
-      price: 499,
-      desc: "Most Popular Currency Booster",
+      price: customPrices.coins2500,
+      desc: "Popular Value Pack",
       perks: ["Buy premium shop enchants", "Unlock custom pets", "Dominate server auctions"],
       featured: true,
     },
     {
       id: "coins-6000",
       name: "6,000 Coins Pack",
-      price: 999,
+      price: customPrices.coins6000,
       desc: "The Wealthy Lord Treasury",
       perks: ["Unlimited claims expansion", "Buy top-tier gear sets", "Unlock elite server items"],
+    },
+    {
+      id: "coins-12000",
+      name: "12,000 Coins Pack",
+      price: customPrices.coins12000,
+      desc: "The Sovereign King Vault",
+      perks: ["Perfect for claim scaling", "Buy multiple elite spawner cores", "Bypass auction bid wars"],
     },
   ];
 

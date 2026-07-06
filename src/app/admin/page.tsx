@@ -54,10 +54,11 @@ export default function AdminPage() {
     epic_crate: 50,
     superior_crate: 75,
     // Coins
-    coins500: 99,
-    coins1200: 249,
-    coins2500: 499,
-    coins6000: 999
+    coins500: 49,
+    coins1200: 99,
+    coins2500: 199,
+    coins6000: 399,
+    coins12000: 699
   });
 
   // Mock Console State
@@ -879,6 +880,15 @@ export default function AdminPage() {
                                 type="number"
                                 value={prices.coins6000}
                                 onChange={(e) => handlePriceChange("coins6000", parseInt(e.target.value) || 0)}
+                                className="w-20 bg-[#09090B] border border-border-custom p-1.5 rounded text-white-text text-right"
+                              />
+                            </div>
+                            <div className="flex justify-between items-center gap-2">
+                              <span>12,000 Coins</span>
+                              <input
+                                type="number"
+                                value={prices.coins12000}
+                                onChange={(e) => handlePriceChange("coins12000", parseInt(e.target.value) || 0)}
                                 className="w-20 bg-[#09090B] border border-border-custom p-1.5 rounded text-white-text text-right"
                               />
                             </div>
