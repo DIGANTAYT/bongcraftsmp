@@ -643,11 +643,11 @@ export default function RanksPage() {
 
                     {/* Screenshot image (if available) */}
                     {["rank-knight", "rank-paladin", "rank-king"].includes(selectedRank.id) ? (
-                      <div className="relative border border-border-custom/80 rounded-2xl overflow-hidden bg-primary-bg/40 p-2 group/kit-img shadow-inner shadow-black">
+                      <div className="relative border border-border-custom/80 rounded-2xl overflow-hidden bg-primary-bg/40 p-2 group/kit-img shadow-inner shadow-black flex items-center justify-center min-h-[150px]">
                         <img
                           src={`/images/kits/${selectedRank.id.replace("rank-", "")}_kit.png`}
                           alt={`${selectedRank.name} Kit Preview`}
-                          className="w-full h-auto object-contain rounded-xl group-hover/kit-img:scale-[1.01] transition-transform duration-500 filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                          className="w-full max-h-[300px] object-contain rounded-xl group-hover/kit-img:scale-[1.01] transition-transform duration-500 filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
                         />
                       </div>
                     ) : (
