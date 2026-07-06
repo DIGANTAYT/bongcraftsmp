@@ -16,3 +16,6 @@ if (!isSupabaseConfigured) {
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : (null as any);
+
+// Force rebuild trigger to load Vercel environment variables
+
