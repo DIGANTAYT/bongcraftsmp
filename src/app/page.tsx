@@ -7,7 +7,6 @@ import { Hero } from "@/components/Hero";
 import { Stats } from "@/components/Stats";
 import { FeaturedRank } from "@/components/FeaturedRank";
 import { WhyChooseUs } from "@/components/WhyChooseUs";
-import { Testimonials } from "@/components/Testimonials";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CheckoutModal } from "@/components/CheckoutModal";
@@ -36,9 +35,6 @@ export default function Home() {
 
         {/* Feature Highlights Grid */}
         <WhyChooseUs />
-
-        {/* Community Testimonials Panel */}
-        <Testimonials />
       </main>
 
       {/* Footer Details */}
