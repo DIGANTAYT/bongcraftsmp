@@ -2,14 +2,28 @@
 
 import React, { useEffect, useState, useRef } from "react";
 
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  rot: number;
+  color: string;
+  size: number;
+}
+
 export const CursorFollower: React.FC = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [trailPosition, setTrailPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [isHidden, setIsHidden] = useState(true);
   const [isMobile, setIsMobile] = useState(true);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   const trailRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const lastSpawnRef = useRef({ x: 0, y: 0 });
+  const particleIdRef = useRef(0);
   const requestRef = useRef<number | null>(null);
 
   // Check mobile on mount
@@ -32,6 +46,41 @@ export const CursorFollower: React.FC = () => {
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
       setIsHidden(false);
+
+      // Spawn Minecraft-style villager particles on movement
+      const dx = e.clientX - lastSpawnRef.current.x;
+      const dy = e.clientY - lastSpawnRef.current.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > 15) {
+        const id = particleIdRef.current++;
+        const randomDx = (Math.random() - 0.5) * 45; 
+        const randomDy = (Math.random() - 0.5) * 45 - 25; // Drift upwards slightly
+        const randomRot = (Math.random() - 0.5) * 180;
+        const size = Math.random() * 4 + 3.5; // Minecraft square particles size
+
+        // Green-Yellow happy villager particle palette matching the reference image
+        const colors = ["#a3e635", "#84cc16", "#eab308", "#facc15", "#bef264", "#22c55e"];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        const newParticle: Particle = {
+          id,
+          x: e.clientX,
+          y: e.clientY,
+          dx: randomDx,
+          dy: randomDy,
+          rot: randomRot,
+          color: randomColor,
+          size
+        };
+
+        setParticles((prev) => [...prev.slice(-15), newParticle]); // Limit to max 15 active particles for performance
+        lastSpawnRef.current = { x: e.clientX, y: e.clientY };
+
+        setTimeout(() => {
+          setParticles((prev) => prev.filter((p) => p.id !== id));
+        }, 750);
+      }
     };
 
     const handleMouseLeave = () => {
@@ -136,7 +185,43 @@ export const CursorFollower: React.FC = () => {
         .cursor-wavy-aura {
           animation: wavy-aura-pulse 2.2s infinite ease-in-out;
         }
+        @keyframes particle-drift {
+          0% {
+            transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translate3d(var(--dx), var(--dy), 0) scale(0.1) rotate(var(--rot));
+            opacity: 0;
+          }
+        }
+        .cursor-particle {
+          position: fixed;
+          pointer-events: none;
+          z-index: 9998;
+          animation: particle-drift 0.75s forwards cubic-bezier(0.1, 0.8, 0.25, 1);
+        }
       `}</style>
+
+      {/* Dynamic Minecraft Sparkle Particles */}
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="cursor-particle mix-blend-screen"
+          style={{
+            left: p.x,
+            top: p.y,
+            width: p.size,
+            height: p.size,
+            backgroundColor: p.color,
+            boxShadow: `0 0 5px ${p.color}`,
+            borderRadius: "1px", // Minecraft square particles style
+            "--dx": `${p.dx}px`,
+            "--dy": `${p.dy}px`,
+            "--rot": `${p.rot}deg`,
+          } as any}
+        />
+      ))}
 
       {/* Outer Eased Glowing Aura (Small, Wavy/Pulsing) */}
       <div
