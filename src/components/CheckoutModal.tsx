@@ -21,9 +21,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const [copied, setCopied] = useState(false);
   const [copiedDetails, setCopiedDetails] = useState(false);
   const [orderId, setOrderId] = useState("");
-  const [isTebexEnabled, setIsTebexEnabled] = useState(false);
-  const [tebexError, setTebexError] = useState<string | null>(null);
-  const [isTebexLoading, setIsTebexLoading] = useState(false);
 
   const activeIgn = profile?.minecraft_username || minecraftUsername || "GuestPlayer";
 
@@ -74,59 +71,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     if (isOpen) {
       setStep("summary");
       setOrderId("BC-" + Math.floor(100000 + Math.random() * 900000));
-      setTebexError(null);
-      setIsTebexLoading(false);
-      const tebexActive = localStorage.getItem("bongcraft_tebex_enabled") === "true";
-      setIsTebexEnabled(tebexActive);
     }
   }, [isOpen]);
-
-  const handleTebexCheckout = async () => {
-    setIsTebexLoading(true);
-    setTebexError(null);
-    setStep("processing");
-
-    const publicToken = localStorage.getItem("bongcraft_tebex_public_token") || "";
-    const privateKey = localStorage.getItem("bongcraft_tebex_private_key") || "";
-    
-    let packageMappings = {};
-    try {
-      packageMappings = JSON.parse(localStorage.getItem("bongcraft_tebex_package_mappings") || "{}");
-    } catch (e) {
-      console.error("Failed to parse package mappings", e);
-    }
-
-    try {
-      const res = await fetch("/api/tebex", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: activeIgn,
-          cart: cart.map(item => ({ id: item.id, quantity: item.quantity })),
-          publicToken,
-          privateKey,
-          packageMappings
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to initiate Tebex checkout");
-      }
-
-      if (data.checkoutUrl) {
-        clearCart();
-        window.location.href = data.checkoutUrl;
-      } else {
-        throw new Error("No checkout URL returned by Tebex");
-      }
-    } catch (err: any) {
-      console.error(err);
-      setTebexError(err.message || "An unexpected error occurred during Tebex checkout");
-      setStep("summary");
-      setIsTebexLoading(false);
-    }
-  };
 
   const copyUpi = () => {
     navigator.clipboard.writeText(upiId);
@@ -253,7 +199,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-primary-accent rounded-full animate-ping" />
             <h3 className="font-cinzel text-base md:text-lg font-bold text-white-text tracking-wider uppercase">
-              {isTebexEnabled ? "Tebex Checkout Portal" : "UPI Checkout Portal"}
+              UPI Checkout Portal
             </h3>
           </div>
           <button
@@ -296,15 +242,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
             </div>
           ) : step === "summary" && (
             <div className="space-y-6">
-              {tebexError && (
-                <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-start gap-3 text-xs leading-relaxed">
-                  <ShieldAlert className="w-5 h-5 shrink-0 text-rose-500" />
-                  <div>
-                    <span className="font-bold uppercase block mb-0.5">Tebex Connection Error</span>
-                    {tebexError}
-                  </div>
-                </div>
-              )}
               
               {/* Delivery Account Summary */}
               <div className="flex items-center gap-4 bg-secondary-bg/60 border border-border-custom p-4 rounded-2xl">
@@ -331,106 +268,60 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 </div>
               </div>
 
-              {isTebexEnabled ? (
-                /* Tebex Payment Section */
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                  {/* Left Column: Visual Icon representation */}
-                  <div className="md:col-span-5 flex flex-col items-center justify-center space-y-3.5">
-                    <div className="relative w-40 h-40 bg-gradient-to-br from-primary-accent/10 to-gold-accent/5 p-4 rounded-3xl border border-border-custom flex items-center justify-center shadow-lg shadow-primary-accent/5">
-                      <Sparkles className="w-16 h-16 text-gold-accent animate-pulse" />
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="font-inter text-[10px] text-primary-accent font-extrabold uppercase tracking-widest text-center">
-                        Automated Delivery
-                      </span>
-                      <span className="font-inter text-[8px] text-secondary-text text-center">
-                        Instant command dispatch in-game
-                      </span>
-                    </div>
+              {/* UPI & QR Code Manual Payment Section */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                
+                {/* QR Code Left Column */}
+                <div className="md:col-span-5 flex flex-col items-center justify-center space-y-3.5">
+                  <div className="relative w-48 h-48 bg-white p-3 rounded-2xl border-2 border-gold-accent shadow-lg shadow-gold-accent/25 overflow-hidden group/qr">
+                    {/* Glowing Laser Scanner Sweeper */}
+                    <div className="absolute inset-x-0 h-1 bg-gold-accent shadow-[0_0_12px_rgba(251,191,36,1)] animate-scan z-10" />
+                    
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+                        `upi://pay?pa=${upiId}&pn=BongCraft%20SMP&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`
+                      )}`}
+                      alt="Dynamic UPI QR Code Scanner"
+                      width={192}
+                      height={192}
+                      className="object-contain w-full h-full relative z-1"
+                    />
                   </div>
-
-                  {/* Right Column: Tebex Description & Info */}
-                  <div className="md:col-span-7 space-y-4">
-                    <div className="space-y-1">
-                      <span className="font-inter text-[10px] text-secondary-text font-bold uppercase tracking-wider block">
-                        Total Checkout Amount
-                      </span>
-                      <div className="font-cinzel text-3xl font-extrabold text-gold-accent text-glow-gold">
-                        ₹{cartTotal.toLocaleString()}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <span className="font-inter text-[10px] text-primary-accent font-bold uppercase tracking-wider block">
-                        Tebex Checkout Information:
-                      </span>
-                      <p className="font-inter text-[11px] text-secondary-text leading-relaxed">
-                        Clicking the checkout button will initiate a secure Tebex session. You will be redirected to complete payment with any local or global methods.
-                      </p>
-                      <ul className="font-inter text-[11.5px] text-secondary-text list-disc list-inside space-y-1 leading-relaxed">
-                        <li>All payment methods supported by Tebex.</li>
-                        <li>No manual receipt uploads or tickets required.</li>
-                        <li>Rank permissions are processed within 2-5 minutes.</li>
-                      </ul>
-                    </div>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <span className="font-inter text-[10px] text-gold-accent font-extrabold uppercase tracking-widest text-center block">
+                      Amount locked: ₹{cartTotal}
+                    </span>
+                    <span className="font-inter text-[8px] text-secondary-text tracking-wide text-center block">
+                      Scan with GPay, PhonePe, or Paytm
+                    </span>
                   </div>
                 </div>
-              ) : (
-                /* UPI & QR Code Manual Payment Section */
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                  
-                  {/* QR Code Left Column */}
-                  <div className="md:col-span-5 flex flex-col items-center justify-center space-y-3.5">
-                    <div className="relative w-48 h-48 bg-white p-3 rounded-2xl border-2 border-gold-accent shadow-lg shadow-gold-accent/25 overflow-hidden group/qr">
-                      {/* Glowing Laser Scanner Sweeper */}
-                      <div className="absolute inset-x-0 h-1 bg-gold-accent shadow-[0_0_12px_rgba(251,191,36,1)] animate-scan z-10" />
-                      
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-                          `upi://pay?pa=${upiId}&pn=BongCraft%20SMP&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`
-                        )}`}
-                        alt="Dynamic UPI QR Code Scanner"
-                        width={192}
-                        height={192}
-                        className="object-contain w-full h-full relative z-1"
-                      />
-                    </div>
-                    <div className="flex flex-col items-center gap-1.5">
-                      <span className="font-inter text-[10px] text-gold-accent font-extrabold uppercase tracking-widest text-center block">
-                        Amount locked: ₹{cartTotal}
-                      </span>
-                      <span className="font-inter text-[8px] text-secondary-text tracking-wide text-center block">
-                        Scan with GPay, PhonePe, or Paytm
-                      </span>
+
+                {/* Manual Pay Details Right Column */}
+                <div className="md:col-span-7 space-y-4">
+                  <div className="space-y-1.5">
+                    <span className="font-inter text-[10px] text-secondary-text font-bold uppercase tracking-wider block">
+                      Amount to Pay
+                    </span>
+                    <div className="font-cinzel text-3xl font-extrabold text-gold-accent text-glow-gold">
+                      ₹{cartTotal.toLocaleString()}
                     </div>
                   </div>
 
-                  {/* Manual Pay Details Right Column */}
-                  <div className="md:col-span-7 space-y-4">
-                    <div className="space-y-1.5">
-                      <span className="font-inter text-[10px] text-secondary-text font-bold uppercase tracking-wider block">
-                        Amount to Pay
-                      </span>
-                      <div className="font-cinzel text-3xl font-extrabold text-gold-accent text-glow-gold">
-                        ₹{cartTotal.toLocaleString()}
-                      </div>
-                    </div>
-
-                    {/* Rules Bullet Points */}
-                    <div className="space-y-2">
-                      <span className="font-inter text-[10px] text-primary-accent font-bold uppercase tracking-wider block">
-                        Claim Instructions:
-                      </span>
-                      <ol className="font-inter text-[11px] text-secondary-text list-decimal list-inside space-y-1 leading-relaxed">
-                        <li>Pay the total amount above using GPay, PhonePe, or Paytm.</li>
-                        <li>Take a screenshot of the successful transaction page.</li>
-                        <li>Click the button below to launch our Discord ticket helper.</li>
-                        <li>Open a ticket and submit your screenshot + username to claim!</li>
-                      </ol>
-                    </div>
+                  {/* Rules Bullet Points */}
+                  <div className="space-y-2">
+                    <span className="font-inter text-[10px] text-primary-accent font-bold uppercase tracking-wider block">
+                      Claim Instructions:
+                    </span>
+                    <ol className="font-inter text-[11px] text-secondary-text list-decimal list-inside space-y-1 leading-relaxed">
+                      <li>Pay the total amount above using GPay, PhonePe, or Paytm.</li>
+                      <li>Take a screenshot of the successful transaction page.</li>
+                      <li>Click the button below to launch our Discord ticket helper.</li>
+                      <li>Open a ticket and submit your screenshot + username to claim!</li>
+                    </ol>
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Order Items Summary */}
               <div className="bg-secondary-bg/30 border border-border-custom rounded-2xl px-5 py-4 space-y-2.5">
@@ -455,46 +346,34 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                {isTebexEnabled ? (
-                  <button
-                    onClick={handleTebexCheckout}
-                    className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-gradient-to-r from-primary-accent to-gold-accent hover:from-primary-accent/90 hover:to-gold-accent/90 text-white-text font-inter font-bold text-sm tracking-wider uppercase rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.25)] transition-all duration-300 cursor-pointer"
-                  >
-                    <Sparkles className="w-4.5 h-4.5" />
-                    Pay Securely via Tebex
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleSubmitClaim}
-                      className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-inter font-bold text-sm tracking-wider uppercase rounded-xl hover:shadow-[0_0_20px_rgba(88,101,242,0.35)] transition-all duration-300 cursor-pointer"
-                    >
-                      <MessageSquare className="w-4.5 h-4.5 fill-current" />
-                      Submit Claim on Discord
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopyDetails}
-                      className="px-6 py-4 bg-primary-accent/10 hover:bg-primary-accent/20 border border-primary-accent/30 text-primary-accent hover:text-white flex items-center justify-center gap-2 font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer"
-                    >
-                      {copiedDetails ? (
-                        <>
-                          <Check className="w-4 h-4 text-emerald-400" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          Copy Details
-                        </>
-                      )}
-                    </button>
-                  </>
-                )}
+                <button
+                  onClick={handleSubmitClaim}
+                  className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-inter font-bold text-sm tracking-wider uppercase rounded-xl hover:shadow-[0_0_20px_rgba(88,101,242,0.35)] transition-all duration-300 cursor-pointer"
+                >
+                  <MessageSquare className="w-4.5 h-4.5 fill-current" />
+                  Submit Claim on Discord
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyDetails}
+                  className="px-6 py-4 bg-primary-accent/10 hover:bg-primary-accent/20 border border-primary-accent/30 text-primary-accent hover:text-white flex items-center justify-center gap-2 font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  {copiedDetails ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copy Details
+                    </>
+                  )}
+                </button>
               </div>
               <div className="flex items-center justify-center gap-2 text-secondary-text text-[10px] uppercase font-bold tracking-wider pt-1">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                {isTebexEnabled ? "100% Secure Checkout powered by Tebex" : "100% Encrypted Manual Verification System"}
+                100% Encrypted Manual Verification System
               </div>
             </div>
           )}
@@ -507,19 +386,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
               </div>
               <div className="space-y-2">
                 <h4 className="font-cinzel text-lg font-bold text-white-text uppercase tracking-wider">
-                  {isTebexLoading ? "Redirecting to Tebex" : "Preparing Discord Redirect"}
+                  Preparing Discord Redirect
                 </h4>
                 <p className="font-inter text-xs text-secondary-text max-w-sm">
-                  {isTebexLoading 
-                    ? "Creating secure checkout session on Tebex. Please wait..." 
-                    : "Registering order reference and launching your browser..."}
+                  Registering order reference and launching your browser...
                 </p>
               </div>
-              {!isTebexLoading && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-card-bg border border-border-custom rounded-full text-[10px] text-secondary-text font-mono">
-                  <span>Ref: {orderId}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-card-bg border border-border-custom rounded-full text-[10px] text-secondary-text font-mono">
+                <span>Ref: {orderId}</span>
+              </div>
             </div>
           )}
 

@@ -41,12 +41,6 @@ const defaultFullConfig = {
     host: "",
     port: 25575,
     password: ""
-  },
-  tebex: {
-    enabled: false,
-    publicToken: "",
-    privateKey: "",
-    packageMappings: {}
   }
 };
 

@@ -35,11 +35,6 @@ const defaultPublicConfig = {
     coins2500: 199,
     coins6000: 399,
     coins12000: 699
-  },
-  tebex: {
-    enabled: false,
-    publicToken: "",
-    packageMappings: {}
   }
 };
 
@@ -65,12 +60,7 @@ export async function GET() {
     // Filter out private keys/sensitive values to prevent exposing them to normal users
     const publicConfig = {
       maintenanceMode: value.maintenanceMode ?? false,
-      prices: value.prices || defaultPublicConfig.prices,
-      tebex: {
-        enabled: value.tebex?.enabled ?? false,
-        publicToken: value.tebex?.publicToken ?? "",
-        packageMappings: value.tebex?.packageMappings || {}
-      }
+      prices: value.prices || defaultPublicConfig.prices
     };
 
     return NextResponse.json(publicConfig);

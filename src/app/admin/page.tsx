@@ -8,7 +8,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { 
   Lock, LayoutDashboard, CheckSquare, Terminal, Settings, 
   TrendingUp, Clock, CheckCircle2, ShieldAlert, Copy, Check, LogOut,
-  RefreshCw, Server, Trash2, Edit3, DollarSign, FileText, Sparkles
+  RefreshCw, Server, Trash2, Edit3, DollarSign, FileText
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -85,12 +85,6 @@ export default function AdminPage() {
   const [rconDeliveryLogs, setRconDeliveryLogs] = useState<string[]>([]);
   const [isRconLoading, setIsRconLoading] = useState(false);
 
-  // Tebex Config state
-  const [tebexEnabled, setTebexEnabled] = useState(false);
-  const [tebexPublicToken, setTebexPublicToken] = useState("");
-  const [tebexPrivateKey, setTebexPrivateKey] = useState("");
-  const [tebexPackageMappings, setTebexPackageMappings] = useState("");
-
   const loadGlobalConfig = async () => {
     try {
       const authHeader = "Basic " + btoa("admin:bongcraftadmin");
@@ -113,15 +107,6 @@ export default function AdminPage() {
           setRconHost(config.rcon.host ?? "play.bongcraftsmp.in");
           setRconPort(config.rcon.port ?? "25575");
           setRconPassword(config.rcon.password ?? "");
-        }
-        
-        if (config.tebex) {
-          setTebexEnabled(config.tebex.enabled ?? false);
-          setTebexPublicToken(config.tebex.publicToken ?? "");
-          setTebexPrivateKey(config.tebex.privateKey ?? "");
-          setTebexPackageMappings(typeof config.tebex.packageMappings === "string" 
-            ? config.tebex.packageMappings 
-            : JSON.stringify(config.tebex.packageMappings, null, 2));
         }
       }
     } catch (e) {
@@ -378,8 +363,7 @@ export default function AdminPage() {
       maintenanceMode,
       discordWebhook: webhookInput,
       prices: updated,
-      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
-      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword }
     };
     await saveFullConfig(fullConfig);
     addAuditLog(`Catalog pricing updated for ${key} to ₹${value}`, "info");
@@ -398,30 +382,10 @@ export default function AdminPage() {
       maintenanceMode: val,
       discordWebhook: webhookInput,
       prices,
-      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
-      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword }
     };
     await saveFullConfig(fullConfig);
     addAuditLog(`Maintenance mode toggled ${val ? "ON" : "OFF"}`, val ? "warning" : "success");
-  };
-
-  const handleSaveTebexSettings = async () => {
-    try {
-      const parsedMappings = tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {};
-      
-      const fullConfig = {
-        maintenanceMode,
-        discordWebhook: webhookInput,
-        prices,
-        rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
-        tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: parsedMappings }
-      };
-      await saveFullConfig(fullConfig);
-      alert("Tebex checkout settings saved successfully!");
-      addAuditLog("Tebex configuration details updated", "info");
-    } catch (e: any) {
-      alert("Error: Package mappings must be valid JSON!\n" + e.message);
-    }
   };
 
   const handleSaveDiscordWebhook = async () => {
@@ -429,8 +393,7 @@ export default function AdminPage() {
       maintenanceMode,
       discordWebhook: webhookInput,
       prices,
-      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
-      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword }
     };
     await saveFullConfig(fullConfig);
     alert("Discord Webhook saved successfully!");
@@ -442,8 +405,7 @@ export default function AdminPage() {
       maintenanceMode,
       discordWebhook: webhookInput,
       prices,
-      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
-      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword }
     };
     await saveFullConfig(fullConfig);
     alert("RCON configuration saved successfully!");
@@ -1400,83 +1362,6 @@ export default function AdminPage() {
                           </div>
                         </div>
 
-                        {/* Tebex Checkout Automation Integration */}
-                        <div className="bg-secondary-bg/50 p-5 rounded-2xl border border-border-custom space-y-5">
-                          <div className="flex items-center justify-between gap-4 border-b border-border-custom/50 pb-3.5">
-                            <div className="space-y-1">
-                              <h3 className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-gold-accent" />
-                                Tebex Checkout Automation
-                              </h3>
-                              <p className="text-xs text-secondary-text">
-                                Enable fully-automated rank delivery via Tebex Headless API (replaces manual UPI checkout).
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => setTebexEnabled(!tebexEnabled)}
-                              className={`w-14 h-8 rounded-full transition-all relative flex items-center px-1 border cursor-pointer ${
-                                tebexEnabled
-                                  ? "bg-gold-accent border-gold-accent/80 justify-end"
-                                  : "bg-[#111217] border-border-custom justify-start"
-                              }`}
-                            >
-                              <span className="w-5.5 h-5.5 rounded-full bg-white shadow-md block transition-transform" />
-                            </button>
-                          </div>
-
-                          {tebexEnabled && (
-                            <div className="space-y-4 pt-1 font-inter text-xs text-secondary-text">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Tebex Public Token</label>
-                                  <input
-                                    type="text"
-                                    value={tebexPublicToken}
-                                    onChange={(e) => setTebexPublicToken(e.target.value)}
-                                    placeholder="e.g. 1a2b3c4d5e6f7g8h9i0j..."
-                                    className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
-                                  />
-                                </div>
-                                <div className="space-y-1.5">
-                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Tebex Private Key (Optional)</label>
-                                  <input
-                                    type="password"
-                                    value={tebexPrivateKey}
-                                    onChange={(e) => setTebexPrivateKey(e.target.value)}
-                                    placeholder="Enter private key (if required)"
-                                    className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="space-y-1.5">
-                                <div className="flex justify-between items-center">
-                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Tebex Package Mappings (JSON)</label>
-                                  <span className="text-[9px] text-secondary-text uppercase">Map store product IDs to Tebex Package IDs</span>
-                                </div>
-                                <textarea
-                                  rows={8}
-                                  value={tebexPackageMappings}
-                                  onChange={(e) => setTebexPackageMappings(e.target.value)}
-                                  placeholder={`{\n  "rank-knight": "1234567"\n}`}
-                                  className="w-full bg-[#09090B] border border-border-custom p-3 rounded-xl text-white-text outline-none font-mono text-[11px] focus:border-primary-accent/60 leading-relaxed"
-                                />
-                                <span className="text-[9px] text-secondary-text/80 block mt-1">
-                                  Note: Package IDs must be numeric. Ensure you copy the Package IDs from your Tebex Creator panel.
-                                </span>
-                              </div>
-
-                              <div className="flex justify-end pt-1">
-                                <button
-                                  onClick={handleSaveTebexSettings}
-                                  className="px-6 py-2.5 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
-                                >
-                                  Save Tebex Configuration
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
 
                         {/* RCON Live Commands Integration */}
                         <div className="bg-secondary-bg/50 p-5 rounded-2xl border border-border-custom space-y-5">
