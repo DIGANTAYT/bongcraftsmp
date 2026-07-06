@@ -25,6 +25,8 @@ export default function CheckoutPage() {
   const [utrNumber, setUtrNumber] = useState("");
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
+  const [receiptItems, setReceiptItems] = useState<any[]>([]);
+  const [receiptTotal, setReceiptTotal] = useState(0);
   
   const upiId = "sarkardiganta04-2@oksbi";
   const activeIgn = minecraftUsername || "GuestPlayer";
@@ -34,8 +36,8 @@ export default function CheckoutPage() {
   }, []);
 
   const getCopyableText = () => {
-    const itemsText = cart.map(item => `  • ${item.name} (x${item.quantity})`).join("\n");
-    return `🛒 **BongCraft SMP Store Order**\n- **Order ID:** ${orderId}\n- **Minecraft IGN:** ${activeIgn}\n- **UTR Reference:** ${utrNumber || "N/A"}\n- **Items:**\n${itemsText}\n- **Total Paid:** ₹${cartTotal}`;
+    const itemsText = receiptItems.map(item => `  • ${item.name} (x${item.quantity})`).join("\n");
+    return `🛒 **BongCraft SMP Store Order**\n- **Order ID:** ${orderId}\n- **Minecraft IGN:** ${activeIgn}\n- **UTR Reference:** ${utrNumber || "N/A"}\n- **Items:**\n${itemsText}\n- **Total Paid:** ₹${receiptTotal}`;
   };
 
   const handleCopyDetails = () => {
@@ -59,6 +61,8 @@ export default function CheckoutPage() {
     }
 
     setStep("processing");
+    setReceiptItems([...cart]);
+    setReceiptTotal(cartTotal);
 
     // Format username to include UTR reference for visibility in Admin panel
     const formattedIgn = `${activeIgn} (UTR: ${utrNumber.trim()})`;
@@ -460,57 +464,102 @@ export default function CheckoutPage() {
                 </p>
               </div>
 
-              {/* Ticket Details card */}
-              <div className="w-full bg-[#09090B]/60 border border-border-custom rounded-2xl p-5 space-y-4 text-left">
-                <div className="flex justify-between items-center pb-2 border-b border-border-custom/50">
-                  <span className="font-inter text-[10px] font-bold text-primary-accent uppercase tracking-wider">
-                    Copy Details to Ticket
-                  </span>
+              {/* Receipt Voucher Card */}
+              <div className="w-full bg-[#111217]/90 border border-border-custom rounded-3xl overflow-hidden shadow-2xl">
+                {/* Header */}
+                <div className="bg-[#18181b] border-b border-border-custom/50 px-6 py-4 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <span className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider">
+                      Official Store Receipt
+                    </span>
+                  </div>
                   <button
                     onClick={handleCopyDetails}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-accent/10 hover:bg-primary-accent/20 border border-primary-accent/30 text-primary-accent hover:text-white rounded-lg transition-colors text-[10px] font-inter font-bold uppercase tracking-wider cursor-pointer"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-accent/10 hover:bg-primary-accent/20 border border-primary-accent/30 text-primary-accent hover:text-white rounded-xl transition-colors text-[10px] font-inter font-bold uppercase tracking-wider cursor-pointer"
                   >
                     {copiedText ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        Copied!
+                        Receipt Copied!
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5" />
-                        Copy Details
+                        Copy Receipt Text
                       </>
                     )}
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-inter text-xs">
-                  <div>
-                    <span className="text-secondary-text block text-[10px] uppercase font-semibold">Order Reference</span>
-                    <span className="text-white-text font-bold font-mono">{orderId}</span>
+                {/* Receipt Body */}
+                <div className="p-6 space-y-6 font-inter text-xs text-left">
+                  {/* Metadata Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-4 border-b border-dashed border-border-custom/50">
+                    <div>
+                      <span className="text-secondary-text text-[9px] uppercase font-bold block">Order ID</span>
+                      <span className="text-white-text font-bold font-mono">{orderId}</span>
+                    </div>
+                    <div>
+                      <span className="text-secondary-text text-[9px] uppercase font-bold block">Target IGN</span>
+                      <span className="text-white-text font-bold">{activeIgn}</span>
+                    </div>
+                    <div>
+                      <span className="text-secondary-text text-[9px] uppercase font-bold block">UTR Reference</span>
+                      <span className="text-white-text font-bold font-mono">{utrNumber || "N/A"}</span>
+                    </div>
+                    <div>
+                      <span className="text-secondary-text text-[9px] uppercase font-bold block">Method</span>
+                      <span className="text-emerald-400 font-bold uppercase">UPI QR Code</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-secondary-text block text-[10px] uppercase font-semibold">Target IGN</span>
-                    <span className="text-white-text font-bold">{activeIgn}</span>
+
+                  {/* Items List */}
+                  <div className="space-y-3">
+                    <span className="text-secondary-text text-[9px] uppercase font-bold block">Purchased Items</span>
+                    <div className="divide-y divide-border-custom/30">
+                      {receiptItems.map((item) => (
+                        <div key={item.id} className="py-2.5 flex justify-between gap-3">
+                          <div>
+                            <span className="text-white-text font-bold block">{item.name}</span>
+                            <span className="text-secondary-text text-[9px] uppercase font-bold block mt-0.5">
+                              {item.category} (x{item.quantity})
+                            </span>
+                          </div>
+                          <span className="text-gold-accent font-cinzel font-semibold text-right">
+                            ₹{(item.price * item.quantity).toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-secondary-text block text-[10px] uppercase font-semibold">UTR Reference</span>
-                    <span className="text-white-text font-bold font-mono">{utrNumber}</span>
+
+                  {/* Totals */}
+                  <div className="pt-4 border-t border-dashed border-border-custom/50 flex justify-between items-center">
+                    <div>
+                      <span className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest block">Payment Status</span>
+                      <span className="text-[9px] text-secondary-text block mt-0.5">Pending Staff Verification</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-secondary-text text-[9px] uppercase font-bold block">Total Paid</span>
+                      <span className="text-gold-accent text-glow-gold font-cinzel font-black text-lg">
+                        ₹{receiptTotal.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="h-px bg-border-custom/50" />
-
-                <div className="space-y-2">
-                  <span className="font-inter text-[11px] font-bold text-primary-accent uppercase tracking-wider block">
-                    Claim Ticket Check-List:
-                  </span>
-                  <ul className="font-inter text-xs text-secondary-text list-disc list-inside space-y-1.5 leading-relaxed">
-                    <li>Upload your successful <strong className="text-white-text">UPI Payment Screenshot</strong>.</li>
-                    <li>Paste the copied ticket details in the support channel.</li>
-                    <li>Our staff will verify your UTR reference and run RCON delivery!</li>
-                  </ul>
-                </div>
+              {/* Claim Check-List */}
+              <div className="w-full glass-panel p-5 rounded-2xl border border-border-custom/50 text-left space-y-3">
+                <span className="font-inter text-[11px] font-bold text-primary-accent uppercase tracking-wider block">
+                  Support Ticket Guidelines:
+                </span>
+                <ul className="font-inter text-xs text-secondary-text list-disc list-inside space-y-1.5 leading-relaxed">
+                  <li>Upload your successful <strong className="text-white-text">UPI Payment Screenshot</strong>.</li>
+                  <li>Click <strong className="text-white-text">"Copy Receipt Text"</strong> above and paste it in the channel.</li>
+                  <li>Staff will match your UTR reference and run command delivery instantly!</li>
+                </ul>
               </div>
 
               {/* Actions */}
