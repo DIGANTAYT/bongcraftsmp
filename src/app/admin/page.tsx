@@ -49,10 +49,10 @@ export default function AdminPage() {
     duke: 999,
     king: 1499,
     // Crates
-    party: 20,
-    spawner: 30,
-    rare: 50,
-    epic: 80,
+    common_crate: 20,
+    rare_crate: 30,
+    epic_crate: 50,
+    superior_crate: 75,
     // Coins
     coins500: 99,
     coins1200: 249,
@@ -802,20 +802,11 @@ export default function AdminPage() {
                           </h3>
                           <div className="space-y-3">
                             <div className="flex justify-between items-center gap-2">
-                              <span>Party Key</span>
+                              <span>Common Key</span>
                               <input
                                 type="number"
-                                value={prices.party}
-                                onChange={(e) => handlePriceChange("party", parseInt(e.target.value) || 0)}
-                                className="w-20 bg-[#09090B] border border-border-custom p-1.5 rounded text-white-text text-right"
-                              />
-                            </div>
-                            <div className="flex justify-between items-center gap-2">
-                              <span>Spawner Key</span>
-                              <input
-                                type="number"
-                                value={prices.spawner}
-                                onChange={(e) => handlePriceChange("spawner", parseInt(e.target.value) || 0)}
+                                value={prices.common_crate}
+                                onChange={(e) => handlePriceChange("common_crate", parseInt(e.target.value) || 0)}
                                 className="w-20 bg-[#09090B] border border-border-custom p-1.5 rounded text-white-text text-right"
                               />
                             </div>
@@ -823,8 +814,8 @@ export default function AdminPage() {
                               <span>Rare Key</span>
                               <input
                                 type="number"
-                                value={prices.rare}
-                                onChange={(e) => handlePriceChange("rare", parseInt(e.target.value) || 0)}
+                                value={prices.rare_crate}
+                                onChange={(e) => handlePriceChange("rare_crate", parseInt(e.target.value) || 0)}
                                 className="w-20 bg-[#09090B] border border-border-custom p-1.5 rounded text-white-text text-right"
                               />
                             </div>
@@ -832,8 +823,17 @@ export default function AdminPage() {
                               <span>Epic Key</span>
                               <input
                                 type="number"
-                                value={prices.epic}
-                                onChange={(e) => handlePriceChange("epic", parseInt(e.target.value) || 0)}
+                                value={prices.epic_crate}
+                                onChange={(e) => handlePriceChange("epic_crate", parseInt(e.target.value) || 0)}
+                                className="w-20 bg-[#09090B] border border-border-custom p-1.5 rounded text-white-text text-right"
+                              />
+                            </div>
+                            <div className="flex justify-between items-center gap-2">
+                              <span>Superior Key</span>
+                              <input
+                                type="number"
+                                value={prices.superior_crate}
+                                onChange={(e) => handlePriceChange("superior_crate", parseInt(e.target.value) || 0)}
                                 className="w-20 bg-[#09090B] border border-border-custom p-1.5 rounded text-white-text text-right"
                               />
                             </div>

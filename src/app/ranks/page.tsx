@@ -642,7 +642,7 @@ export default function RanksPage() {
                     </div>
 
                     {/* Screenshot image (if available) */}
-                    {["rank-knight", "rank-paladin", "rank-king"].includes(selectedRank.id) ? (
+                    {["rank-knight", "rank-lord", "rank-paladin", "rank-king"].includes(selectedRank.id) ? (
                       <div className="relative border border-border-custom/80 rounded-2xl overflow-hidden bg-primary-bg/40 p-2 group/kit-img shadow-inner shadow-black flex items-center justify-center min-h-[150px]">
                         <img
                           src={`/images/kits/${selectedRank.id.replace("rank-", "")}_kit.png`}

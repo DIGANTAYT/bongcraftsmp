@@ -199,17 +199,24 @@ export default function CratesPage() {
   const { addToCart, cart } = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedCrate, setSelectedCrate] = useState<CrateItemType | null>(null);
+  const [activeModalTab, setActiveModalTab] = useState<"drops" | "screenshot">("drops");
 
   const [crates, setCrates] = useState<CrateItemType[]>([]);
+
+  useEffect(() => {
+    if (selectedCrate) {
+      setActiveModalTab("drops");
+    }
+  }, [selectedCrate]);
 
   useEffect(() => {
     // Get custom prices if set in localStorage
     const savedPricesStr = localStorage.getItem("bongcraft_prices");
     let customPrices = {
-      party: 20,
-      spawner: 30,
-      rare: 50,
-      epic: 80
+      common: 20,
+      rare: 30,
+      epic: 50,
+      superior: 75
     };
     if (savedPricesStr) {
       try {
@@ -221,34 +228,34 @@ export default function CratesPage() {
 
     const defaultCrates: CrateItemType[] = [
       {
-        id: "crate-party",
-        name: "Party Crate Key",
-        price: customPrices.party,
-        accentColor: "#D946EF",
-        glowClass: "hover:border-fuchsia-500/40 hover:shadow-[0_0_20px_-5px_rgba(217,70,239,0.3)]",
-        desc: "Unlock the festive Party Crate. Access colorful storage shulkers!",
-        rewards: [
-          { name: "Green Shulker Box", count: "1x", type: "shulker" },
-          { name: "Pink Shulker Box", count: "1x", type: "shulker" },
-          { name: "Purple Shulker Box", count: "1x", type: "shulker" },
-          { name: "Yellow Shulker Box", count: "1x", type: "shulker" },
-          { name: "Red Shulker Box", count: "1x", type: "shulker" },
-        ],
-      },
-      {
-        id: "crate-spawner",
-        name: "Spawner Crate Key",
-        price: customPrices.spawner,
+        id: "crate-common",
+        name: "Common Crate Key",
+        price: customPrices.common,
         accentColor: "#10B981",
         glowClass: "hover:border-emerald-500/40 hover:shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]",
-        desc: "Unlock creature spawners and custom cores for automatic farms.",
+        desc: "Unlock the Common Crate. Access starter diamond gear, ingots, and boosters!",
         rewards: [
-          { name: "Zombie Spawner", count: "1x", type: "block" },
-          { name: "Skeleton Spawner", count: "1x", type: "block" },
-          { name: "Spider Spawner", count: "1x", type: "block" },
-          { name: "Pig Spawner", count: "1x", type: "block" },
-          { name: "Cow Spawner", count: "1x", type: "block" },
-          { name: "Sheep Spawner", count: "1x", type: "block" },
+          { name: "Diamond Sword", type: "weapon" },
+          { name: "Diamond Pickaxe", type: "tool" },
+          { name: "Diamond Axe", type: "tool" },
+          { name: "Coal Block", count: "64x", type: "block" },
+          { name: "Iron Ingot", count: "32x", type: "resource" },
+          { name: "Gold Ingot", count: "24x", type: "resource" },
+          { name: "Emerald", count: "6x", type: "resource" },
+          { name: "Diamond", count: "4x", type: "resource" },
+          { name: "Netherite Ingot", count: "1x", type: "resource" },
+          { name: "Money Roll", count: "2x", type: "resource" },
+          { name: "Coin Stack", count: "2x", type: "resource" },
+          { name: "EXP Bottle", count: "2x", type: "xp" },
+          { name: "Premium Pickaxe", type: "tool" },
+          { name: "Blue Key", type: "travel" },
+          { name: "Purple Key", type: "travel" },
+          { name: "Shulker Box", type: "shulker" },
+          { name: "Totem of Undying", type: "defense" },
+          { name: "Trident", type: "weapon" },
+          { name: "Nether Star", type: "resource" },
+          { name: "Shield Upgrade", type: "defense" },
+          { name: "Hourglass", type: "travel" },
         ],
       },
       {
@@ -257,56 +264,91 @@ export default function CratesPage() {
         price: customPrices.rare,
         accentColor: "#3B82F6",
         glowClass: "hover:border-blue-500/40 hover:shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)]",
-        desc: "Unlock high-tier netherite weapons, armor, and enchanted golden apples.",
+        desc: "Unlock the Rare Crate. Contains netherite tools, stackable blocks, and key sets!",
         rewards: [
-          { name: "Netherite Helmet", type: "armor" },
-          { name: "Netherite Chestplate", type: "armor" },
-          { name: "Netherite Leggings", type: "armor" },
-          { name: "Netherite Boots", type: "armor" },
           { name: "Netherite Sword", type: "weapon" },
           { name: "Netherite Pickaxe", type: "tool" },
           { name: "Netherite Axe", type: "tool" },
-          { name: "Netherite Shovel", type: "tool" },
-          { name: "Shield", type: "defense" },
-          { name: "Bow", type: "weapon" },
-          { name: "Enchanted Golden Apple", count: "69x", type: "food" },
-          { name: "Golden Apple", count: "8x", type: "food" },
-          { name: "Golden Carrot", count: "64x", type: "food" },
+          { name: "Coal Block", count: "16x", type: "block" },
+          { name: "Iron Block", count: "8x", type: "block" },
+          { name: "Gold Ingot", count: "48x", type: "resource" },
+          { name: "Emerald", count: "16x", type: "resource" },
+          { name: "Diamond", count: "8x", type: "resource" },
+          { name: "Netherite Ingot", count: "2x", type: "resource" },
+          { name: "Blue Rune Item", type: "resource" },
+          { name: "Money Roll", count: "2x", type: "resource" },
+          { name: "Coin Stack", count: "2x", type: "resource" },
+          { name: "EXP Bottle", count: "2x", type: "xp" },
+          { name: "Premium Pickaxe", type: "tool" },
+          { name: "Purple Key", type: "travel" },
+          { name: "Gold Key", type: "travel" },
           { name: "Totem of Undying", type: "defense" },
-          { name: "Ender Pearl", count: "16x", type: "travel" },
-          { name: "Arrow", count: "64x", type: "ammo" },
-          { name: "Bottle o' Enchanting", count: "69x", type: "xp" },
-          { name: "Pink Shulker Box", count: "1x", type: "shulker" },
-          { name: "Yellow Shulker Box", count: "1x", type: "shulker" },
+          { name: "Trident", type: "weapon" },
+          { name: "Nether Star", type: "resource" },
+          { name: "Shield Upgrade", type: "defense" },
+          { name: "Hourglass", type: "travel" },
         ],
       },
       {
         id: "crate-epic",
         name: "Epic Crate Key",
         price: customPrices.epic,
-        accentColor: "#FBBF24",
-        glowClass: "hover:border-amber-500/40 hover:shadow-[0_0_20px_-5px_rgba(251,191,36,0.3)]",
-        desc: "The ultimate premium crate! Contains max netherite gear, scrap, and totems.",
+        accentColor: "#A855F7",
+        glowClass: "hover:border-purple-500/40 hover:shadow-[0_0_20px_-5px_rgba(168,85,247,0.3)]",
+        desc: "Unlock the Epic Crate. Features high-tier weapons, blocks, elytra, and runes!",
         rewards: [
-          { name: "Netherite Helmet", type: "armor" },
-          { name: "Netherite Chestplate", type: "armor" },
-          { name: "Netherite Leggings", type: "armor" },
-          { name: "Netherite Boots", type: "armor" },
           { name: "Netherite Sword", type: "weapon" },
           { name: "Netherite Pickaxe", type: "tool" },
           { name: "Netherite Axe", type: "tool" },
-          { name: "Netherite Shovel", type: "tool" },
-          { name: "Shield", type: "defense" },
-          { name: "Bow", type: "weapon" },
-          { name: "Enchanted Golden Apple", count: "64x", type: "food" },
-          { name: "Golden Apple", count: "16x", type: "food" },
-          { name: "Golden Carrot", count: "64x", type: "food" },
-          { name: "Totem of Undying", type: "defense" },
-          { name: "Ender Pearl", count: "16x", type: "travel" },
-          { name: "Spectral Arrow", count: "64x", type: "ammo" },
-          { name: "Netherite Scrap", count: "64x", type: "resource" },
-          { name: "Pink Shulker Box", count: "1x", type: "shulker" },
-          { name: "Purple Shulker Box", count: "1x", type: "shulker" },
+          { name: "Coal Block", count: "32x", type: "block" },
+          { name: "Iron Block", count: "16x", type: "block" },
+          { name: "Gold Block", count: "8x", type: "block" },
+          { name: "Emerald", count: "32x", type: "resource" },
+          { name: "Diamond", count: "12x", type: "resource" },
+          { name: "Netherite Ingot", count: "3x", type: "resource" },
+          { name: "Blue Rune Item", type: "resource" },
+          { name: "Copper Ingot", type: "resource" },
+          { name: "Money Roll", count: "2x", type: "resource" },
+          { name: "Coin Stack", count: "2x", type: "resource" },
+          { name: "EXP Bottle", count: "2x", type: "xp" },
+          { name: "Premium Pickaxe", type: "tool" },
+          { name: "Gold Key", type: "travel" },
+          { name: "Trident", type: "weapon" },
+          { name: "Nether Star", type: "resource" },
+          { name: "Elytra", type: "travel" },
+          { name: "Shield Upgrade", type: "defense" },
+          { name: "Hourglass", type: "travel" },
+        ],
+      },
+      {
+        id: "crate-superior",
+        name: "Superior Crate Key",
+        price: customPrices.superior,
+        accentColor: "#FBBF24",
+        glowClass: "hover:border-amber-500/40 hover:shadow-[0_0_20px_-5px_rgba(251,191,36,0.3)]",
+        desc: "The ultimate premium crate! Offers max netherite gear, blocks, double keys, and elytra!",
+        rewards: [
+          { name: "Netherite Sword", type: "weapon" },
+          { name: "Netherite Pickaxe", type: "tool" },
+          { name: "Netherite Axe", type: "tool" },
+          { name: "Coal Block", count: "64x", type: "block" },
+          { name: "Iron Block", count: "32x", type: "block" },
+          { name: "Gold Block", count: "16x", type: "block" },
+          { name: "Emerald Block", count: "8x", type: "block" },
+          { name: "Diamond Block", count: "3x", type: "block" },
+          { name: "Netherite Ingot", count: "4x", type: "resource" },
+          { name: "Blue Rune Item", type: "resource" },
+          { name: "Copper Ingot", type: "resource" },
+          { name: "Money Roll", count: "2x", type: "resource" },
+          { name: "Coin Stack", count: "2x", type: "resource" },
+          { name: "EXP Bottle", count: "2x", type: "xp" },
+          { name: "Premium Pickaxe", type: "tool" },
+          { name: "Gold Key", count: "2x", type: "travel" },
+          { name: "Trident", type: "weapon" },
+          { name: "Nether Star", type: "resource" },
+          { name: "Elytra", type: "travel" },
+          { name: "Shield Upgrade", type: "defense" },
+          { name: "Hourglass", type: "travel" },
         ],
         featured: true,
       }
@@ -477,60 +519,109 @@ export default function CratesPage() {
                 </button>
               </div>
 
-              {/* Body (Minecraft Inventory Grid) */}
-              <div className="p-6 md:p-8 overflow-y-auto space-y-6">
-                <div className="space-y-3">
-                  <span className="font-cinzel text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
-                    Crate Loot Chest contents
-                  </span>
+              {/* Tab Navigation */}
+              <div className="flex border-b border-border-custom px-6 bg-secondary-bg/10 select-none shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveModalTab("drops")}
+                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                    activeModalTab === "drops"
+                      ? "border-primary-accent text-white-text"
+                      : "border-transparent text-secondary-text hover:text-white-text"
+                  }`}
+                >
+                  ✨ Drops Grid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveModalTab("screenshot")}
+                  className={`px-4 py-3.5 font-cinzel text-xs font-bold tracking-wider border-b-2 transition-all cursor-pointer ${
+                    activeModalTab === "screenshot"
+                      ? "border-primary-accent text-white-text"
+                      : "border-transparent text-secondary-text hover:text-white-text"
+                  }`}
+                >
+                  📸 GUI Screenshot
+                </button>
+              </div>
 
-                  {/* Minecraft Chest GUI Mockup */}
-                  <div className="bg-[#2D2D2D]/95 border-[4px] border-t-[#5E5E5E] border-l-[#5E5E5E] border-r-[#1B1B1B] border-b-[#1B1B1B] rounded-lg p-4.5 shadow-inner">
-                    {/* Chest Label */}
-                    <div className="font-mono text-xs font-bold text-[#D1D5DB] mb-3.5 uppercase tracking-wider flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
-                      {selectedCrate.name.split(" ")[0]} Loot Chest
-                    </div>
-                    
-                    {/* Slots Grid (9 columns) */}
-                    <div className="grid grid-cols-5 sm:grid-cols-9 gap-1.5">
-                      {/* Render Crate Drops in slots */}
-                      {selectedCrate.rewards.map((reward, i) => (
-                        <div
-                          key={i}
-                          className="relative aspect-square w-full bg-[#8B8B8B] border-[3px] border-t-[#373737] border-l-[#373737] border-r-[#FFFFFF] border-b-[#FFFFFF] flex items-center justify-center group/slot cursor-help hover:bg-[#9E9E9E] transition-colors rounded"
-                        >
-                          {/* Proper Graphic SVG Item Icon */}
-                          <div className="w-8 h-8 flex items-center justify-center p-1">
-                            <MinecraftItemIcon name={reward.name} type={reward.type} />
+              {/* Body */}
+              {activeModalTab === "drops" ? (
+                <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1">
+                  <div className="space-y-3">
+                    <span className="font-cinzel text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
+                      Crate Loot Chest contents
+                    </span>
+
+                    {/* Minecraft Chest GUI Mockup */}
+                    <div className="bg-[#2D2D2D]/95 border-[4px] border-t-[#5E5E5E] border-l-[#5E5E5E] border-r-[#1B1B1B] border-b-[#1B1B1B] rounded-lg p-4.5 shadow-inner">
+                      {/* Chest Label */}
+                      <div className="font-mono text-xs font-bold text-[#D1D5DB] mb-3.5 uppercase tracking-wider flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+                        {selectedCrate.name.split(" ")[0]} Loot Chest
+                      </div>
+                      
+                      {/* Slots Grid (9 columns) */}
+                      <div className="grid grid-cols-5 sm:grid-cols-9 gap-1.5">
+                        {/* Render Crate Drops in slots */}
+                        {selectedCrate.rewards.map((reward, i) => (
+                          <div
+                            key={i}
+                            className="relative aspect-square w-full bg-[#8B8B8B] border-[3px] border-t-[#373737] border-l-[#373737] border-r-[#FFFFFF] border-b-[#FFFFFF] flex items-center justify-center group/slot cursor-help hover:bg-[#9E9E9E] transition-colors rounded"
+                          >
+                            {/* Proper Graphic SVG Item Icon */}
+                            <div className="w-8 h-8 flex items-center justify-center p-1">
+                              <MinecraftItemIcon name={reward.name} type={reward.type} />
+                            </div>
+
+                            {/* Item count badge (if exists) */}
+                            {reward.count && (
+                              <span className="absolute bottom-0.5 right-1 font-mono text-[10px] font-black text-white text-shadow-sm select-none z-15">
+                                {reward.count.replace("x", "")}
+                              </span>
+                            )}
+
+                            {/* Interactive Hover Tooltip */}
+                            <div className="absolute bottom-[115%] left-1/2 -translate-x-1/2 bg-[#09090B]/95 border border-border-custom px-3 py-1.5 rounded-lg pointer-events-none opacity-0 group-hover/slot:opacity-100 transition-opacity duration-200 whitespace-nowrap z-25 shadow-xl">
+                              <span className="font-mono text-xs font-bold text-gold-accent">{reward.name}</span>
+                              {reward.count && <span className="font-mono text-[10px] text-secondary-text ml-1.5">x{reward.count.replace("x", "")}</span>}
+                            </div>
                           </div>
+                        ))}
 
-                          {/* Item count badge (if exists) */}
-                          {reward.count && (
-                            <span className="absolute bottom-0.5 right-1 font-mono text-[10px] font-black text-white text-shadow-sm select-none z-15">
-                              {reward.count.replace("x", "")}
-                            </span>
-                          )}
-
-                          {/* Interactive Hover Tooltip */}
-                          <div className="absolute bottom-[115%] left-1/2 -translate-x-1/2 bg-[#09090B]/95 border border-border-custom px-3 py-1.5 rounded-lg pointer-events-none opacity-0 group-hover/slot:opacity-100 transition-opacity duration-200 whitespace-nowrap z-25 shadow-xl">
-                            <span className="font-mono text-xs font-bold text-gold-accent">{reward.name}</span>
-                            {reward.count && <span className="font-mono text-[10px] text-secondary-text ml-1.5">x{reward.count.replace("x", "")}</span>}
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Fill remaining slots to make 9 slots minimal grid */}
-                      {[...Array(Math.max(0, 9 - selectedCrate.rewards.length))].map((_, i) => (
-                        <div
-                          key={`empty-${i}`}
-                          className="aspect-square w-full bg-[#8B8B8B] border-[3px] border-t-[#373737] border-l-[#373737] border-r-[#FFFFFF] border-b-[#FFFFFF] opacity-20 rounded"
-                        />
-                      ))}
+                        {/* Fill remaining slots to make 9 slots minimal grid */}
+                        {[...Array(Math.max(0, 9 - selectedCrate.rewards.length))].map((_, i) => (
+                          <div
+                            key={`empty-${i}`}
+                            className="aspect-square w-full bg-[#8B8B8B] border-[3px] border-t-[#373737] border-l-[#373737] border-r-[#FFFFFF] border-b-[#FFFFFF] opacity-20 rounded"
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-cinzel text-[10px] font-bold text-secondary-text uppercase tracking-widest block">
+                        In-Game Crate GUI Preview
+                      </span>
+                      <span className="font-inter text-[10px] text-gold-accent font-bold uppercase tracking-wider">
+                        Real-time Server drops
+                      </span>
+                    </div>
+
+                    <div className="relative border border-border-custom/80 rounded-2xl overflow-hidden bg-primary-bg/40 p-2 group/crate-img shadow-inner shadow-black flex items-center justify-center min-h-[150px]">
+                      <img
+                        src={`/images/crates/${selectedCrate.id.replace("crate-", "")}_crate.png`}
+                        alt={`${selectedCrate.name} Screenshot`}
+                        className="w-full max-h-[300px] object-contain rounded-xl group-hover/crate-img:scale-[1.01] transition-transform duration-500 filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Footer */}
               <div className="px-6 py-5 border-t border-border-custom bg-secondary-bg/25 flex flex-col sm:flex-row items-center justify-between gap-4">

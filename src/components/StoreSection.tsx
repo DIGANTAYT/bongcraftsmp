@@ -16,7 +16,11 @@ export const StoreSection: React.FC = () => {
     lord: 399,
     paladin: 699,
     duke: 999,
-    king: 1499
+    king: 1499,
+    common_crate: 20,
+    rare_crate: 30,
+    epic_crate: 50,
+    superior_crate: 75
   });
 
   useEffect(() => {
@@ -130,32 +134,32 @@ export const StoreSection: React.FC = () => {
   // Keys Data
   const keys = [
     {
-      id: "crate-party",
-      name: "Party Crate Key",
-      price: 20,
-      desc: "Unlock the festive Party Crate. Access colorful storage shulkers!",
-      perks: ["Unlocks Party Crate", "Green Shulker Box", "Pink Shulker Box", "Purple Shulker Box", "Yellow/Red Shulker Boxes"],
-    },
-    {
-      id: "crate-spawner",
-      name: "Spawner Crate Key",
-      price: 30,
-      desc: "Unlock creature spawners and custom cores for automatic farms.",
-      perks: ["Unlocks Spawner Crate", "Zombie Spawner", "Skeleton Spawner", "Spider Spawner", "Pig/Cow/Sheep Spawners"],
+      id: "crate-common",
+      name: "Common Crate Key",
+      price: customPrices.common_crate,
+      desc: "Unlock the Common Crate. Access starter diamond gear, ingots, and boosters!",
+      perks: ["Unlocks Common Crate", "Diamond Weapons & Tools", "64x Coal Blocks", "Ingots, Coins & EXP Boosters"],
     },
     {
       id: "crate-rare",
       name: "Rare Crate Key",
-      price: 50,
-      desc: "Unlock high-tier netherite weapons, armor, and enchanted golden fruits.",
-      perks: ["Unlocks Rare Crate", "Netherite Armor & Weapons", "69x Enchanted Golden Apples", "64x Golden Carrots", "Totems of Undying & Shulkers"],
+      price: customPrices.rare_crate,
+      desc: "Unlock the Rare Crate. Contains netherite tools, stackable blocks, and key sets!",
+      perks: ["Unlocks Rare Crate", "Netherite Weapons & Tools", "8x Iron Blocks", "Gold Keys & EXP Boosters"],
     },
     {
       id: "crate-epic",
       name: "Epic Crate Key",
-      price: 80,
-      desc: "The ultimate premium crate! Contains max netherite gear, scrap, and totems.",
-      perks: ["Unlocks Epic Crate", "Full Netherite Gear Set", "64x Enchanted Golden Apples", "64x Netherite Scraps", "Totems of Undying & Shulkers"],
+      price: customPrices.epic_crate,
+      desc: "Unlock the Epic Crate. Features high-tier weapons, blocks, elytra, and runes!",
+      perks: ["Unlocks Epic Crate", "Netherite Tools & Weapons", "8x Gold Blocks", "Elytra, Rune Items & Keys"],
+    },
+    {
+      id: "crate-superior",
+      name: "Superior Crate Key",
+      price: customPrices.superior_crate,
+      desc: "The ultimate premium crate! Offers max netherite gear, blocks, double keys, and elytra!",
+      perks: ["Unlocks Superior Crate", "Netherite Tools & Weapons", "16x Gold Blocks", "3x Diamond Blocks & Elytra"],
       featured: true,
     },
   ];
