@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface CartDrawerProps {
   onOpenCheckout: () => void;
@@ -24,6 +25,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
   } = useCart();
 
   const { user, profile } = useAuth();
+  const router = useRouter();
   const [usernameInput, setUsernameInput] = useState(minecraftUsername);
   const [isUsernameValid, setIsUsernameValid] = useState(minecraftUsername.length >= 3);
 
@@ -50,7 +52,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
   const handleCheckoutClick = () => {
     if (!isUsernameValid) return;
     setIsCartOpen(false);
-    onOpenCheckout();
+    router.push("/checkout");
   };
 
   if (!isCartOpen) return null;

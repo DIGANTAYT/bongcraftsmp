@@ -489,7 +489,8 @@ export default function AdminPage() {
   };
 
   // Minecraft command generator helper
-  const getDeliveryCommands = (ign: string, items: string[]) => {
+  const getDeliveryCommands = (rawIgn: string, items: string[]) => {
+    const ign = rawIgn.split(" ")[0];
     const commands: string[] = [];
     items.forEach(item => {
       const lower = item.toLowerCase();

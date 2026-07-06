@@ -99,7 +99,7 @@ export const CursorFollower: React.FC = () => {
     if (isMobile) return;
 
     const animateTrail = () => {
-      const ease = 0.15; // Smooth delay interpolation factor
+      const ease = 0.07; // Much smoother delay factor (wavier flow)
       
       const dx = position.x - trailRef.current.x;
       const dy = position.y - trailRef.current.y;
@@ -122,21 +122,40 @@ export const CursorFollower: React.FC = () => {
 
   return (
     <>
-      {/* Outer Eased Glowing Aura */}
+      <style>{`
+        @keyframes wavy-aura-pulse {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1);
+            opacity: 0.8;
+          }
+          50% {
+            transform: translate3d(0, 0, 0) scale(1.2);
+            opacity: 0.45;
+          }
+        }
+        .cursor-wavy-aura {
+          animation: wavy-aura-pulse 2.2s infinite ease-in-out;
+        }
+      `}</style>
+
+      {/* Outer Eased Glowing Aura (Small, Wavy/Pulsing) */}
       <div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-[9999] transition-transform duration-100 ease-out -translate-x-1/2 -translate-y-1/2 mix-blend-screen bg-rose-500/5 border border-rose-500/30 blur-[1px]"
+        className="fixed top-0 left-0 w-5.5 h-5.5 rounded-full pointer-events-none z-[9999] transition-transform duration-75 ease-out -translate-x-1/2 -translate-y-1/2 mix-blend-screen bg-rose-500/5 border border-rose-500/25 blur-[0.5px]"
         style={{
-          transform: `translate3d(${trailPosition.x}px, ${trailPosition.y}px, 0) scale(${isHovering ? 1.6 : 1})`,
-          borderColor: isHovering ? "rgba(245, 158, 11, 0.6)" : "rgba(244, 63, 94, 0.3)",
-          backgroundColor: isHovering ? "rgba(245, 158, 11, 0.08)" : "rgba(244, 63, 94, 0.03)",
+          transform: `translate3d(${trailPosition.x}px, ${trailPosition.y}px, 0) scale(${isHovering ? 1.45 : 1})`,
+          borderColor: isHovering ? "rgba(245, 158, 11, 0.55)" : "rgba(244, 63, 94, 0.28)",
+          backgroundColor: isHovering ? "rgba(245, 158, 11, 0.06)" : "rgba(244, 63, 94, 0.02)",
           boxShadow: isHovering 
-            ? "0 0 15px rgba(245, 158, 11, 0.25)" 
-            : "0 0 8px rgba(244, 63, 94, 0.15)"
+            ? "0 0 12px rgba(245, 158, 11, 0.22)" 
+            : "0 0 6px rgba(244, 63, 94, 0.12)"
         }}
-      />
-      {/* Inner Real-time Core Point */}
+      >
+        <div className="w-full h-full rounded-full cursor-wavy-aura border border-dashed border-rose-500/20" />
+      </div>
+
+      {/* Inner Real-time Core Point (Small & Sharp) */}
       <div
-        className="fixed top-0 left-0 w-2.5 h-2.5 rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-rose-500 to-amber-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]"
+        className="fixed top-0 left-0 w-1.5 h-1.5 rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-rose-500 to-amber-500 shadow-[0_0_6px_rgba(244,63,94,0.75)]"
         style={{
           transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${isHovering ? 0.8 : 1})`,
         }}
