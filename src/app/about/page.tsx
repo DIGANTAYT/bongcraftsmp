@@ -257,6 +257,54 @@ export default function AboutPage() {
                 </div>
               </div>
 
+              {/* Server Owners */}
+              <div className="glass-panel p-6.5 rounded-3xl border border-border-custom space-y-5">
+                <h3 className="font-cinzel text-sm font-bold text-white-text tracking-wider uppercase border-b border-border-custom pb-3 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 bg-primary-accent rounded-full" />
+                  Server Owners
+                </h3>
+
+                <div className="space-y-4">
+                  {/* Neel */}
+                  <div className="flex items-center gap-3.5 bg-secondary-bg/30 p-3 rounded-2xl border border-border-custom/50">
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-gold-accent/30 bg-primary-bg p-0.5 shrink-0">
+                      <img
+                        src="https://mc-heads.net/avatar/Neel"
+                        alt="Neel Avatar"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <span className="font-cinzel text-xs font-bold text-white-text block">
+                        Neel
+                      </span>
+                      <span className="font-inter text-[10px] text-gold-accent font-semibold block uppercase tracking-wider">
+                        Owner & Developer
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Akash */}
+                  <div className="flex items-center gap-3.5 bg-secondary-bg/30 p-3 rounded-2xl border border-border-custom/50">
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-primary-accent/30 bg-primary-bg p-0.5 shrink-0">
+                      <img
+                        src="https://mc-heads.net/avatar/Akash"
+                        alt="Akash Avatar"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <span className="font-cinzel text-xs font-bold text-white-text block">
+                        Akash
+                      </span>
+                      <span className="font-inter text-[10px] text-primary-accent font-semibold block uppercase tracking-wider">
+                        Owner & Administrator
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
           </div>
