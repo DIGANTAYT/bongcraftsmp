@@ -1,9 +1,38 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
+const isSupabaseConfigured = 
+  supabaseUrl.startsWith("https://") && 
+  supabaseAnonKey.length > 10;
+
+const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 export async function POST(req: Request) {
   try {
     const { orderId, activeIgn, cartTotal, cart } = await req.json();
+
+    if (!orderId) {
+      return NextResponse.json({ success: false, error: "Missing orderId parameter" }, { status: 400 });
+    }
+
+    // Verify order registration in database to prevent unauthorized SMTP spamming
+    if (supabase) {
+      const { data: orderExists, error: dbError } = await supabase
+        .from("orders")
+        .select("order_id")
+        .eq("order_id", orderId)
+        .maybeSingle();
+
+      if (dbError || !orderExists) {
+        return NextResponse.json({ success: false, error: "Invalid order transaction" }, { status: 400 });
+      }
+    }
 
     const smtpHost = process.env.SMTP_HOST;
     const smtpPort = process.env.SMTP_PORT || "587";

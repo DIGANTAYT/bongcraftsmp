@@ -1,5 +1,17 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import net from "net";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
+const isSupabaseConfigured = 
+  supabaseUrl.startsWith("https://") && 
+  supabaseAnonKey.length > 10;
+
+const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 class RconClient {
   private socket: net.Socket;
@@ -18,7 +30,7 @@ class RconClient {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.socket.destroy();
-        reject(new Error("RCON connection timed out. Check if server RCON is enabled and port 25575 is open."));
+        reject(new Error("RCON connection timed out. Check if server RCON is enabled and port is open."));
       }, 6000);
 
       this.socket.connect(this.port, this.host, () => {
@@ -77,28 +89,69 @@ class RconClient {
   }
 }
 
-export async function POST(req: Request) {
+// Secure Basic Auth Check
+function verifyAdmin(authHeader: string | null) {
+  if (!authHeader) return false;
   try {
-    const { command, authKey, rconHost, rconPort, rconPassword } = await req.json();
+    const token = authHeader.split(" ")[1];
+    const decoded = Buffer.from(token, "base64").toString("ascii");
+    const [user, pass] = decoded.split(":");
+    return user === "admin" && pass === "bongcraftadmin";
+  } catch {
+    return false;
+  }
+}
 
-    if (authKey !== "bongcraft_admin_secret_handshake") {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+export async function POST(req: Request) {
+  // 1. Authenticate Request
+  const authHeader = req.headers.get("authorization");
+  if (!verifyAdmin(authHeader)) {
+    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  }
+
+  try {
+    const { command } = await req.json();
+
+    if (!command) {
+      return NextResponse.json({ error: "Missing command parameter" }, { status: 400 });
     }
 
-    if (!rconHost || !rconPort || !rconPassword) {
-      return NextResponse.json({ error: "Missing RCON configuration details" }, { status: 400 });
+    if (!supabase) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
-    // Sanitize command (strip leading slash if present, Minecraft RCON commands shouldn't have leading slash)
+    // 2. Load configurations directly from Database (prevents exposing RCON password to client-side requests)
+    const { data, error } = await supabase
+      .from("store_config")
+      .select("value")
+      .eq("key", "global_settings")
+      .maybeSingle();
+
+    if (error || !data || !data.value || !data.value.rcon) {
+      return NextResponse.json({ error: "RCON configuration not found in database" }, { status: 500 });
+    }
+
+    const { enabled, host, port, password } = data.value.rcon;
+
+    if (!enabled) {
+      return NextResponse.json({ error: "RCON command delivery is disabled" }, { status: 400 });
+    }
+
+    if (!host || !port || !password) {
+      return NextResponse.json({ error: "Incomplete RCON parameters in database config" }, { status: 500 });
+    }
+
+    // Sanitize command (strip leading slash)
     const sanitizedCommand = command.startsWith("/") ? command.substring(1) : command;
 
-    const rcon = new RconClient(rconHost, parseInt(rconPort), rconPassword);
+    // 3. Connect and execute
+    const rcon = new RconClient(host, parseInt(port), password);
     await rcon.connect();
     const output = await rcon.execute(sanitizedCommand);
     rcon.disconnect();
 
     return NextResponse.json({ output });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "RCON Connection Refused" }, { status: 500 });
+    return NextResponse.json({ error: err.message || "RCON Gateway Failure" }, { status: 500 });
   }
 }

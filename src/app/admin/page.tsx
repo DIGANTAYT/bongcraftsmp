@@ -414,16 +414,14 @@ export default function AdminPage() {
 
   const executeRconCommand = async (command: string): Promise<string> => {
     try {
+      const authHeader = "Basic " + btoa("admin:bongcraftadmin");
       const res = await fetch("/api/rcon", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          command,
-          authKey: "bongcraft_admin_secret_handshake",
-          rconHost,
-          rconPort,
-          rconPassword
-        })
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": authHeader
+        },
+        body: JSON.stringify({ command })
       });
       const data = await res.json();
       if (!res.ok) {
