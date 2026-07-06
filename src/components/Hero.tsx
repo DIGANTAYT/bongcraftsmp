@@ -7,15 +7,30 @@ import { Play, ShoppingCart, MessageSquare, Copy, Check } from "lucide-react";
 export const Hero: React.FC = () => {
   const [copiedJava, setCopiedJava] = useState(false);
   const [copiedBedrock, setCopiedBedrock] = useState(false);
-  const [playerCount, setPlayerCount] = useState(384);
+  const [playerCount, setPlayerCount] = useState<number | null>(null);
+  const [isServerOnline, setIsServerOnline] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlayerCount((prev) => {
-        const delta = Math.floor(Math.random() * 5) - 2;
-        return Math.max(350, Math.min(420, prev + delta));
-      });
-    }, 8000);
+    const fetchServerStatus = async () => {
+      try {
+        const res = await fetch("https://api.mcsrvstat.us/3/bongcraftsmp.pdhost.in:25571");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.online) {
+            setPlayerCount(data.players?.online ?? 0);
+            setIsServerOnline(true);
+          } else {
+            setPlayerCount(0);
+            setIsServerOnline(false);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to query Minecraft server status in Hero:", err);
+      }
+    };
+
+    fetchServerStatus();
+    const interval = setInterval(fetchServerStatus, 30000); // query every 30s
     return () => clearInterval(interval);
   }, []);
 
@@ -77,13 +92,24 @@ export const Hero: React.FC = () => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-bg/50 border border-border-custom backdrop-blur-md"
+          className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-bg/50 border border-border-custom backdrop-blur-md relative"
         >
-          <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
-          <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full absolute" />
-          <span className="font-inter text-[10px] text-white-text font-bold ml-1.5 tracking-wider uppercase">
-            {playerCount} Players Online • Server Active
-          </span>
+          {isServerOnline ? (
+            <>
+              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full absolute" />
+              <span className="font-inter text-[10px] text-white-text font-bold ml-1.5 tracking-wider uppercase">
+                {playerCount !== null ? `${playerCount} Players Online` : "Checking server..."} • Server Active
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="w-2.5 h-2.5 bg-red-500 rounded-full" />
+              <span className="font-inter text-[10px] text-red-400 font-bold ml-1.5 tracking-wider uppercase">
+                Server Offline • In-game delivery paused
+              </span>
+            </>
+          )}
         </motion.div>
 
         {/* Connection Details Cards */}
