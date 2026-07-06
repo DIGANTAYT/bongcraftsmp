@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
+import Script from "next/script";
 
 export default function CheckoutPage() {
   const { cart, cartTotal, minecraftUsername, clearCart } = useCart();
@@ -27,6 +28,8 @@ export default function CheckoutPage() {
   const [copiedText, setCopiedText] = useState(false);
   const [receiptItems, setReceiptItems] = useState<any[]>([]);
   const [receiptTotal, setReceiptTotal] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState<"automatic" | "manual">("automatic");
+  const [isRazorpayLoading, setIsRazorpayLoading] = useState(false);
   
   const upiId = "sarkardiganta04-2@oksbi";
   const activeIgn = minecraftUsername || "GuestPlayer";
@@ -51,6 +54,111 @@ export default function CheckoutPage() {
     navigator.clipboard.writeText(upiId);
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 2000);
+  };
+
+  const handleRazorpayPayment = async () => {
+    if (isRazorpayLoading) return;
+    setIsRazorpayLoading(true);
+
+    try {
+      const res = await fetch("/api/checkout/razorpay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: cartTotal,
+          receipt: orderId,
+          ign: activeIgn,
+          items: cart.map(item => ({ name: item.name, quantity: item.quantity }))
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.status === 501) {
+        // If not configured, automatically switch to manual UPI and notify the user
+        alert("🔒 Razorpay is currently not configured on this server. Please use the Manual UPI payment option instead!");
+        setPaymentMethod("manual");
+        setIsRazorpayLoading(false);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to initiate Razorpay order");
+      }
+
+      // Open Razorpay Checkout Modal
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: "BongCraft SMP Store",
+        description: `Order Receipt: ${orderId}`,
+        order_id: data.id,
+        prefill: {
+          name: activeIgn
+        },
+        theme: {
+          color: "#7c3aed"
+        },
+        handler: async function (response: any) {
+          setStep("processing");
+          setReceiptItems([...cart]);
+          setReceiptTotal(cartTotal);
+
+          // Save order to database as completed
+          if (isSupabaseConfigured) {
+            try {
+              await supabase.from("orders").insert([{
+                user_id: user?.id || null,
+                order_id: orderId,
+                ign: activeIgn,
+                items: cart.map(item => ({ name: item.name, quantity: item.quantity, price: item.price })),
+                total: cartTotal,
+                status: "Completed" // automatically completed since payment verified!
+              }]);
+            } catch (err) {
+              console.error("Failed to insert completed order:", err);
+            }
+          }
+
+          // Trigger email notification to admin
+          try {
+            await fetch("/api/order-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orderId,
+                activeIgn: activeIgn,
+                cartTotal,
+                cart
+              })
+            });
+          } catch (err) {
+            console.error("Failed to send order email:", err);
+          }
+
+          setStep("success");
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.5 }
+          });
+          clearCart();
+        },
+        modal: {
+          ondismiss: function() {
+            setIsRazorpayLoading(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Something went wrong initiating automatic checkout.");
+      setIsRazorpayLoading(false);
+    }
   };
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -255,96 +363,155 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* Payment Details block */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                    
-                    {/* QR Code */}
-                    <div className="md:col-span-5 flex flex-col items-center justify-center space-y-3.5">
-                      <div className="relative w-44 h-44 bg-white p-3 rounded-2xl border-2 border-gold-accent shadow-lg shadow-gold-accent/15 overflow-hidden group/qr">
-                        <div className="absolute inset-x-0 h-1 bg-gold-accent shadow-[0_0_12px_rgba(251,191,36,1)] animate-scan z-10" />
-                        <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-                            `upi://pay?pa=${upiId}&pn=BongCraft%20SMP&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`
-                          )}`}
-                          alt="Dynamic UPI QR Code Scanner"
-                          className="object-contain w-full h-full relative z-1"
-                        />
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="font-inter text-[10px] text-gold-accent font-extrabold uppercase tracking-widest text-center">
-                          Amount: ₹{cartTotal}
-                        </span>
-                        <span className="font-inter text-[8px] text-secondary-text tracking-wide text-center">
-                          Scan with PhonePe, GPay, or Paytm
-                        </span>
-                      </div>
-                    </div>
+                  {/* Payment Method Selector Tabs */}
+                  <div className="flex bg-[#09090B] p-1 border border-border-custom rounded-2xl gap-1">
+                    <button
+                      onClick={() => setPaymentMethod("automatic")}
+                      className={`flex-1 py-3 text-center rounded-xl text-xs uppercase tracking-wider font-bold transition-all duration-300 cursor-pointer ${
+                        paymentMethod === "automatic"
+                          ? "bg-primary-accent text-white-text shadow-lg shadow-primary-accent/15"
+                          : "text-secondary-text hover:text-white-text"
+                      }`}
+                    >
+                      ⚡ Instant Automatic Delivery
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod("manual")}
+                      className={`flex-1 py-3 text-center rounded-xl text-xs uppercase tracking-wider font-bold transition-all duration-300 cursor-pointer ${
+                        paymentMethod === "manual"
+                          ? "bg-rose-500 text-white-text shadow-lg shadow-rose-500/15"
+                          : "text-secondary-text hover:text-white-text"
+                      }`}
+                    >
+                      ✉️ Manual UPI Claim (No fees)
+                    </button>
+                  </div>
 
-                    {/* Instruction List & UPI Copy */}
-                    <div className="md:col-span-7 space-y-4 font-inter">
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] text-secondary-text font-bold uppercase tracking-wider block">UPI VPA Address</span>
-                        <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            value={upiId} 
-                            readOnly 
-                            className="flex-1 bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs font-mono"
-                          />
-                          <button
-                            onClick={copyUpi}
-                            className="px-4 py-2 bg-secondary-bg hover:bg-secondary-bg/80 border border-border-custom text-white-text hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer flex items-center gap-1"
-                          >
-                            {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                            {copiedUpi ? "Copied" : "Copy"}
-                          </button>
+                  {paymentMethod === "automatic" ? (
+                    /* Automated Razorpay Checkout Card */
+                    <div className="bg-secondary-bg/30 border border-border-custom p-6 rounded-2xl space-y-6 text-center">
+                      <div className="w-14 h-14 bg-primary-accent/10 border border-primary-accent/20 rounded-full flex items-center justify-center text-primary-accent mx-auto">
+                        <Sparkles className="w-6 h-6 text-gold-accent animate-pulse" />
+                      </div>
+                      <div className="space-y-1.5 max-w-sm mx-auto">
+                        <h4 className="font-cinzel text-sm font-bold text-white-text uppercase tracking-wider">
+                          Razorpay Secure Gateway
+                        </h4>
+                        <p className="font-inter text-[11px] text-secondary-text leading-relaxed">
+                          Pay instantly via UPI (GPay, PhonePe, Paytm), NetBanking, or Cards. Ranks are delivered automatically in-game in less than 3 seconds!
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={handleRazorpayPayment}
+                        disabled={isRazorpayLoading}
+                        className="w-full py-4 bg-gradient-to-r from-primary-accent to-purple-600 hover:from-primary-accent/90 hover:to-purple-600/90 text-white-text font-bold uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-primary-accent/15 disabled:opacity-50"
+                      >
+                        {isRazorpayLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Redirecting to Gateway...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4" />
+                            Pay Automatically (₹{cartTotal})
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    /* Manual UPI QR Code Block */
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                        {/* QR Code */}
+                        <div className="md:col-span-5 flex flex-col items-center justify-center space-y-3.5">
+                          <div className="relative w-44 h-44 bg-white p-3 rounded-2xl border-2 border-gold-accent shadow-lg shadow-gold-accent/15 overflow-hidden group/qr">
+                            <div className="absolute inset-x-0 h-1 bg-gold-accent shadow-[0_0_12px_rgba(251,191,36,1)] animate-scan z-10" />
+                            <img
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+                                `upi://pay?pa=${upiId}&pn=BongCraft%20SMP&am=${cartTotal}&cu=INR&tn=Order%20${orderId}`
+                              )}`}
+                              alt="Dynamic UPI QR Code Scanner"
+                              className="object-contain w-full h-full relative z-1"
+                            />
+                          </div>
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="font-inter text-[10px] text-gold-accent font-extrabold uppercase tracking-widest text-center">
+                              Amount: ₹{cartTotal}
+                            </span>
+                            <span className="font-inter text-[8px] text-secondary-text tracking-wide text-center">
+                              Scan with PhonePe, GPay, or Paytm
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Instruction List & UPI Copy */}
+                        <div className="md:col-span-7 space-y-4 font-inter">
+                          <div className="space-y-1.5">
+                            <span className="text-[10px] text-secondary-text font-bold uppercase tracking-wider block">UPI VPA Address</span>
+                            <div className="flex gap-2">
+                              <input 
+                                type="text" 
+                                value={upiId} 
+                                readOnly 
+                                className="flex-1 bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs font-mono"
+                              />
+                              <button
+                                onClick={copyUpi}
+                                className="px-4 py-2 bg-secondary-bg hover:bg-secondary-bg/80 border border-border-custom text-white-text hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer flex items-center gap-1"
+                              >
+                                {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copiedUpi ? "Copied" : "Copy"}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <span className="text-[10px] text-primary-accent font-bold uppercase tracking-wider block">Claim Instructions:</span>
+                            <ol className="text-[11px] text-secondary-text list-decimal list-inside space-y-1.5 leading-relaxed">
+                              <li>Pay the amount above via any UPI scanner application.</li>
+                              <li>Save the successful payment receipt page/screenshot.</li>
+                              <li>Copy the UPI transaction reference ID / UTR number.</li>
+                              <li>Input the UTR number in the form below and submit order!</li>
+                            </ol>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <span className="text-[10px] text-primary-accent font-bold uppercase tracking-wider block">Claim Instructions:</span>
-                        <ol className="text-[11px] text-secondary-text list-decimal list-inside space-y-1.5 leading-relaxed">
-                          <li>Pay the amount above via any UPI scanner application.</li>
-                          <li>Save the successful payment receipt page/screenshot.</li>
-                          <li>Copy the UPI transaction reference ID / UTR number.</li>
-                          <li>Input the UTR number in the form below and submit order!</li>
-                        </ol>
+                      {/* Form Input for UTR Validation */}
+                      <div className="glass-panel p-6 rounded-3xl border border-border-custom mt-6">
+                        <form onSubmit={handleSubmitOrder} className="space-y-4">
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center">
+                              <label className="text-xs font-bold uppercase tracking-wider text-white-text block">
+                                Transaction Ref / UTR Number
+                              </label>
+                              <span className="text-[9px] text-secondary-text uppercase">12-Digit Transaction Reference</span>
+                            </div>
+                            <input
+                              type="text"
+                              required
+                              value={utrNumber}
+                              onChange={(e) => setUtrNumber(e.target.value.replace(/[^0-9]/g, ""))}
+                              maxLength={12}
+                              placeholder="e.g. 123456789012"
+                              className="w-full bg-[#09090B] border border-border-custom px-4 py-3.5 rounded-xl text-white-text outline-none text-sm font-mono tracking-wider focus:border-primary-accent"
+                            />
+                          </div>
+
+                          <button
+                            type="submit"
+                            className="w-full py-4 bg-gradient-to-r from-primary-accent to-purple-600 hover:from-primary-accent/90 hover:to-purple-600/90 text-white-text font-bold uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-primary-accent/15"
+                          >
+                            <Send className="w-4 h-4" />
+                            Submit Order & Launch Discord Claim
+                          </button>
+                        </form>
                       </div>
-                    </div>
+                    </>
+                  )}
 
-                  </div>
-
-                </div>
-
-                {/* Form Input for UTR Validation */}
-                <div className="glass-panel p-6 rounded-3xl border border-border-custom">
-                  <form onSubmit={handleSubmitOrder} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs font-bold uppercase tracking-wider text-white-text block">
-                          Transaction Ref / UTR Number
-                        </label>
-                        <span className="text-[9px] text-secondary-text uppercase">12-Digit Transaction Reference</span>
-                      </div>
-                      <input
-                        type="text"
-                        required
-                        value={utrNumber}
-                        onChange={(e) => setUtrNumber(e.target.value.replace(/[^0-9]/g, ""))}
-                        maxLength={12}
-                        placeholder="e.g. 123456789012"
-                        className="w-full bg-[#09090B] border border-border-custom px-4 py-3.5 rounded-xl text-white-text outline-none text-sm font-mono tracking-wider focus:border-primary-accent"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full py-4 bg-gradient-to-r from-primary-accent to-purple-600 hover:from-primary-accent/90 hover:to-purple-600/90 text-white-text font-bold uppercase tracking-wider text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-primary-accent/15"
-                    >
-                      <Send className="w-4 h-4" />
-                      Submit Order & Launch Discord Claim
-                    </button>
-                  </form>
                 </div>
 
               </div>
@@ -590,6 +757,7 @@ export default function CheckoutPage() {
       </main>
 
       <Footer />
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
     </div>
   );
 }
