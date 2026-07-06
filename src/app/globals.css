@@ -10,8 +10,8 @@
   --color-secondary-text: #A1A1AA;
   --color-border-custom: rgba(255, 255, 255, 0.08);
 
-  --font-cinzel: var(--font-cinzel), serif;
-  --font-inter: var(--font-inter), sans-serif;
+  --font-cinzel: var(--font-outfit), sans-serif;
+  --font-inter: var(--font-space-grotesk), sans-serif;
   
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;

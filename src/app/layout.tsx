@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { Cinzel, Inter } from "next/font/google";
+import { Outfit, Space_Grotesk } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cinzel.variable} ${inter.variable} h-full scroll-smooth`}
+      className={`${outfit.variable} ${spaceGrotesk.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full bg-[#09090B] text-[#F8FAFC] antialiased overflow-x-hidden">
         <AuthProvider>
