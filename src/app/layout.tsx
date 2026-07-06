@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Space_Grotesk } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { CursorFollower } from "@/components/CursorFollower";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -39,6 +40,7 @@ export default function RootLayout({
       className={`${outfit.variable} ${spaceGrotesk.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full bg-[#09090B] text-[#F8FAFC] antialiased overflow-x-hidden">
+        <CursorFollower />
         <AuthProvider>
           <CartProvider>
             {children}
