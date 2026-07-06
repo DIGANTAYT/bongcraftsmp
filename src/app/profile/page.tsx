@@ -135,14 +135,14 @@ export default function ProfilePage() {
             <div className="w-16 h-1 bg-gradient-to-r from-primary-accent to-gold-accent mt-4 hidden md:block" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
             
             {/* Left Side: Profile Details Card */}
-            <div className="lg:col-span-4 space-y-6">
+            <div className="lg:col-span-4 w-full space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-panel p-6 rounded-3xl border border-border-custom relative overflow-hidden flex flex-col items-center text-center"
+                className="glass-panel p-6 rounded-3xl border border-border-custom relative overflow-hidden flex flex-col items-center text-center w-full"
               >
                 {/* Backlight glow */}
                 <div className="absolute -top-16 -left-16 w-32 h-32 rounded-full bg-primary-accent/10 filter blur-2xl -z-1" />
@@ -197,12 +197,12 @@ export default function ProfilePage() {
             </div>
 
             {/* Right Side: Purchase History */}
-            <div className="lg:col-span-8 space-y-6">
+            <div className="lg:col-span-8 w-full space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="glass-panel p-6 md:p-8 rounded-3xl border border-border-custom space-y-6"
+                className="glass-panel p-6 md:p-8 rounded-3xl border border-border-custom space-y-6 w-full"
               >
                 <div className="flex items-center justify-between border-b border-border-custom pb-4">
                   <div className="flex items-center gap-2">
