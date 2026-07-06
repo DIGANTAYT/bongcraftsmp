@@ -11,17 +11,34 @@ export const FeaturedRank: React.FC = () => {
   const [price, setPrice] = React.useState(1499);
 
   React.useEffect(() => {
-    const saved = localStorage.getItem("bongcraft_prices");
-    if (saved) {
+    const loadPrice = async () => {
       try {
-        const pricesObj = JSON.parse(saved);
-        if (pricesObj.king) {
-          setPrice(pricesObj.king);
+        const res = await fetch("/api/config/public");
+        const config = await res.json();
+        if (config && config.prices && config.prices.king) {
+          setPrice(config.prices.king);
+        } else {
+          // Fallback to local storage
+          const saved = localStorage.getItem("bongcraft_prices");
+          if (saved) {
+            const pricesObj = JSON.parse(saved);
+            if (pricesObj.king) setPrice(pricesObj.king);
+          }
         }
       } catch (e) {
-        console.error(e);
+        console.error("Failed to load king price from API:", e);
+        const saved = localStorage.getItem("bongcraft_prices");
+        if (saved) {
+          try {
+            const pricesObj = JSON.parse(saved);
+            if (pricesObj.king) setPrice(pricesObj.king);
+          } catch (err) {
+            console.error(err);
+          }
+        }
       }
-    }
+    };
+    loadPrice();
   }, []);
 
   const handlePurchase = () => {

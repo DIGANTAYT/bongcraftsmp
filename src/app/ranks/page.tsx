@@ -120,6 +120,37 @@ export default function RanksPage() {
 
   const [ranks, setRanks] = useState<RankType[]>([]);
 
+  const [customPrices, setCustomPrices] = useState({
+    knight: 99,
+    lord: 399,
+    paladin: 699,
+    duke: 999,
+    king: 1499
+  });
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        const config = await res.json();
+        if (config && config.prices) {
+          setCustomPrices(prev => ({ ...prev, ...config.prices }));
+        }
+      } catch (e) {
+        console.error("Failed to load prices from public API:", e);
+        const savedPricesStr = localStorage.getItem("bongcraft_prices");
+        if (savedPricesStr) {
+          try {
+            setCustomPrices(prev => ({ ...prev, ...JSON.parse(savedPricesStr) }));
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+    };
+    loadConfig();
+  }, []);
+
   useEffect(() => {
     if (selectedRank) {
       setActiveModalTab("perks");
@@ -127,23 +158,6 @@ export default function RanksPage() {
   }, [selectedRank]);
 
   useEffect(() => {
-    // Get custom prices if set in localStorage
-    const savedPricesStr = localStorage.getItem("bongcraft_prices");
-    let customPrices = {
-      knight: 99,
-      lord: 399,
-      paladin: 699,
-      duke: 999,
-      king: 1499
-    };
-    if (savedPricesStr) {
-      try {
-        customPrices = { ...customPrices, ...JSON.parse(savedPricesStr) };
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     const defaultRanks: RankType[] = [
       {
         id: "rank-knight",
@@ -330,7 +344,7 @@ export default function RanksPage() {
     ];
 
     setRanks(defaultRanks);
-  }, []);
+  }, [customPrices]);
 
   const isItemInCart = (id: string) => cart.some((cartItem) => cartItem.id === id);
 

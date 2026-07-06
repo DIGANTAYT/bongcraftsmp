@@ -26,24 +26,51 @@ export default function CoinsPage() {
 
   const [coins, setCoins] = useState<CoinItemType[]>([]);
 
-  useEffect(() => {
-    // Get custom prices if set in localStorage
-    const savedPricesStr = localStorage.getItem("bongcraft_prices");
-    let customPrices = {
-      coins500: 49,
-      coins1200: 99,
-      coins2500: 199,
-      coins6000: 399,
-      coins12000: 699
-    };
-    if (savedPricesStr) {
-      try {
-        customPrices = { ...customPrices, ...JSON.parse(savedPricesStr) };
-      } catch (e) {
-        console.error(e);
-      }
-    }
+  const [customPrices, setCustomPrices] = useState({
+    coins500: 49,
+    coins1200: 99,
+    coins2500: 199,
+    coins6000: 399,
+    coins12000: 699
+  });
 
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        const config = await res.json();
+        if (config && config.prices) {
+          setCustomPrices({
+            coins500: config.prices.coins500 ?? 49,
+            coins1200: config.prices.coins1200 ?? 99,
+            coins2500: config.prices.coins2500 ?? 199,
+            coins6000: config.prices.coins6000 ?? 399,
+            coins12000: config.prices.coins12000 ?? 699
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load prices from public API:", e);
+        const savedPricesStr = localStorage.getItem("bongcraft_prices");
+        if (savedPricesStr) {
+          try {
+            const savedPrices = JSON.parse(savedPricesStr);
+            setCustomPrices({
+              coins500: savedPrices.coins500 ?? 49,
+              coins1200: savedPrices.coins1200 ?? 99,
+              coins2500: savedPrices.coins2500 ?? 199,
+              coins6000: savedPrices.coins6000 ?? 399,
+              coins12000: savedPrices.coins12000 ?? 699
+            });
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+    };
+    loadConfig();
+  }, []);
+
+  useEffect(() => {
     const defaultCoins = [
       {
         id: "coins-500",
@@ -94,7 +121,7 @@ export default function CoinsPage() {
     ];
 
     setCoins(defaultCoins);
-  }, []);
+  }, [customPrices]);
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">

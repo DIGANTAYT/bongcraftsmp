@@ -91,6 +91,64 @@ export default function AdminPage() {
   const [tebexPrivateKey, setTebexPrivateKey] = useState("");
   const [tebexPackageMappings, setTebexPackageMappings] = useState("");
 
+  const loadGlobalConfig = async () => {
+    try {
+      const authHeader = "Basic " + btoa("admin:bongcraftadmin");
+      const res = await fetch("/api/config/admin", {
+        headers: { "Authorization": authHeader }
+      });
+      if (!res.ok) throw new Error("Failed to fetch admin config");
+      const config = await res.json();
+
+      if (config) {
+        setMaintenanceMode(config.maintenanceMode ?? false);
+        setWebhookInput(config.discordWebhook ?? "");
+        
+        if (config.prices) {
+          setPrices(config.prices);
+        }
+        
+        if (config.rcon) {
+          setRconEnabled(config.rcon.enabled ?? false);
+          setRconHost(config.rcon.host ?? "play.bongcraftsmp.in");
+          setRconPort(config.rcon.port ?? "25575");
+          setRconPassword(config.rcon.password ?? "");
+        }
+        
+        if (config.tebex) {
+          setTebexEnabled(config.tebex.enabled ?? false);
+          setTebexPublicToken(config.tebex.publicToken ?? "");
+          setTebexPrivateKey(config.tebex.privateKey ?? "");
+          setTebexPackageMappings(typeof config.tebex.packageMappings === "string" 
+            ? config.tebex.packageMappings 
+            : JSON.stringify(config.tebex.packageMappings, null, 2));
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load global config:", e);
+    }
+  };
+
+  const saveFullConfig = async (updatedConfig: any) => {
+    try {
+      const authHeader = "Basic " + btoa("admin:bongcraftadmin");
+      const res = await fetch("/api/config/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": authHeader
+        },
+        body: JSON.stringify(updatedConfig)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save configuration");
+      addAuditLog("Global configuration synced to Supabase database", "success");
+    } catch (e: any) {
+      console.error("Failed to save config:", e);
+      alert("Error saving configuration to database: " + e.message);
+    }
+  };
+
   useEffect(() => {
     // Check session auth
     const auth = sessionStorage.getItem("bongcraft_admin_auth");
@@ -99,52 +157,7 @@ export default function AdminPage() {
     }
     
     loadOrders();
-    loadPrices();
-    
-    const maint = localStorage.getItem("bongcraft_maintenance_mode") === "true";
-    setMaintenanceMode(maint);
-
-    const webhook = localStorage.getItem("bongcraft_discord_webhook") || "";
-    setWebhookInput(webhook);
-
-    // Load RCON configuration
-    const savedHost = localStorage.getItem("bongcraft_rcon_host") || "play.bongcraftsmp.in";
-    const savedPort = localStorage.getItem("bongcraft_rcon_port") || "25575";
-    const savedPass = localStorage.getItem("bongcraft_rcon_pass") || "";
-    const savedEnabled = localStorage.getItem("bongcraft_rcon_enabled") === "true";
-
-    setRconHost(savedHost);
-    setRconPort(savedPort);
-    setRconPassword(savedPass);
-    setRconEnabled(savedEnabled);
-
-    // Load Tebex configuration
-    const savedTebexEnabled = localStorage.getItem("bongcraft_tebex_enabled") === "true";
-    const savedTebexPublicToken = localStorage.getItem("bongcraft_tebex_public_token") || "";
-    const savedTebexPrivateKey = localStorage.getItem("bongcraft_tebex_private_key") || "";
-    
-    const defaultMappings = {
-      "rank-knight": "",
-      "rank-lord": "",
-      "rank-paladin": "",
-      "rank-duke": "",
-      "rank-king": "",
-      "crate-common": "",
-      "crate-rare": "",
-      "crate-epic": "",
-      "crate-superior": "",
-      "coins-500": "",
-      "coins-1200": "",
-      "coins-2500": "",
-      "coins-6000": "",
-      "coins-12000": ""
-    };
-    const savedTebexPackageMappings = localStorage.getItem("bongcraft_tebex_package_mappings") || JSON.stringify(defaultMappings, null, 2);
-
-    setTebexEnabled(savedTebexEnabled);
-    setTebexPublicToken(savedTebexPublicToken);
-    setTebexPrivateKey(savedTebexPrivateKey);
-    setTebexPackageMappings(savedTebexPackageMappings);
+    loadGlobalConfig();
 
     // Initialize audit logs
     const savedLogs = JSON.parse(sessionStorage.getItem("bongcraft_audit_logs") || "[]");
@@ -357,10 +370,18 @@ export default function AdminPage() {
     }
   };
 
-  const handlePriceChange = (key: keyof typeof prices, value: number) => {
+  const handlePriceChange = async (key: keyof typeof prices, value: number) => {
     const updated = { ...prices, [key]: value };
     setPrices(updated);
-    localStorage.setItem("bongcraft_prices", JSON.stringify(updated));
+    
+    const fullConfig = {
+      maintenanceMode,
+      discordWebhook: webhookInput,
+      prices: updated,
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
+      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+    };
+    await saveFullConfig(fullConfig);
     addAuditLog(`Catalog pricing updated for ${key} to ₹${value}`, "info");
   };
 
@@ -370,24 +391,63 @@ export default function AdminPage() {
     setTimeout(() => setCopiedText(null), 2000);
   };
 
-  const handleToggleMaintenance = (val: boolean) => {
+  const handleToggleMaintenance = async (val: boolean) => {
     setMaintenanceMode(val);
-    localStorage.setItem("bongcraft_maintenance_mode", String(val));
+    
+    const fullConfig = {
+      maintenanceMode: val,
+      discordWebhook: webhookInput,
+      prices,
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
+      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+    };
+    await saveFullConfig(fullConfig);
     addAuditLog(`Maintenance mode toggled ${val ? "ON" : "OFF"}`, val ? "warning" : "success");
   };
 
-  const handleSaveTebexSettings = () => {
+  const handleSaveTebexSettings = async () => {
     try {
-      JSON.parse(tebexPackageMappings);
-      localStorage.setItem("bongcraft_tebex_enabled", String(tebexEnabled));
-      localStorage.setItem("bongcraft_tebex_public_token", tebexPublicToken);
-      localStorage.setItem("bongcraft_tebex_private_key", tebexPrivateKey);
-      localStorage.setItem("bongcraft_tebex_package_mappings", tebexPackageMappings);
+      const parsedMappings = tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {};
+      
+      const fullConfig = {
+        maintenanceMode,
+        discordWebhook: webhookInput,
+        prices,
+        rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
+        tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: parsedMappings }
+      };
+      await saveFullConfig(fullConfig);
       alert("Tebex checkout settings saved successfully!");
       addAuditLog("Tebex configuration details updated", "info");
     } catch (e: any) {
       alert("Error: Package mappings must be valid JSON!\n" + e.message);
     }
+  };
+
+  const handleSaveDiscordWebhook = async () => {
+    const fullConfig = {
+      maintenanceMode,
+      discordWebhook: webhookInput,
+      prices,
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
+      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+    };
+    await saveFullConfig(fullConfig);
+    alert("Discord Webhook saved successfully!");
+    addAuditLog("Discord Webhook endpoint updated", "info");
+  };
+
+  const handleSaveRconSettings = async () => {
+    const fullConfig = {
+      maintenanceMode,
+      discordWebhook: webhookInput,
+      prices,
+      rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword },
+      tebex: { enabled: tebexEnabled, publicToken: tebexPublicToken, privateKey: tebexPrivateKey, packageMappings: tebexPackageMappings ? JSON.parse(tebexPackageMappings) : {} }
+    };
+    await saveFullConfig(fullConfig);
+    alert("RCON configuration saved successfully!");
+    addAuditLog("RCON server settings updated", "info");
   };
 
   const executeRconCommand = async (command: string): Promise<string> => {
@@ -1327,18 +1387,12 @@ export default function AdminPage() {
                             <input
                               type="password"
                               value={webhookInput}
-                              onChange={(e) => {
-                                setWebhookInput(e.target.value);
-                                localStorage.setItem("bongcraft_discord_webhook", e.target.value);
-                              }}
+                              onChange={(e) => setWebhookInput(e.target.value)}
                               placeholder="https://discord.com/api/webhooks/..."
                               className="flex-1 bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
                             />
                             <button
-                              onClick={() => {
-                                alert("Discord Webhook saved successfully!");
-                                addAuditLog("Discord Webhook endpoint updated", "info");
-                              }}
+                              onClick={handleSaveDiscordWebhook}
                               className="px-4 py-2 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer"
                             >
                               Save
@@ -1418,6 +1472,77 @@ export default function AdminPage() {
                                   className="px-6 py-2.5 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
                                 >
                                   Save Tebex Configuration
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* RCON Live Commands Integration */}
+                        <div className="bg-secondary-bg/50 p-5 rounded-2xl border border-border-custom space-y-5">
+                          <div className="flex items-center justify-between gap-4 border-b border-border-custom/50 pb-3.5">
+                            <div className="space-y-1">
+                              <h3 className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider flex items-center gap-2">
+                                <Server className="w-4 h-4 text-emerald-500" />
+                                RCON Live Command Delivery
+                              </h3>
+                              <p className="text-xs text-secondary-text">
+                                Enable direct delivery of packages via RCON when manual claims are verified (requires RCON port open on your server).
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => setRconEnabled(!rconEnabled)}
+                              className={`w-14 h-8 rounded-full transition-all relative flex items-center px-1 border cursor-pointer ${
+                                rconEnabled
+                                  ? "bg-emerald-500 border-emerald-500/80 justify-end"
+                                  : "bg-[#111217] border-border-custom justify-start"
+                              }`}
+                            >
+                              <span className="w-5.5 h-5.5 rounded-full bg-white shadow-md block transition-transform" />
+                            </button>
+                          </div>
+
+                          {rconEnabled && (
+                            <div className="space-y-4 pt-1 font-inter text-xs text-secondary-text">
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">RCON Server Host</label>
+                                  <input
+                                    type="text"
+                                    value={rconHost}
+                                    onChange={(e) => setRconHost(e.target.value)}
+                                    placeholder="e.g. play.bongcraftsmp.in"
+                                    className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">RCON Port</label>
+                                  <input
+                                    type="text"
+                                    value={rconPort}
+                                    onChange={(e) => setRconPort(e.target.value)}
+                                    placeholder="e.g. 25575"
+                                    className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">RCON Password</label>
+                                  <input
+                                    type="password"
+                                    value={rconPassword}
+                                    onChange={(e) => setRconPassword(e.target.value)}
+                                    placeholder="Enter RCON password"
+                                    className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end pt-1">
+                                <button
+                                  onClick={handleSaveRconSettings}
+                                  className="px-6 py-2.5 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
+                                >
+                                  Save RCON Configuration
                                 </button>
                               </div>
                             </div>

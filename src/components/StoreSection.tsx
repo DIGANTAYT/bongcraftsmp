@@ -29,14 +29,32 @@ export const StoreSection: React.FC = () => {
   });
 
   useEffect(() => {
-    const savedPricesStr = localStorage.getItem("bongcraft_prices");
-    if (savedPricesStr) {
+    const loadPrices = async () => {
       try {
-        setCustomPrices(prev => ({ ...prev, ...JSON.parse(savedPricesStr) }));
+        const res = await fetch("/api/config/public");
+        const config = await res.json();
+        if (config && config.prices) {
+          setCustomPrices(prev => ({ ...prev, ...config.prices }));
+        } else {
+          // Fallback to local storage
+          const savedPricesStr = localStorage.getItem("bongcraft_prices");
+          if (savedPricesStr) {
+            setCustomPrices(prev => ({ ...prev, ...JSON.parse(savedPricesStr) }));
+          }
+        }
       } catch (e) {
-        console.error(e);
+        console.error("Failed to load prices from public API:", e);
+        const savedPricesStr = localStorage.getItem("bongcraft_prices");
+        if (savedPricesStr) {
+          try {
+            setCustomPrices(prev => ({ ...prev, ...JSON.parse(savedPricesStr) }));
+          } catch (err) {
+            console.error(err);
+          }
+        }
       }
-    }
+    };
+    loadPrices();
   }, []);
 
   const categories = [

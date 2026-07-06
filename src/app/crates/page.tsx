@@ -203,6 +203,47 @@ export default function CratesPage() {
 
   const [crates, setCrates] = useState<CrateItemType[]>([]);
 
+  const [customPrices, setCustomPrices] = useState({
+    common: 20,
+    rare: 30,
+    epic: 50,
+    superior: 75
+  });
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        const config = await res.json();
+        if (config && config.prices) {
+          setCustomPrices({
+            common: config.prices.common_crate ?? 20,
+            rare: config.prices.rare_crate ?? 30,
+            epic: config.prices.epic_crate ?? 50,
+            superior: config.prices.superior_crate ?? 75
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load prices from public API:", e);
+        const savedPricesStr = localStorage.getItem("bongcraft_prices");
+        if (savedPricesStr) {
+          try {
+            const savedPrices = JSON.parse(savedPricesStr);
+            setCustomPrices({
+              common: savedPrices.common_crate ?? savedPrices.common ?? 20,
+              rare: savedPrices.rare_crate ?? savedPrices.rare ?? 30,
+              epic: savedPrices.epic_crate ?? savedPrices.epic ?? 50,
+              superior: savedPrices.superior_crate ?? savedPrices.superior ?? 75
+            });
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+    };
+    loadConfig();
+  }, []);
+
   useEffect(() => {
     if (selectedCrate) {
       setActiveModalTab("drops");
@@ -210,22 +251,6 @@ export default function CratesPage() {
   }, [selectedCrate]);
 
   useEffect(() => {
-    // Get custom prices if set in localStorage
-    const savedPricesStr = localStorage.getItem("bongcraft_prices");
-    let customPrices = {
-      common: 20,
-      rare: 30,
-      epic: 50,
-      superior: 75
-    };
-    if (savedPricesStr) {
-      try {
-        customPrices = { ...customPrices, ...JSON.parse(savedPricesStr) };
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     const defaultCrates: CrateItemType[] = [
       {
         id: "crate-common",
@@ -355,7 +380,7 @@ export default function CratesPage() {
     ];
 
     setCrates(defaultCrates);
-  }, []);
+  }, [customPrices]);
 
   const isItemInCart = (id: string) => cart.some((cartItem) => cartItem.id === id);
 
