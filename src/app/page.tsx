@@ -7,6 +7,7 @@ import { Hero } from "@/components/Hero";
 import { Stats } from "@/components/Stats";
 import { FeaturedRank } from "@/components/FeaturedRank";
 import { WhyChooseUs } from "@/components/WhyChooseUs";
+import { HowToJoin } from "@/components/HowToJoin";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CheckoutModal } from "@/components/CheckoutModal";
@@ -35,6 +36,9 @@ export default function Home() {
 
         {/* Feature Highlights Grid */}
         <WhyChooseUs />
+
+        {/* Quick Start How to Join Guide */}
+        <HowToJoin />
       </main>
 
       {/* Footer Details */}
