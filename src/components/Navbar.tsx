@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart, Menu, X, Copy, Check, LogOut, User, LogIn } from "lucide-react";
+import { ShoppingCart, Menu, X, Copy, Check, LogOut, User, LogIn, Shield } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export const Navbar: React.FC = () => {
@@ -226,12 +226,30 @@ export const Navbar: React.FC = () => {
                         {profile?.minecraft_username}
                       </div>
                     </div>
+                    <Link
+                      href="/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs font-inter text-secondary-text hover:text-white-text hover:bg-card-bg/60 rounded-xl transition-colors cursor-pointer w-full text-left"
+                    >
+                      <User className="w-4 h-4" />
+                      My Profile
+                    </Link>
+                    {user?.email === "sarkardiganta04@gmail.com" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 text-xs font-inter text-gold-accent hover:text-white-text hover:bg-gold-accent/10 rounded-xl transition-colors cursor-pointer w-full text-left font-bold"
+                      >
+                        <Shield className="w-4 h-4" />
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         signOut();
                         setDropdownOpen(false);
                       }}
-                      className="flex items-center gap-2 px-3 py-2 text-xs font-inter text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer w-full text-left"
+                      className="flex items-center gap-2 px-3 py-2 text-xs font-inter text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer w-full text-left border-t border-border-custom/30 mt-1 pt-2"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -299,6 +317,24 @@ export const Navbar: React.FC = () => {
                     </span>
                   </div>
                 </div>
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full py-2.5 bg-secondary-bg hover:bg-card-bg/60 border border-border-custom text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  My Profile
+                </Link>
+                {user?.email === "sarkardiganta04@gmail.com" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full py-2.5 bg-gold-accent/10 hover:bg-gold-accent/20 border border-gold-accent/40 text-gold-accent font-inter font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Admin Panel
+                  </Link>
+                )}
                 <button
                   onClick={() => {
                     signOut();
