@@ -163,7 +163,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Step 1: Sign up user
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: {
+          minecraft_username: minecraftUsername
+        }
+      }
+    });
     if (error) return { error };
 
     if (data.user) {

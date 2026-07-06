@@ -76,6 +76,14 @@ export default function AdminPage() {
   const [sandboxQty, setSandboxQty] = useState(1);
   const [webhookInput, setWebhookInput] = useState("");
 
+  // RCON Config state
+  const [rconHost, setRconHost] = useState("bongcraftsmp.pdhost.in");
+  const [rconPort, setRconPort] = useState("25575");
+  const [rconPassword, setRconPassword] = useState("");
+  const [rconEnabled, setRconEnabled] = useState(false);
+  const [rconDeliveryLogs, setRconDeliveryLogs] = useState<string[]>([]);
+  const [isRconLoading, setIsRconLoading] = useState(false);
+
   useEffect(() => {
     // Check session auth
     const auth = sessionStorage.getItem("bongcraft_admin_auth");
@@ -91,6 +99,17 @@ export default function AdminPage() {
 
     const webhook = localStorage.getItem("bongcraft_discord_webhook") || "";
     setWebhookInput(webhook);
+
+    // Load RCON configuration
+    const savedHost = localStorage.getItem("bongcraft_rcon_host") || "bongcraftsmp.pdhost.in";
+    const savedPort = localStorage.getItem("bongcraft_rcon_port") || "25575";
+    const savedPass = localStorage.getItem("bongcraft_rcon_pass") || "";
+    const savedEnabled = localStorage.getItem("bongcraft_rcon_enabled") === "true";
+
+    setRconHost(savedHost);
+    setRconPort(savedPort);
+    setRconPassword(savedPass);
+    setRconEnabled(savedEnabled);
 
     // Initialize audit logs
     const savedLogs = JSON.parse(sessionStorage.getItem("bongcraft_audit_logs") || "[]");
@@ -183,6 +202,30 @@ export default function AdminPage() {
   };
 
   const handleApprove = async (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    let rconLogOutput = "";
+    let rconSuccess = true;
+
+    if (rconEnabled && order.status === "Pending Verification") {
+      const commands = getDeliveryCommands(order.ign, order.items);
+      addAuditLog(`Attempting live RCON delivery for Order ${orderId}...`, "info");
+      
+      const results: string[] = [];
+      for (const cmd of commands) {
+        if (cmd.startsWith("#")) continue;
+        try {
+          const output = await executeRconCommand(cmd);
+          results.push(`[Success] ${cmd}: ${output}`);
+        } catch (err: any) {
+          rconSuccess = false;
+          results.push(`[Failed] ${cmd}: ${err.message}`);
+        }
+      }
+      rconLogOutput = results.join("\n");
+    }
+
     if (isSupabaseConfigured) {
       try {
         const { error } = await supabase
@@ -192,7 +235,16 @@ export default function AdminPage() {
 
         if (error) throw error;
 
-        addAuditLog(`Order ${orderId} verified and approved in database`, "success");
+        addAuditLog(`Order ${orderId} approved in database`, "success");
+        if (rconEnabled) {
+          if (rconSuccess) {
+            alert(`Order Approved & Packages Delivered Live!\n\nRCON Output:\n${rconLogOutput}`);
+            addAuditLog(`RCON Delivery completed for Order ${orderId}`, "success");
+          } else {
+            alert(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}\n\nPlease verify commands manually.`);
+            addAuditLog(`RCON Delivery failed for some commands on Order ${orderId}`, "warning");
+          }
+        }
         loadOrders();
         if (selectedOrder?.id === orderId) {
           setSelectedOrder(prev => prev ? { ...prev, status: "Completed" } : null);
@@ -206,6 +258,13 @@ export default function AdminPage() {
           const approvedOrder: Order = { ...o, status: "Completed" };
           setSelectedOrder(approvedOrder);
           addAuditLog(`Order ${orderId} verified and approved`, "success");
+          if (rconEnabled) {
+            if (rconSuccess) {
+              alert(`Order Approved & Packages Delivered Live!\n\nRCON Output:\n${rconLogOutput}`);
+            } else {
+              alert(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}`);
+            }
+          }
           return approvedOrder;
         }
         return o;
@@ -260,41 +319,80 @@ export default function AdminPage() {
     addAuditLog(`Maintenance mode toggled ${val ? "ON" : "OFF"}`, val ? "warning" : "success");
   };
 
-  const handleConsoleSubmit = (e: React.FormEvent) => {
+  const executeRconCommand = async (command: string): Promise<string> => {
+    try {
+      const res = await fetch("/api/rcon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          command,
+          authKey: "bongcraft_admin_secret_handshake",
+          rconHost,
+          rconPort,
+          rconPassword
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "RCON execution error");
+      }
+      return data.output || "Command executed successfully (no response output).";
+    } catch (e: any) {
+      throw new Error(e.message || "Failed to contact RCON gateway");
+    }
+  };
+
+  const handleConsoleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consoleInput.trim()) return;
 
     const cmd = consoleInput.trim();
-    const newLogs = [...consoleLogs, `> ${cmd}`];
-
-    // Mock console response logic
-    if (cmd.startsWith("/lp user")) {
-      const parts = cmd.split(" ");
-      const user = parts[2] || "Player";
-      const rank = parts[parts.length - 1] || "default";
-      newLogs.push(`[LuckPerms] Promotion successful: Added parent group '${rank}' to player '${user}'.`);
-    } else if (cmd.startsWith("/crazycrates")) {
-      const parts = cmd.split(" ");
-      const crate = parts[3] || "crate";
-      const qty = parts[4] || "1";
-      const user = parts[5] || "Player";
-      newLogs.push(`[CrazyCrates] Delivered ${qty}x physical ${crate} key(s) to inventory of ${user}.`);
-    } else if (cmd.startsWith("/points give")) {
-      const parts = cmd.split(" ");
-      const user = parts[2] || "Player";
-      const qty = parts[3] || "500";
-      newLogs.push(`[PlayerPoints] Credited ${qty} points successfully to player account '${user}'.`);
-    } else if (cmd === "clear") {
+    if (cmd === "clear") {
       setConsoleLogs([]);
       setConsoleInput("");
       return;
-    } else {
-      newLogs.push(`[Console] Error: Unknown command syntax. Available: /lp, /crazycrates, /points, clear`);
     }
 
+    const newLogs = [...consoleLogs, `> ${cmd}`];
     setConsoleLogs(newLogs);
     setConsoleInput("");
-    addAuditLog(`RCON Command executed: ${cmd.substring(0, 20)}...`, "info");
+
+    if (rconEnabled) {
+      setConsoleLogs(prev => [...prev, `[RCON] Executing on server...`]);
+      try {
+        const output = await executeRconCommand(cmd);
+        const splitOutput = output.split("\n").filter(Boolean);
+        setConsoleLogs(prev => [...prev, ...splitOutput]);
+        addAuditLog(`RCON Command executed: ${cmd.substring(0, 30)}`, "success");
+      } catch (err: any) {
+        setConsoleLogs(prev => [...prev, `[RCON Error] ${err.message}`]);
+        addAuditLog(`RCON Command failed: ${cmd.substring(0, 30)}`, "warning");
+      }
+    } else {
+      // Mock console response logic
+      const mockLogs = [...newLogs];
+      if (cmd.startsWith("/lp user") || cmd.startsWith("lp user")) {
+        const parts = cmd.split(" ");
+        const user = parts[cmd.startsWith("/") ? 2 : 1] || "Player";
+        const rank = parts[parts.length - 1] || "default";
+        mockLogs.push(`[LuckPerms] Promotion successful: Added parent group '${rank}' to player '${user}'.`);
+      } else if (cmd.startsWith("/crazycrates") || cmd.startsWith("crazycrates")) {
+        const parts = cmd.split(" ");
+        const crate = parts[cmd.startsWith("/") ? 3 : 2] || "crate";
+        const qty = parts[cmd.startsWith("/") ? 4 : 3] || "1";
+        const user = parts[cmd.startsWith("/") ? 5 : 4] || "Player";
+        mockLogs.push(`[CrazyCrates] Delivered ${qty}x physical ${crate} key(s) to inventory of ${user}.`);
+      } else if (cmd.startsWith("/points give") || cmd.startsWith("points give")) {
+        const parts = cmd.split(" ");
+        const user = parts[cmd.startsWith("/") ? 2 : 1] || "Player";
+        const qty = parts[cmd.startsWith("/") ? 3 : 2] || "500";
+        mockLogs.push(`[PlayerPoints] Credited ${qty} points successfully to player account '${user}'.`);
+      } else {
+        mockLogs.push(`[Console (Mock Mode)] Command dispatched (enable RCON in config for live delivery).`);
+      }
+      setConsoleLogs(mockLogs);
+      addAuditLog(`Mock Command executed: ${cmd.substring(0, 20)}...`, "info");
+    }
   };
 
   // Minecraft command generator helper
