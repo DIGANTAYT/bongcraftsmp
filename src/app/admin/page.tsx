@@ -44,10 +44,10 @@ export default function AdminPage() {
   const [prices, setPrices] = useState({
     // Ranks
     knight: 99,
-    lord: 149,
-    paladin: 249,
-    duke: 399,
-    king: 599,
+    lord: 399,
+    paladin: 699,
+    duke: 999,
+    king: 1499,
     // Crates
     party: 20,
     spawner: 30,

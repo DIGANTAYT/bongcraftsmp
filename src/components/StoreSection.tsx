@@ -13,10 +13,10 @@ export const StoreSection: React.FC = () => {
   
   const [customPrices, setCustomPrices] = useState({
     knight: 99,
-    lord: 149,
-    paladin: 249,
-    duke: 399,
-    king: 599
+    lord: 399,
+    paladin: 699,
+    duke: 999,
+    king: 1499
   });
 
   useEffect(() => {
@@ -96,11 +96,13 @@ export const StoreSection: React.FC = () => {
       glowClass: "hover:border-[#A855F7]/40 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)]",
       desc: "Level 4 Sovereign RPG Rank",
       perks: [
-        "10 Auction Listings",
-        "8 Order Listings",
-        "8 Homes",
-        "Access to /anvil & /grindstone",
-        "Access to /nick (colors)",
+        "5 Auction Slots (+5)",
+        "10 Homes (+10)",
+        "3 Player Warps (+3)",
+        "8 Claim Blocks (+8)",
+        "Access to /disposal & /craft",
+        "Access to /nick & /back",
+        "Access to /feed",
         "Duke Kit & Prefix"
       ],
     },
@@ -110,12 +112,14 @@ export const StoreSection: React.FC = () => {
       price: customPrices.king,
       accentColor: "#EF4444",
       glowClass: "hover:border-[#EF4444]/40 hover:shadow-[0_0_30px_-5px_rgba(239,68,68,0.3)]",
-      desc: "Level 5 Supreme Ruler RPG Rank",
+      desc: "Tier 5 Premium Rank",
       perks: [
-        "15 Auction Listings",
-        "12 Order Listings",
-        "12 Homes",
-        "Access to /fly (in claims)",
+        "6 Auction Slots (+6)",
+        "12 Homes (+12)",
+        "3 Player Warps (+3)",
+        "10 Claim Blocks (+10)",
+        "Access to /disposal & /craft",
+        "Access to /nick & /back",
         "Access to /feed & /enderchest",
         "King Kit & Prefix"
       ],

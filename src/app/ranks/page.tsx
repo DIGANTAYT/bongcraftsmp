@@ -41,10 +41,10 @@ export default function RanksPage() {
     const savedPricesStr = localStorage.getItem("bongcraft_prices");
     let customPrices = {
       knight: 99,
-      lord: 149,
-      paladin: 249,
-      duke: 399,
-      king: 599
+      lord: 399,
+      paladin: 699,
+      duke: 999,
+      king: 1499
     };
     if (savedPricesStr) {
       try {
@@ -165,31 +165,34 @@ export default function RanksPage() {
         glowClass: "hover:border-[#A855F7]/40 hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)]",
         desc: "Level 4 Sovereign RPG Rank",
         perks: [
-          "10 Auction Listings",
-          "8 Order Listings",
-          "8 Homes",
-          "Access to /anvil & /grindstone",
-          "Access to /nick (color support)",
-          "Duke Kit & Prefix",
-          "750 Coins & 4 Crate Keys"
+          "5 Auction Slots (+5)",
+          "10 Homes (+10)",
+          "3 Player Warps (+3)",
+          "8 Claim Blocks (+8)",
+          "Access to /disposal & /craft",
+          "Access to /nick & /back",
+          "Access to /feed",
+          "Duke Kit & Prefix"
         ],
         chatPrefix: "&d&lDUKE",
         chatColor: "text-purple-400",
         detailedPerks: {
           commands: [
-            { cmd: "/anvil", desc: "Open a virtual anvil interface anywhere." },
-            { cmd: "/grindstone", desc: "Open a virtual grindstone interface anywhere." },
-            { cmd: "/nick", desc: "Customize your display name with colors in chat." }
+            { cmd: "/disposal", desc: "Open a remote disposal menu." },
+            { cmd: "/nick", desc: "Change your display name in tag and chat." },
+            { cmd: "/back", desc: "Return to your previous location." },
+            { cmd: "/craft", desc: "Open a remote crafting table." },
+            { cmd: "/feed", desc: "Restore your saturation fully." }
           ],
           economy: [
-            "10 Auction Listings (Sell 10 items simultaneously on /ah)",
-            "8 Order Listings (Request 8 items in player markets)",
-            "Set up to 8 homes (/sethome)"
+            "5 Auction Slots (+5 simultaneous listings on /ah)",
+            "10 Homes slots (+10 /sethome)",
+            "3 Player Warps (pwarp slots)",
+            "8 Claims slots (+8 claim blocks)"
           ],
           bonuses: [
-            "750 Server Coins instantly credited",
-            "4x Crate Keys bonus",
-            "Exclusive [Duke] chat prefix & kit access"
+            "Exclusive [Duke] prefix in TAB and Chat",
+            "Claim weekly kit via /kits"
           ]
         }
       },
@@ -199,34 +202,38 @@ export default function RanksPage() {
         price: customPrices.king,
         accentColor: "#EF4444",
         glowClass: "hover:border-[#EF4444]/40 hover:shadow-[0_0_30px_-5px_rgba(239,68,68,0.3)]",
-        desc: "Level 5 Supreme Ruler RPG Rank",
+        desc: "Tier 5 Premium Rank",
         perks: [
-          "15 Auction Listings",
-          "12 Order Listings",
-          "12 Homes",
-          "Access to /fly (in claims)",
+          "6 Auction Slots (+6)",
+          "12 Homes (+12)",
+          "3 Player Warps (+3)",
+          "10 Claim Blocks (+10)",
+          "Access to /disposal & /craft",
+          "Access to /nick & /back",
           "Access to /feed & /enderchest",
-          "King Kit & Prefix",
-          "1200 Coins & 5 Crate Keys"
+          "King Kit & Prefix"
         ],
         chatPrefix: "&c&lKING",
         chatColor: "text-rose-500",
         featured: true,
         detailedPerks: {
           commands: [
-            { cmd: "/fly", desc: "Allows fly mode in your claimed regions." },
-            { cmd: "/enderchest", desc: "Access your virtual enderchest anywhere." },
-            { cmd: "/feed", desc: "Instantly satisfy hunger cravings with a cooldown." }
+            { cmd: "/disposal", desc: "Open a remote disposal menu." },
+            { cmd: "/nick", desc: "Change your display name in tag and chat." },
+            { cmd: "/back", desc: "Return to your previous location." },
+            { cmd: "/craft", desc: "Open a remote crafting table." },
+            { cmd: "/feed", desc: "Restore your saturation fully." },
+            { cmd: "/enderchest", desc: "Open your enderchest anywhere." }
           ],
           economy: [
-            "15 Auction Listings (Sell 15 items simultaneously on /ah)",
-            "12 Order Listings (Request 12 items in player markets)",
-            "Set up to 12 homes (/sethome)"
+            "6 Auction Slots (+6 simultaneous listings on /ah)",
+            "12 Homes slots (+12 /sethome)",
+            "3 Player Warps (pwarp slots)",
+            "10 Claims slots (+10 claim blocks)"
           ],
           bonuses: [
-            "1,200 Server Coins instantly credited",
-            "5x Crate Keys bonus",
-            "Exclusive [King] chat prefix & kit access"
+            "Exclusive [King] prefix in TAB and Chat",
+            "Claim weekly kit via /kits"
           ]
         }
       }

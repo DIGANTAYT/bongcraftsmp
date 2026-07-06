@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 export const FeaturedRank: React.FC = () => {
   const { addToCart } = useCart();
-  const [price, setPrice] = React.useState(599);
+  const [price, setPrice] = React.useState(1499);
 
   React.useEffect(() => {
     const saved = localStorage.getItem("bongcraft_prices");
@@ -35,15 +35,14 @@ export const FeaturedRank: React.FC = () => {
   };
 
   const perks = [
-    "15 Auction Listings",
-    "12 Order Listings",
-    "12 Homes",
-    "Access to /fly (in claims)",
-    "Access to /feed command",
-    "Access to /enderchest",
+    "6 Auction Slots (+6)",
+    "12 Homes (+12)",
+    "3 Player Warps (+3)",
+    "10 Claim Blocks (+10)",
+    "Access to /disposal & /craft",
+    "Access to /nick & /back",
+    "Access to /feed & /enderchest",
     "King Kit Access & Prefix",
-    "1,200 Server Coins Bonus",
-    "5 Crate Keys Bonus",
   ];
 
   return (
