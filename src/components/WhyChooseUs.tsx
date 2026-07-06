@@ -41,7 +41,7 @@ export const WhyChooseUs: React.FC = () => {
       icon: <ShieldCheck className="w-6 h-6" />,
     },
     {
-      title: "Bengal's Pride Server",
+      title: "Bangalir Nijer Server",
       desc: "The largest Minecraft survival server dedicated to providing Bengali players and communities with their ultimate home.",
       icon: <Sparkles className="w-6 h-6" />,
     },

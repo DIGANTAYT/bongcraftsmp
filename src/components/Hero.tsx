@@ -70,7 +70,7 @@ export const Hero: React.FC = () => {
             <span className="w-1.5 h-1.5 bg-[#138808] rounded-full" />
           </span>
           <span className="font-inter text-xs text-white-text font-bold uppercase tracking-widest">
-            Bengal's Pride Survival Server
+            Bangalir Nijer Survival Server
           </span>
         </motion.div>
 
