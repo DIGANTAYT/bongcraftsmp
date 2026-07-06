@@ -50,9 +50,9 @@ export const Hero: React.FC = () => {
       id="home"
       className="relative min-h-screen flex items-center justify-center pt-28 pb-16 px-4 md:px-8 overflow-hidden z-10"
     >
-      {/* Ambient center glows */}
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-radial from-primary-accent/10 to-transparent blur-3xl -z-1 pointer-events-none" />
-      <div className="absolute w-[300px] h-[300px] rounded-full bg-radial from-gold-accent/5 to-transparent blur-2xl -z-1 pointer-events-none" />
+      {/* Ambient center glows - Indian flag colors (Saffron & Green) */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-radial from-[#FF9933]/8 to-transparent blur-3xl -z-1 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-radial from-[#138808]/8 to-transparent blur-3xl -z-1 pointer-events-none" />
 
       <div className="max-w-[850px] w-full mx-auto flex flex-col items-center text-center space-y-8 md:space-y-10">
         
@@ -61,10 +61,15 @@ export const Hero: React.FC = () => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-accent/10 border border-primary-accent/30 backdrop-blur-sm"
+          className="inline-flex items-center gap-2.5 px-4.5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm shadow-md"
         >
-          <span className="w-2 h-2 bg-gold-accent rounded-full animate-pulse" />
-          <span className="font-inter text-xs text-glow-gold text-gold-accent font-bold uppercase tracking-widest">
+          {/* Indian flag color indicators */}
+          <span className="flex items-center gap-1 select-none">
+            <span className="w-1.5 h-1.5 bg-[#FF9933] rounded-full" />
+            <span className="w-1.5 h-1.5 bg-[#FFFFFF] rounded-full" />
+            <span className="w-1.5 h-1.5 bg-[#138808] rounded-full" />
+          </span>
+          <span className="font-inter text-xs text-white-text font-bold uppercase tracking-widest">
             Bengal's Pride Survival Server
           </span>
         </motion.div>
@@ -78,7 +83,7 @@ export const Hero: React.FC = () => {
         >
           <h1 className="font-cinzel text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-wider leading-[1.05] text-white-text">
             BONGCRAFT <br />
-            <span className="bg-gradient-to-r from-primary-accent via-[#A855F7] to-gold-accent bg-clip-text text-transparent drop-shadow-sm">
+            <span className="bg-gradient-to-r from-[#FF9933] via-[#FFFFFF] to-[#138808] bg-clip-text text-transparent drop-shadow-sm select-none">
               SMP
             </span>
           </h1>
