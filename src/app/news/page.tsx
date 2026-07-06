@@ -60,7 +60,7 @@ export default function NewsPage() {
               News & Updates
             </h1>
             <p className="font-inter text-xs md:text-sm text-secondary-text leading-relaxed">
-              Everything you need to know about what's happening on play.bongcraftsmp.in.
+              Your central source for announcements, patch notes, events, and chronicles from the heart of the BongCraft SMP community.
             </p>
             <div className="w-16 h-1 bg-gradient-to-r from-primary-accent to-gold-accent mx-auto mt-4" />
           </div>
