@@ -34,7 +34,7 @@ export const Footer: React.FC = () => {
     {
       title: "Vote & Connect",
       links: [
-        { name: "Vote for Server (Coming Soon)", href: "#" },
+        { name: "Vote for Server", href: "/vote" },
         { name: "Official Discord", href: "https://discord.gg/WzDAzMYwGX" },
         { name: "Staff Application (Coming Soon)", href: "#" },
         { name: "About Us", href: "/about" },
