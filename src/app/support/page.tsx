@@ -13,20 +13,20 @@ export default function SupportPage() {
 
   const faqs = [
     {
-      q: "How long does rank delivery take?",
-      a: "Most purchases are delivered in-game within 2 to 5 minutes automatically. If you don't receive it, ensure you are online and type '/claim' in chat.",
+      q: "How are server purchases delivered?",
+      a: "Since we accept local UPI payments to keep transactions fee-free, all orders undergo manual verification. After payment, join our Discord, open a ticket, and upload your screenshot receipt. Our staff will instantly approve your order and deliver your packages.",
     },
     {
-      q: "Which payment methods are accepted?",
-      a: "We accept all major Indian and international payment gateways, including UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, Net Banking, and custom Gift Cards.",
+      q: "Which payment methods do you accept?",
+      a: "We support local Indian payments using UPI (via PhonePe, Google Pay, Paytm, BHIM, or any banking app). Simply scan the QR code displayed on checkout.",
     },
     {
-      q: "Can I transfer my purchase to another Minecraft account?",
+      q: "Can I transfer my ranks or keys to another account?",
       a: "No. All packages, ranks, and coin bundles are strictly bound to the Minecraft Username (IGN) entered during checkout and cannot be transferred.",
     },
     {
       q: "I entered the wrong username. What should I do?",
-      a: "Don't panic! Join our Discord server immediately and open a billing support ticket with your Order ID (starts with BC-). Our staff will manually update it.",
+      a: "Don't panic! Open a billing ticket on our Discord server immediately and share your Order ID. Our staff will manually adjust the username before delivering.",
     },
     {
       q: "What is your refund policy?",
@@ -42,7 +42,7 @@ export default function SupportPage() {
       <main className="flex-1 w-full relative z-10 pt-32 pb-16 px-4 md:px-8">
         <div className="max-w-[1400px] mx-auto">
           {/* Header */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <span className="font-inter text-xs text-primary-accent font-extrabold uppercase tracking-widest block mb-2">
               Get Help
             </span>
@@ -53,6 +53,15 @@ export default function SupportPage() {
               Got billing questions or need server help? Check our FAQs below or contact our dedicated admin team directly on Discord.
             </p>
             <div className="w-16 h-1 bg-gradient-to-r from-primary-accent to-gold-accent mx-auto mt-5" />
+          </div>
+
+          {/* Manual Payment Warning Banner */}
+          <div className="glass-panel p-5.5 rounded-2.5xl border border-amber-500/25 bg-amber-500/5 text-amber-400 font-inter text-xs leading-relaxed max-w-5xl mx-auto mb-10 flex items-start gap-3">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse mt-1 shrink-0" />
+            <div>
+              <strong className="text-white-text block mb-0.5 font-bold uppercase tracking-wider text-[10px]">ℹ️ Manual UPI Verification Process</strong>
+              BongCraft SMP uses local UPI payments (no automatic payment gateway). Ranks, coins, and keys must be claimed manually by uploading your payment receipt screenshot inside a Discord support ticket. Our team will verify and deliver your package in-game.
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-5xl mx-auto items-start">
