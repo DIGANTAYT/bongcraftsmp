@@ -8,7 +8,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { 
   Lock, LayoutDashboard, CheckSquare, Terminal, Settings, 
   TrendingUp, Clock, CheckCircle2, ShieldAlert, Copy, Check, LogOut,
-  RefreshCw, Server, Trash2, Edit3, DollarSign, FileText
+  RefreshCw, Server, Trash2, Edit3, DollarSign, FileText, Sparkles
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getDeliveryCommands as sharedGetDeliveryCommands } from "@/lib/commands";
@@ -86,6 +86,12 @@ export default function AdminPage() {
   const [rconDeliveryLogs, setRconDeliveryLogs] = useState<string[]>([]);
   const [isRconLoading, setIsRconLoading] = useState(false);
 
+  // Sales Configuration states
+  const [salesActive, setSalesActive] = useState(false);
+  const [salesText, setSalesText] = useState("");
+  const [adminCouponCode, setAdminCouponCode] = useState("");
+  const [adminDiscountPercentage, setAdminDiscountPercentage] = useState("0");
+
   const loadGlobalConfig = async () => {
     try {
       const authHeader = "Basic " + btoa("admin:bongcraftadmin");
@@ -109,9 +115,38 @@ export default function AdminPage() {
           setRconPort(config.rcon.port ?? "25575");
           setRconPassword(config.rcon.password ?? "");
         }
+
+        setSalesActive(config.salesActive ?? false);
+        setSalesText(config.salesText ?? "🔥 Grand Launch Sale: 25% OFF ALL RANKS & COINS!");
+        setAdminCouponCode(config.couponCode ?? "");
+        setAdminDiscountPercentage(String(config.discountPercentage ?? 0));
       }
     } catch (e) {
       console.error("Failed to load global config:", e);
+    }
+  };
+
+  const handleSaveSalesSettings = async () => {
+    try {
+      const authHeader = "Basic " + btoa("admin:bongcraftadmin");
+      const res = await fetch("/api/config/admin", {
+        headers: { "Authorization": authHeader }
+      });
+      const currentConfig = await res.json();
+      
+      const updatedConfig = {
+        ...currentConfig,
+        salesActive,
+        salesText,
+        couponCode: adminCouponCode.toUpperCase().trim(),
+        discountPercentage: parseInt(adminDiscountPercentage) || 0
+      };
+
+      await saveFullConfig(updatedConfig);
+      alert("Sales & Coupon configuration saved successfully to Supabase!");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to save sales configuration");
     }
   };
 
@@ -1395,6 +1430,80 @@ export default function AdminPage() {
                                   className="px-6 py-2.5 bg-primary-accent hover:bg-primary-accent/90 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
                                 >
                                   Save RCON Configuration
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sales & Discounts Coupon Management Section */}
+                        <div className="bg-[#111217] border border-border-custom p-5 rounded-2xl space-y-5">
+                          <div className="flex items-center justify-between gap-4 border-b border-border-custom/50 pb-3.5">
+                            <div className="space-y-1">
+                              <h3 className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+                                Storefront Sales & Coupon Management
+                              </h3>
+                              <p className="text-xs text-secondary-text">
+                                Enable server-wide discount events, configure banner text announcement, and define active coupon codes.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => setSalesActive(!salesActive)}
+                              className={`w-14 h-8 rounded-full transition-all relative flex items-center px-1 border cursor-pointer ${
+                                salesActive
+                                  ? "bg-rose-500 border-rose-500/80 justify-end"
+                                  : "bg-[#09090B] border-border-custom justify-start"
+                              }`}
+                            >
+                              <span className="w-5.5 h-5.5 rounded-full bg-white shadow-md block transition-transform" />
+                            </button>
+                          </div>
+
+                          {salesActive && (
+                            <div className="space-y-4 pt-1 font-inter text-xs text-secondary-text">
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Sales Announcement Banner Text</label>
+                                <input
+                                  type="text"
+                                  value={salesText}
+                                  onChange={(e) => setSalesText(e.target.value)}
+                                  placeholder="e.g. 🔥 Grand Launch Sale: 25% OFF ALL RANKS & COINS! Use Code: AKASH"
+                                  className="w-full bg-[#09090B] border border-border-custom px-3 py-2.5 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Discount Coupon Code</label>
+                                  <input
+                                    type="text"
+                                    value={adminCouponCode}
+                                    onChange={(e) => setAdminCouponCode(e.target.value)}
+                                    placeholder="e.g. AKASH"
+                                    className="w-full bg-[#09090B] border border-border-custom px-3 py-2.5 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60 uppercase font-mono"
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Discount Percentage (0-100%)</label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={adminDiscountPercentage}
+                                    onChange={(e) => setAdminDiscountPercentage(e.target.value)}
+                                    placeholder="e.g. 25"
+                                    className="w-full bg-[#09090B] border border-border-custom px-3 py-2.5 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60 font-mono"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end pt-1">
+                                <button
+                                  onClick={handleSaveSalesSettings}
+                                  className="px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
+                                >
+                                  Save Sales Configuration
                                 </button>
                               </div>
                             </div>

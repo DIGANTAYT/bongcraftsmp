@@ -41,7 +41,11 @@ const defaultFullConfig = {
     host: "",
     port: 25575,
     password: ""
-  }
+  },
+  salesActive: false,
+  salesText: "🔥 Grand Launch Sale: 25% OFF ALL RANKS & COINS!",
+  couponCode: "",
+  discountPercentage: 0
 };
 
 // Simple secure verification check

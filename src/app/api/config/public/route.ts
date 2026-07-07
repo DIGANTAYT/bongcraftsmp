@@ -35,7 +35,11 @@ const defaultPublicConfig = {
     coins2500: 199,
     coins6000: 399,
     coins12000: 699
-  }
+  },
+  salesActive: false,
+  salesText: "🔥 Grand Launch Sale: 25% OFF ALL RANKS & COINS!",
+  couponCode: "",
+  discountPercentage: 0
 };
 
 export async function GET() {
@@ -60,7 +64,11 @@ export async function GET() {
     // Filter out private keys/sensitive values to prevent exposing them to normal users
     const publicConfig = {
       maintenanceMode: value.maintenanceMode ?? false,
-      prices: value.prices || defaultPublicConfig.prices
+      prices: value.prices || defaultPublicConfig.prices,
+      salesActive: value.salesActive ?? false,
+      salesText: value.salesText ?? defaultPublicConfig.salesText,
+      couponCode: value.couponCode ?? defaultPublicConfig.couponCode,
+      discountPercentage: value.discountPercentage ?? defaultPublicConfig.discountPercentage
     };
 
     return NextResponse.json(publicConfig);

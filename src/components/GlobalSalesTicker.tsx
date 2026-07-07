@@ -13,6 +13,25 @@ interface Purchase {
 export const GlobalSalesTicker: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 32, seconds: 15 });
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [salesActive, setSalesActive] = useState(false);
+  const [salesText, setSalesText] = useState("");
+
+  // Load public sale configs from server
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        const data = await res.json();
+        if (data) {
+          setSalesActive(data.salesActive ?? false);
+          setSalesText(data.salesText ?? "");
+        }
+      } catch (e) {
+        console.error("Failed to load global sales config:", e);
+      }
+    };
+    loadConfig();
+  }, []);
 
   // 1. Ticking countdown timer that resets daily to maintain active urgency
   useEffect(() => {
@@ -122,20 +141,22 @@ export const GlobalSalesTicker: React.FC = () => {
       `}</style>
 
       {/* ⚠️ 1. Top Urgency Count-down Sales Banner */}
-      <div className="w-full bg-gradient-to-r from-[#7c3aed] via-[#f43f5e] to-[#fbbf24] py-2 px-4 flex flex-col sm:flex-row items-center justify-center gap-3 text-center text-white-text select-none shadow-lg">
-        <div className="flex items-center gap-1.5 font-inter text-[10px] font-black uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5 animate-bounce text-yellow-300" />
-          <span>🔥 Grand Launch Sale: 25% OFF ALL RANKS & COINS! Use Code: <strong className="underline text-yellow-300">AKASH</strong></span>
+      {salesActive && (
+        <div className="w-full bg-gradient-to-r from-[#7c3aed] via-[#f43f5e] to-[#fbbf24] py-2 px-4 flex flex-col sm:flex-row items-center justify-center gap-3 text-center text-white-text select-none shadow-lg">
+          <div className="flex items-center gap-1.5 font-inter text-[10px] font-black uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 animate-bounce text-yellow-300" />
+            <span>{salesText}</span>
+          </div>
+          
+          <div className="flex items-center gap-1.5 font-mono text-[10px] font-extrabold uppercase bg-black/35 px-2.5 py-1 rounded-md border border-white/10 shrink-0">
+            <Clock className="w-3.5 h-3.5 text-yellow-300 animate-spin-slow" />
+            <span>Ends In:</span>
+            <span className="text-yellow-300">
+              {formatNumber(timeLeft.hours)}h:{formatNumber(timeLeft.minutes)}m:{formatNumber(timeLeft.seconds)}s
+            </span>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-1.5 font-mono text-[10px] font-extrabold uppercase bg-black/35 px-2.5 py-1 rounded-md border border-white/10 shrink-0">
-          <Clock className="w-3.5 h-3.5 text-yellow-300 animate-spin-slow" />
-          <span>Ends In:</span>
-          <span className="text-yellow-300">
-            {formatNumber(timeLeft.hours)}h:{formatNumber(timeLeft.minutes)}m:{formatNumber(timeLeft.seconds)}s
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* 🛒 2. Horizontal Scrolling Purchases Ticker */}
       <div className="w-full bg-[#111217]/90 border-b border-border-custom/50 py-2.5 overflow-hidden flex items-center relative">

@@ -41,8 +41,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [minecraftUsername, setMinecraftUsername] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [discountPercentage, setDiscountPercentage] = useState(0);
+  
+  const [salesActive, setSalesActive] = useState(false);
+  const [allowedCoupon, setAllowedCoupon] = useState("");
+  const [dbDiscountPercentage, setDbDiscountPercentage] = useState(0);
 
-  // Load cart from localStorage on mount
+  // Load cart and check active coupon config from server on mount
   useEffect(() => {
     const savedCart = localStorage.getItem("bongcraft_cart");
     if (savedCart) {
@@ -56,11 +60,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (savedUsername) {
       setMinecraftUsername(savedUsername);
     }
-    const savedCoupon = localStorage.getItem("bongcraft_coupon");
-    if (savedCoupon) {
-      setCouponCode(savedCoupon);
-      setDiscountPercentage(25);
-    }
+
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        const data = await res.json();
+        if (data) {
+          const active = data.salesActive ?? false;
+          const coupon = (data.couponCode ?? "").toUpperCase().trim();
+          const pct = Number(data.discountPercentage) || 0;
+
+          setSalesActive(active);
+          setAllowedCoupon(coupon);
+          setDbDiscountPercentage(pct);
+
+          const savedCoupon = localStorage.getItem("bongcraft_coupon");
+          if (savedCoupon && active && savedCoupon.toUpperCase() === coupon) {
+            setCouponCode(savedCoupon.toUpperCase());
+            setDiscountPercentage(pct);
+          } else {
+            // Clear expired or disabled coupon
+            setCouponCode("");
+            setDiscountPercentage(0);
+            localStorage.removeItem("bongcraft_coupon");
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load public coupon config:", e);
+      }
+    };
+    loadConfig();
   }, []);
 
   // Save cart to localStorage when it changes
@@ -105,9 +134,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyCoupon = (code: string): boolean => {
     const formatted = code.toUpperCase().trim();
-    if (formatted === "AKASH" || formatted === "BONGCRAFT") {
+    if (salesActive && allowedCoupon && formatted === allowedCoupon) {
       setCouponCode(formatted);
-      setDiscountPercentage(25); // 25% Off
+      setDiscountPercentage(dbDiscountPercentage);
       localStorage.setItem("bongcraft_coupon", formatted);
       return true;
     }
