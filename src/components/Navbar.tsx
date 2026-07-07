@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { ShoppingCart, Menu, X, Copy, Check, LogOut, User, LogIn, Shield } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { GlobalSalesTicker } from "./GlobalSalesTicker";
 
 export const Navbar: React.FC = () => {
   const { cartCount, setIsCartOpen } = useCart();
@@ -88,20 +89,27 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 flex flex-col ${
-        scrolled
-          ? "bg-[#09090B]/85 backdrop-blur-md border-b border-border-custom py-3"
-          : "bg-transparent py-5"
-      }`}
-    >
-      {maintenance && (
-        <div className="w-full bg-amber-500/10 border-b border-amber-500/20 py-2 px-4 flex items-center justify-center gap-2 text-center text-amber-500 font-inter text-[10px] font-bold uppercase tracking-wider select-none">
-          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />
-          <span>Server Under Maintenance - In-Game Deliveries May Have Short Delays</span>
-        </div>
-      )}
-      <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 flex items-center justify-between">
+    <header className="fixed top-0 inset-x-0 z-55 flex flex-col w-full pointer-events-none">
+      {/* 1. Global Sales Countdown & Recent Purchases Ticker */}
+      <div className="w-full pointer-events-auto">
+        <GlobalSalesTicker />
+      </div>
+
+      {/* 2. Main Navigation Bar */}
+      <div
+        className={`w-full transition-all duration-300 flex flex-col pointer-events-auto ${
+          scrolled
+            ? "bg-[#09090B]/90 backdrop-blur-md border-b border-border-custom py-3"
+            : "bg-[#09090B]/40 backdrop-blur-sm py-4 border-b border-border-custom/20"
+        }`}
+      >
+        {maintenance && (
+          <div className="w-full bg-amber-500/10 border-b border-amber-500/20 py-2 px-4 flex items-center justify-center gap-2 text-center text-amber-500 font-inter text-[10px] font-bold uppercase tracking-wider select-none mb-2">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />
+            <span>Server Under Maintenance - In-Game Deliveries May Have Short Delays</span>
+          </div>
+        )}
+        <div className="max-w-[1400px] mx-auto w-full px-4 md:px-8 flex items-center justify-between">
         {/* Logo and Brand */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="relative w-10 h-10 md:w-12 md:h-12 overflow-hidden rounded-xl border border-gold-accent/20 bg-card-bg/60 p-0.5 transition-transform duration-300 group-hover:scale-105">
@@ -393,6 +401,7 @@ export const Navbar: React.FC = () => {
           </a>
         </div>
       )}
+      </div>
     </header>
   );
 };
