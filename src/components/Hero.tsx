@@ -13,7 +13,7 @@ export const Hero: React.FC = () => {
   useEffect(() => {
     const fetchServerStatus = async () => {
       try {
-        const res = await fetch("https://api.mcsrvstat.us/3/play.bongcraftssmp.in");
+        const res = await fetch("https://api.mcsrvstat.us/3/play.bongcraftsmp.in");
         if (res.ok) {
           const data = await res.json();
           if (data.online) {
