@@ -5,7 +5,7 @@ import { Trophy, Gift, ArrowRight } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export const CommunityGoal: React.FC = () => {
-  const [currentAmount, setCurrentAmount] = useState(7800); // Default placeholder
+  const [currentAmount, setCurrentAmount] = useState(0);
   const goalAmount = 10000;
 
   useEffect(() => {
@@ -19,8 +19,7 @@ export const CommunityGoal: React.FC = () => {
 
           if (!error && data) {
             const sum = data.reduce((acc: number, curr: any) => acc + (Number(curr.total) || 0), 0);
-            // We can baseline it at ₹7,800 and add database checkouts to make it feel rich and scaling!
-            setCurrentAmount(Math.max(7800, sum));
+            setCurrentAmount(sum);
           }
         } catch (e) {
           console.error("Failed to load community goal progress:", e);
