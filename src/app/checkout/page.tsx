@@ -15,9 +15,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import Script from "next/script";
+import { audioSynth } from "@/lib/audio";
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, minecraftUsername, clearCart } = useCart();
+  const { 
+    cart, cartTotal, minecraftUsername, clearCart,
+    couponCode, discountPercentage, discountAmount, rawTotal, applyCoupon, removeCoupon
+  } = useCart();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -138,6 +142,7 @@ export default function CheckoutPage() {
           }
 
           setStep("success");
+          audioSynth.playLevelUp(); // Synthesize Minecraft XP level-up chime!
           confetti({
             particleCount: 150,
             spread: 80,
@@ -212,35 +217,37 @@ export default function CheckoutPage() {
       }
     }
 
-    // 2. Dispatch Discord Webhook Notification if configured
     try {
       const webhookUrl = localStorage.getItem("bongcraft_discord_webhook");
       if (webhookUrl && webhookUrl.startsWith("https://discord.com/api/webhooks/")) {
+        const payload = {
+          content: null,
+          embeds: [
+            {
+              title: "🛒 New Store Order Received (Manual UPI)",
+              description: `A player has submitted an order receipt for verification.`,
+              color: 16106001,
+              fields: [
+                { name: "Order ID", value: orderId, inline: true },
+                { name: "Minecraft IGN", value: activeIgn, inline: true },
+                { name: "UTR / Ref Number", value: utrNumber.trim(), inline: true },
+                { name: "Total Paid", value: `₹${cartTotal}`, inline: true },
+                { name: "Applied Coupon", value: couponCode || "None", inline: true },
+                {
+                  name: "Items Purchased",
+                  value: cart.map(item => `- ${item.name} (x${item.quantity})`).join("\n")
+                }
+              ],
+              footer: { text: "BongCraft SMP Shop Bot" },
+              timestamp: new Date().toISOString()
+            }
+          ]
+        };
+
         await fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            embeds: [
-              {
-                title: "🟢 NEW STORE CLAIM SUBMITTED",
-                color: 16507396, // gold accent
-                fields: [
-                  { name: "Minecraft IGN", value: activeIgn, inline: true },
-                  { name: "Order ID", value: orderId, inline: true },
-                  { name: "Transaction UTR", value: utrNumber.trim(), inline: true },
-                  { name: "Grand Total", value: `₹${cartTotal}`, inline: true },
-                  {
-                    name: "Purchased Items",
-                    value: cart.map(item => `• ${item.name} (x${item.quantity})`).join("\n")
-                  }
-                ],
-                footer: {
-                  text: "Verification Action: Match UTR in dashboard & verify receipt in Discord ticket!"
-                },
-                timestamp: new Date().toISOString()
-              }
-            ]
-          })
+          body: JSON.stringify(payload)
         });
       }
     } catch (err) {
@@ -340,18 +347,18 @@ export default function CheckoutPage() {
                   
                   {/* Delivery Username Summary */}
                   <div className="flex items-center gap-4 bg-secondary-bg/30 border border-border-custom/60 p-4 rounded-2xl">
-                    <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#09090B] border border-primary-accent/30 p-0.5 shrink-0">
+                    <div className="relative w-14 h-20 rounded-xl overflow-hidden bg-[#09090B] border border-primary-accent/30 p-1.5 shrink-0 flex items-center justify-center">
                       <img
-                        src={`https://mc-heads.net/avatar/${activeIgn}`}
+                        src={`https://mc-heads.net/player/${activeIgn}`}
                         alt={activeIgn}
-                        className="w-full h-full object-cover"
+                        className="h-full object-contain"
                       />
                     </div>
                     <div>
                       <div className="font-inter text-[10px] text-primary-accent uppercase tracking-widest font-bold">
                         Target Username (IGN)
                       </div>
-                      <h4 className="font-inter text-lg font-black text-white-text leading-tight mt-0.5">
+                      <h4 className="font-inter text-lg font-black text-white-text leading-tight mt-0.5 animate-pulse">
                         {activeIgn}
                       </h4>
                       <div className="flex items-center gap-1.5 mt-1">
@@ -548,8 +555,14 @@ export default function CheckoutPage() {
                   <div className="space-y-2.5 pt-1 text-xs">
                     <div className="flex justify-between text-secondary-text">
                       <span>Subtotal</span>
-                      <span>₹{cartTotal.toLocaleString()}</span>
+                      <span>₹{rawTotal.toLocaleString()}</span>
                     </div>
+                    {discountPercentage > 0 && (
+                      <div className="flex justify-between text-rose-500 font-bold">
+                        <span>Discount ({discountPercentage}% Off)</span>
+                        <span>- ₹{discountAmount.toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-secondary-text">
                       <span>Taxes & Gateway Fees</span>
                       <span className="text-emerald-500 font-bold uppercase">FREE</span>
@@ -561,6 +574,57 @@ export default function CheckoutPage() {
                         ₹{cartTotal.toLocaleString()}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Coupon Application Box */}
+                  <div className="h-px bg-border-custom/50 my-4" />
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-secondary-text font-bold uppercase tracking-wider block">Have a Coupon Code?</label>
+                    {couponCode ? (
+                      <div className="flex items-center justify-between bg-primary-accent/10 border border-primary-accent/30 rounded-xl px-3 py-2.5 text-xs">
+                        <span className="text-white-text font-bold">🎁 {couponCode} Applied (-{discountPercentage}%)</span>
+                        <button 
+                          onClick={removeCoupon} 
+                          className="text-rose-500 hover:text-rose-400 font-bold uppercase text-[9px] cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="e.g. AKASH" 
+                          id="couponInput"
+                          className="flex-1 bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs font-mono uppercase tracking-wider"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              const val = (e.target as HTMLInputElement).value;
+                              if (applyCoupon(val)) {
+                                audioSynth.playLevelUp(); // Synthesize XP sound!
+                                (e.target as HTMLInputElement).value = "";
+                              } else {
+                                alert("Invalid coupon code! Try code: AKASH");
+                              }
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            const input = document.getElementById("couponInput") as HTMLInputElement;
+                            if (input && applyCoupon(input.value)) {
+                              audioSynth.playLevelUp(); // Synthesize XP sound!
+                              input.value = "";
+                            } else {
+                              alert("Invalid coupon code! Try code: AKASH");
+                            }
+                          }}
+                          className="px-4 py-2 bg-secondary-bg hover:bg-secondary-bg/80 border border-border-custom text-white rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 

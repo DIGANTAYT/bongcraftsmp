@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { audioSynth } from "@/lib/audio";
 
 export interface CartItem {
   id: string;
@@ -24,6 +25,12 @@ interface CartContextType {
   setMinecraftUsername: (username: string) => void;
   cartTotal: number;
   cartCount: number;
+  couponCode: string;
+  discountPercentage: number;
+  discountAmount: number;
+  rawTotal: number;
+  applyCoupon: (code: string) => boolean;
+  removeCoupon: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -32,6 +39,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [minecraftUsername, setMinecraftUsername] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [discountPercentage, setDiscountPercentage] = useState(0);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -47,6 +56,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (savedUsername) {
       setMinecraftUsername(savedUsername);
     }
+    const savedCoupon = localStorage.getItem("bongcraft_coupon");
+    if (savedCoupon) {
+      setCouponCode(savedCoupon);
+      setDiscountPercentage(25);
+    }
   }, []);
 
   // Save cart to localStorage when it changes
@@ -60,6 +74,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [minecraftUsername]);
 
   const addToCart = (newItem: Omit<CartItem, "quantity">) => {
+    audioSynth.playClick();
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === newItem.id);
       if (existingItem) {
@@ -73,10 +88,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeFromCart = (id: string) => {
+    audioSynth.playClick();
     setCart((prevCart) => prevCart.filter((item) => item.id !== id));
   };
 
   const updateQuantity = (id: string, quantity: number) => {
+    audioSynth.playClick();
     if (quantity <= 0) {
       removeFromCart(id);
       return;
@@ -86,11 +103,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  const clearCart = () => {
-    setCart([]);
+  const applyCoupon = (code: string): boolean => {
+    const formatted = code.toUpperCase().trim();
+    if (formatted === "AKASH" || formatted === "BONGCRAFT") {
+      setCouponCode(formatted);
+      setDiscountPercentage(25); // 25% Off
+      localStorage.setItem("bongcraft_coupon", formatted);
+      return true;
+    }
+    return false;
   };
 
-  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const removeCoupon = () => {
+    setCouponCode("");
+    setDiscountPercentage(0);
+    localStorage.removeItem("bongcraft_coupon");
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    removeCoupon();
+  };
+
+  const rawTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const discountAmount = Math.round((rawTotal * discountPercentage) / 100);
+  const cartTotal = rawTotal - discountAmount;
   const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
   return (
@@ -107,6 +144,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setMinecraftUsername,
         cartTotal,
         cartCount,
+        couponCode,
+        discountPercentage,
+        discountAmount,
+        rawTotal,
+        applyCoupon,
+        removeCoupon
       }}
     >
       {children}

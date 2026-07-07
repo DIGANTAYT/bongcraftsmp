@@ -216,11 +216,11 @@ export default function ProfilePage() {
                 <div className="absolute -bottom-16 -right-16 w-32 h-32 rounded-full bg-gold-accent/10 filter blur-2xl -z-1" />
 
                 {/* Minecraft IGN avatar */}
-                <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-gold-accent bg-primary-bg p-0.5 shadow-xl shadow-gold-accent/10 mb-4 group">
+                <div className="relative w-24 h-36 rounded-2xl overflow-hidden border-2 border-gold-accent bg-primary-bg p-2.5 shadow-xl shadow-gold-accent/10 mb-4 group flex items-center justify-center">
                   <img
-                    src={`https://mc-heads.net/avatar/${profile?.minecraft_username || "Steve"}`}
-                    alt="Minecraft Head"
-                    className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
+                    src={`https://mc-heads.net/player/${profile?.minecraft_username || "Steve"}`}
+                    alt="Minecraft 3D Body"
+                    className="h-full object-contain group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
 

@@ -3,6 +3,7 @@ import { Outfit, Space_Grotesk } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { CursorFollower } from "@/components/CursorFollower";
+import { GlobalSalesTicker } from "@/components/GlobalSalesTicker";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -43,6 +44,7 @@ export default function RootLayout({
         <CursorFollower />
         <AuthProvider>
           <CartProvider>
+            <GlobalSalesTicker />
             {children}
           </CartProvider>
         </AuthProvider>

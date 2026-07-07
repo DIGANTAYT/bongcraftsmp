@@ -7,6 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { audioSynth } from "@/lib/audio";
 
 interface CartDrawerProps {
   onOpenCheckout: () => void;
@@ -22,6 +23,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
     cartTotal,
     minecraftUsername,
     setMinecraftUsername,
+    couponCode,
+    discountPercentage,
+    discountAmount,
+    rawTotal,
+    applyCoupon,
+    removeCoupon
   } = useCart();
 
   const { user, profile } = useAuth();
@@ -223,23 +230,82 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
 
           {/* Footer Billing & Actions */}
           {cart.length > 0 && (
-            <div className="px-6 py-6 border-t border-border-custom bg-secondary-bg/25">
-              <div className="space-y-2.5 mb-5">
-                <div className="flex items-center justify-between font-inter text-sm text-secondary-text">
+            <div className="px-6 py-6 border-t border-border-custom bg-secondary-bg/25 space-y-4">
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between font-inter text-xs text-secondary-text">
                   <span>Subtotal</span>
-                  <span>₹{cartTotal.toLocaleString()}</span>
+                  <span>₹{rawTotal.toLocaleString()}</span>
                 </div>
-                <div className="flex items-center justify-between font-inter text-sm text-secondary-text">
+                {discountPercentage > 0 && (
+                  <div className="flex items-center justify-between font-inter text-xs text-rose-500 font-bold">
+                    <span>Discount ({discountPercentage}% Off)</span>
+                    <span>- ₹{discountAmount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between font-inter text-xs text-secondary-text">
                   <span>Taxes & Gateway Fees</span>
                   <span className="text-emerald-500 font-semibold">FREE</span>
                 </div>
-                <div className="h-px bg-border-custom my-2" />
-                <div className="flex items-center justify-between font-cinzel text-base font-bold text-white-text">
+                <div className="h-px bg-border-custom/50 my-1" />
+                <div className="flex items-center justify-between font-cinzel text-sm font-bold text-white-text">
                   <span>TOTAL AMOUNT</span>
-                  <span className="text-gold-accent text-glow-gold text-lg">
+                  <span className="text-gold-accent text-glow-gold text-base">
                     ₹{cartTotal.toLocaleString()}
                   </span>
                 </div>
+              </div>
+
+              {/* Coupon input code */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[9px] text-secondary-text font-bold uppercase tracking-wider block">Promo Code</span>
+                {couponCode ? (
+                  <div className="flex items-center justify-between bg-primary-accent/10 border border-primary-accent/30 rounded-xl px-3 py-2 text-xs">
+                    <span className="text-white-text font-semibold">🎁 {couponCode} (-{discountPercentage}%)</span>
+                    <button 
+                      onClick={() => {
+                        audioSynth.playClick();
+                        removeCoupon();
+                      }} 
+                      className="text-rose-500 hover:text-rose-400 font-bold uppercase text-[9px] cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="e.g. AKASH" 
+                      id="drawerCouponInput"
+                      className="flex-1 bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs font-mono uppercase tracking-wider"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const val = (e.target as HTMLInputElement).value;
+                          if (applyCoupon(val)) {
+                            audioSynth.playLevelUp(); // Synthesize XP level-up chime!
+                            (e.target as HTMLInputElement).value = "";
+                          } else {
+                            alert("Invalid code! Try: AKASH");
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        const input = document.getElementById("drawerCouponInput") as HTMLInputElement;
+                        if (input && applyCoupon(input.value)) {
+                          audioSynth.playLevelUp(); // Synthesize XP level-up chime!
+                          input.value = "";
+                        } else {
+                          alert("Invalid code! Try: AKASH");
+                        }
+                      }}
+                      className="px-3.5 py-2 bg-[#18181b] hover:bg-[#27272a] border border-border-custom text-white-text rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button
