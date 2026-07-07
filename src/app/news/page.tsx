@@ -40,11 +40,11 @@ export default function NewsPage() {
   const articles: NewsArticle[] = [
     {
       id: "sponsorship-announcement",
-      title: "BongCraft SMP Official Sponsorship — Partnered with Akash Samanta!",
+      title: "BongCraft SMP Official Launch — Sponsored by Akash Samanta!",
       excerpt: "We are thrilled to announce that BongCraft SMP has partnered with Akash Samanta as our official sponsor! This collaboration secures the server nodes for a 100% lag-free experience.",
       category: "notice",
       date: "Jul 7, 2026",
-      image: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=600&auto=format&fit=crop", 
+      image: "/images/news_sponsor.jpg", 
       tagLabel: "Sponsorship",
       tagColor: "#fbbf24",
       content: (
@@ -60,8 +60,9 @@ export default function NewsPage() {
               🎮 Connection Information:
             </h4>
             <ul className="list-disc list-inside space-y-1.5 text-xs text-secondary-text pl-1">
-              <li><strong>Java Server IP:</strong> <code className="text-primary-accent">play.bongcraftsmp.in</code></li>
-              <li><strong>Bedrock Server IP:</strong> <code className="text-primary-accent">play.bongcraftsmp.in</code> (Port: <code className="text-primary-accent">19132</code>)</li>
+              <li><strong>Java Server IP:</strong> <code className="text-primary-accent">play.bongcraftssmp.in</code></li>
+              <li><strong>Bedrock Server IP:</strong> <code className="text-primary-accent">play.bongcraftssmp.in</code> (Port: <code className="text-primary-accent">19132</code>)</li>
+              <li className="text-[10px] text-amber-500/70 list-none mt-1">💡 Note: You can also connect via <code className="text-secondary-text/80">play.bongcraftsmp.in</code></li>
             </ul>
           </div>
 
