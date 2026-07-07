@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { BackgroundParticles } from "@/components/BackgroundParticles";
 import { Footer } from "@/components/Footer";
 import { 
-  Calendar, Tag, MessageSquare, ArrowRight, ShieldAlert, Sparkles 
+  Calendar, Tag, MessageSquare, ArrowRight, ShieldAlert, Sparkles, X 
 } from "lucide-react";
 
 type Category = "all" | "update" | "event" | "notice" | "patch" | "community" | "status";
@@ -19,10 +19,12 @@ interface NewsArticle {
   image: string;
   tagLabel: string;
   tagColor: string;
+  content: React.ReactNode;
 }
 
 export default function NewsPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("all");
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
   const categories = [
     { id: "all", label: "All News" },
@@ -34,9 +36,84 @@ export default function NewsPage() {
     { id: "status", label: "Server Status" },
   ];
 
-  // We define an empty array for the "blank" professional state
-  // If the admin or user wants to add news, they can populate this array
-  const articles: NewsArticle[] = [];
+  // Professional announcements populate array
+  const articles: NewsArticle[] = [
+    {
+      id: "sponsorship-announcement",
+      title: "BongCraft SMP Official Sponsorship — Partnered with Akash Samanta!",
+      excerpt: "We are thrilled to announce that BongCraft SMP has partnered with Akash Samanta as our official sponsor! This collaboration secures the server nodes for a 100% lag-free experience.",
+      category: "notice",
+      date: "Jul 7, 2026",
+      image: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=600&auto=format&fit=crop", 
+      tagLabel: "Sponsorship",
+      tagColor: "#fbbf24",
+      content: (
+        <div className="space-y-5 text-secondary-text leading-relaxed text-sm">
+          <p>
+            BongCraft SMP is proud to announce its official partnership and sponsorship by <strong>Akash Samanta</strong>! 
+            This collaboration marks a massive milestone for our server, providing the resources needed to keep BongCraft online, 
+            stable, and expanding for years to come.
+          </p>
+
+          <div className="bg-primary-bg/50 border border-border-custom rounded-2xl p-4.5 space-y-2">
+            <h4 className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider">
+              🎮 Connection Information:
+            </h4>
+            <ul className="list-disc list-inside space-y-1.5 text-xs text-secondary-text pl-1">
+              <li><strong>Java Server IP:</strong> <code className="text-primary-accent">play.bongcraftsmp.in</code></li>
+              <li><strong>Bedrock Server IP:</strong> <code className="text-primary-accent">play.bongcraftsmp.in</code> (Port: <code className="text-primary-accent">19132</code>)</li>
+            </ul>
+          </div>
+
+          <h4 className="font-cinzel text-white-text font-bold uppercase tracking-wider text-xs mt-6">
+            🚀 Hardware Upgrades & Uptime
+          </h4>
+          <p>
+            With this sponsorship, we have migrated our databases and game nodes to enterprise-grade server hardware 
+            featuring dedicated Ryzen CPUs and ultra-fast NVMe storage. Players can now explore, mine, and battle in the RPG 
+            world with a rock-solid 20 TPS.
+          </p>
+
+          <p>
+            We want to give a massive shoutout and thank you to <strong>Akash Samanta</strong> for believing in the project 
+            and making this community possible. See you in-game!
+          </p>
+        </div>
+      )
+    },
+    {
+      id: "season-genesis-launch",
+      title: "Season: Genesis — The Ultimate RPG Survival is Live!",
+      excerpt: "The Nether dimension is officially unlocked! Evolve your class, unlock tiered trait skill trees, explore custom dungeons, and conquer boss fights today.",
+      category: "update",
+      date: "Jun 13, 2026",
+      image: "https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?q=80&w=600&auto=format&fit=crop",
+      tagLabel: "Update",
+      tagColor: "#f43f5e",
+      content: (
+        <div className="space-y-5 text-secondary-text leading-relaxed text-sm">
+          <p>
+            The wait is finally over! <strong>Season: Genesis</strong> is officially live on BongCraft SMP. 
+            We have integrated our ultimate RPG survival setups, featuring massive progression pathways and custom visual textures.
+          </p>
+
+          <h4 className="font-cinzel text-white-text font-bold uppercase tracking-wider text-xs mt-6">
+            ⚔️ Key RPG Launch Features:
+          </h4>
+          <ul className="list-disc list-inside space-y-2 text-xs text-secondary-text pl-1">
+            <li><strong>Grinwood Town RPG Hub:</strong> Speak with 14+ interactive NPCs, blacksmiths, and merchants for custom trade deals and storylines.</li>
+            <li><strong>Player Classes & Skills:</strong> Choose warrior, archer, or mage to unlock stat boards and combat skills.</li>
+            <li><strong>Dungeons & PvE Bounties:</strong> Battle instanced dungeons containing customized boss mechanics.</li>
+            <li><strong>Skill Trees:</strong> Progress through Bronze, Silver, Gold, and Master level passive trait enhancements.</li>
+          </ul>
+
+          <p>
+            Grab your gear, select your class, and head into the wild today. Check out our ranks and coin pages to support the server!
+          </p>
+        </div>
+      )
+    }
+  ];
 
   const filteredArticles = articles.filter(
     (art) => activeCategory === "all" || art.category === activeCategory
@@ -86,8 +163,6 @@ export default function NewsPage() {
           {filteredArticles.length === 0 ? (
             /* Professional Blank/Placeholder layout when news list is empty */
             <div className="space-y-10">
-              
-              {/* Central empty state warning */}
               <div className="glass-panel p-8 md:p-12 rounded-3xl border border-border-custom max-w-xl mx-auto text-center space-y-6">
                 <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center justify-center text-rose-500 mx-auto">
                   <ShieldAlert className="w-8 h-8 animate-pulse" />
@@ -110,42 +185,6 @@ export default function NewsPage() {
                   Follow Live Discord Feeds
                 </a>
               </div>
-
-              {/* Styled dashed templates to show layout professional structures */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-35 max-w-5xl mx-auto">
-                {[1, 2, 3].map((item) => (
-                  <div 
-                    key={item}
-                    className="glass-panel p-6 rounded-3xl border border-dashed border-border-custom/80 flex flex-col justify-between h-[360px]"
-                  >
-                    <div className="space-y-4">
-                      {/* Image placeholder */}
-                      <div className="w-full h-40 bg-secondary-bg/25 border border-dashed border-border-custom/50 rounded-2xl flex items-center justify-center text-secondary-text/20">
-                        <Tag className="w-10 h-10" />
-                      </div>
-                      
-                      {/* Text placeholders */}
-                      <div className="space-y-3.5">
-                        <div className="flex gap-2">
-                          <span className="w-12 h-4 bg-secondary-bg/40 rounded-full" />
-                          <span className="w-16 h-4 bg-secondary-bg/40 rounded-full" />
-                        </div>
-                        <div className="h-4 bg-secondary-bg/40 rounded-xl w-3/4" />
-                        <div className="space-y-2">
-                          <div className="h-2.5 bg-secondary-bg/30 rounded-xl w-full" />
-                          <div className="h-2.5 bg-secondary-bg/30 rounded-xl w-5/6" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-[10px] text-secondary-text font-bold uppercase tracking-wider">
-                      <span>Preview Draft Slot</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
             </div>
           ) : (
             /* Layout structure grid if articles exist */
@@ -153,7 +192,8 @@ export default function NewsPage() {
               {filteredArticles.map((art) => (
                 <div
                   key={art.id}
-                  className="glass-panel overflow-hidden rounded-3xl border border-border-custom hover:border-primary-accent/30 hover:shadow-[0_10px_25px_-5px_rgba(244,63,94,0.1)] transition-all duration-300 flex flex-col group"
+                  onClick={() => setSelectedArticle(art)}
+                  className="glass-panel overflow-hidden rounded-3xl border border-border-custom hover:border-primary-accent/30 hover:shadow-[0_10px_25px_-5px_rgba(244,63,94,0.1)] transition-all duration-300 flex flex-col group cursor-pointer"
                 >
                   {/* Article Banner image */}
                   <div className="relative h-48 bg-primary-bg overflow-hidden">
@@ -206,6 +246,65 @@ export default function NewsPage() {
 
         </div>
       </main>
+
+      {/* Pop-up Full Article Modal */}
+      {selectedArticle && (
+        <div className="fixed inset-0 z-55 overflow-y-auto flex items-center justify-center p-4">
+          {/* Backdrop with animation */}
+          <div 
+            className="fixed inset-0 bg-[#09090B]/85 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setSelectedArticle(null)}
+          />
+
+          {/* Modal Container */}
+          <div className="glass-panel w-full max-w-2xl rounded-3xl border border-border-custom shadow-2xl relative z-10 overflow-hidden my-8 animate-scale">
+            {/* Image Banner */}
+            <div className="relative h-60 bg-primary-bg">
+              <img
+                src={selectedArticle.image}
+                alt={selectedArticle.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#111217] via-[#111217]/50 to-transparent" />
+              
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedArticle(null)}
+                className="absolute top-4 right-4 p-2 bg-[#09090B]/60 hover:bg-[#09090B]/90 border border-border-custom text-secondary-text hover:text-white rounded-xl transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 md:p-8 space-y-5 bg-[#111217]">
+              {/* Metadata */}
+              <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-secondary-text">
+                <span className="flex items-center gap-1">
+                  <Tag className="w-3.5 h-3.5 text-primary-accent" />
+                  <span style={{ color: selectedArticle.tagColor }}>{selectedArticle.tagLabel}</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>{selectedArticle.date}</span>
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 className="font-cinzel text-xl md:text-2xl font-black text-white-text tracking-wide leading-snug">
+                {selectedArticle.title}
+              </h2>
+
+              <div className="h-px bg-border-custom/50" />
+
+              {/* Detailed Article Contents */}
+              <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4">
+                {selectedArticle.content}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
