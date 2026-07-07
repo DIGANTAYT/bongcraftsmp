@@ -6,10 +6,23 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export const CommunityGoal: React.FC = () => {
   const [currentAmount, setCurrentAmount] = useState(0);
-  const goalAmount = 10000;
+  const [goalAmount, setGoalAmount] = useState(10000);
 
   useEffect(() => {
     const fetchProgress = async () => {
+      // Fetch dynamic community goal target
+      try {
+        const configRes = await fetch("/api/config/public");
+        if (configRes.ok) {
+          const configData = await configRes.json();
+          if (configData.communityGoalTarget) {
+            setGoalAmount(Number(configData.communityGoalTarget) || 10000);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load community goal target config:", e);
+      }
+
       if (isSupabaseConfigured) {
         try {
           const { data, error } = await supabase

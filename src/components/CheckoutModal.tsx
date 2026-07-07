@@ -21,6 +21,22 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const [copied, setCopied] = useState(false);
   const [copiedDetails, setCopiedDetails] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        if (res.ok) {
+          const config = await res.json();
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const activeIgn = profile?.minecraft_username || minecraftUsername || "GuestPlayer";
 
@@ -176,7 +192,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     }, 1500);
 
     // Open Discord ticket in a new tab
-    window.open("https://discord.gg/WzDAzMYwGX", "_blank");
+    window.open(discordUrl, "_blank");
   };
 
   const handleCloseSuccess = () => {

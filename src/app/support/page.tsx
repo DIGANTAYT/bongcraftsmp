@@ -10,6 +10,22 @@ import { MessageSquare, ShieldQuestion, ExternalLink, CalendarDays } from "lucid
 
 export default function SupportPage() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
+  React.useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        if (res.ok) {
+          const config = await res.json();
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const faqs = [
     {
@@ -110,7 +126,7 @@ export default function SupportPage() {
                 </p>
 
                 <a
-                  href="https://discord.gg/WzDAzMYwGX"
+                  href={discordUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-3 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer shadow-md"

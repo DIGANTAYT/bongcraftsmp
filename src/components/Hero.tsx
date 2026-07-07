@@ -10,10 +10,40 @@ export const Hero: React.FC = () => {
   const [playerCount, setPlayerCount] = useState<number | null>(null);
   const [isServerOnline, setIsServerOnline] = useState(true);
 
+  // Dynamic Branding and Connection Details
+  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
+  const [javaPort, setJavaPort] = useState("25565");
+  const [bedrockIP, setBedrockIP] = useState("play.bongcraftsmp.in");
+  const [bedrockPort, setBedrockPort] = useState("19132");
+  const [title, setTitle] = useState("BONGCRAFT");
+  const [subtitle, setSubtitle] = useState("Bengal's Ultimate Survival Experience");
+  const [tagline, setTagline] = useState("Bangalir Nijer Survival Server");
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
   useEffect(() => {
-    const fetchServerStatus = async () => {
+    const loadConfigAndStatus = async () => {
+      let targetIp = "play.bongcraftsmp.in";
       try {
-        const res = await fetch("https://api.mcsrvstat.us/3/play.bongcraftsmp.in");
+        const configRes = await fetch("/api/config/public");
+        if (configRes.ok) {
+          const config = await configRes.json();
+          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
+          setJavaPort(config.serverPortJava ?? "25565");
+          setBedrockIP(config.serverIpBedrock ?? "play.bongcraftsmp.in");
+          setBedrockPort(config.serverPortBedrock ?? "19132");
+          setTitle(config.heroTitle ?? "BONGCRAFT");
+          setSubtitle(config.heroSubtitle ?? "Bengal's Ultimate Survival Experience");
+          setTagline(config.heroTagline ?? "Bangalir Nijer Survival Server");
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+          targetIp = config.serverIpJava ?? "play.bongcraftsmp.in";
+        }
+      } catch (e) {
+        console.error("Failed to load public config in Hero:", e);
+      }
+
+      // Fetch server online status based on active IP
+      try {
+        const res = await fetch(`https://api.mcsrvstat.us/3/${targetIp}`);
         if (res.ok) {
           const data = await res.json();
           if (data.online) {
@@ -29,8 +59,8 @@ export const Hero: React.FC = () => {
       }
     };
 
-    fetchServerStatus();
-    const interval = setInterval(fetchServerStatus, 30000); // query every 30s
+    loadConfigAndStatus();
+    const interval = setInterval(loadConfigAndStatus, 45000); // query every 45s
     return () => clearInterval(interval);
   }, []);
 
@@ -70,7 +100,7 @@ export const Hero: React.FC = () => {
             <span className="w-1.5 h-1.5 bg-[#138808] rounded-full" />
           </span>
           <span className="font-inter text-xs text-white-text font-bold uppercase tracking-widest">
-            Bangalir Nijer Survival Server
+            {tagline}
           </span>
         </motion.div>
 
@@ -82,13 +112,13 @@ export const Hero: React.FC = () => {
           className="space-y-4"
         >
           <h1 className="font-cinzel text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-wider leading-[1.05] text-white-text">
-            BONGCRAFT <br />
+            {title} <br />
             <span className="bg-gradient-to-r from-[#FF9933] via-[#FFFFFF] to-[#138808] bg-clip-text text-transparent drop-shadow-sm select-none">
               SMP
             </span>
           </h1>
           <p className="font-cinzel text-lg sm:text-xl md:text-2xl text-secondary-text font-semibold tracking-wider max-w-xl mx-auto">
-            Bengal's Ultimate Survival Experience
+            {subtitle}
           </p>
         </motion.div>
 
@@ -132,15 +162,15 @@ export const Hero: React.FC = () => {
               </span>
               <div className="space-y-1">
                 <div className="font-mono text-sm md:text-base text-white-text font-bold select-all tracking-wider">
-                  play.bongcraftssmp.in
+                  {javaIP}
                 </div>
                 <div className="font-inter text-[10px] text-secondary-text/60 font-semibold uppercase tracking-wider">
-                  Default Port: 25565
+                  Default Port: {javaPort}
                 </div>
               </div>
             </div>
             <button
-              onClick={() => copyIpText("play.bongcraftssmp.in", "java")}
+              onClick={() => copyIpText(javaIP, "java")}
               className="mt-5 flex items-center gap-1.5 px-4.5 py-2.5 bg-primary-accent/15 hover:bg-primary-accent border border-primary-accent/30 hover:border-primary-accent text-primary-accent hover:text-white-text rounded-xl font-inter text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer w-full justify-center"
             >
               {copiedJava ? (
@@ -165,15 +195,15 @@ export const Hero: React.FC = () => {
               </span>
               <div className="space-y-1">
                 <div className="font-mono text-sm md:text-base text-white-text font-bold select-all tracking-wider">
-                  play.bongcraftssmp.in
+                  {bedrockIP}
                 </div>
                 <div className="font-inter text-[10px] text-secondary-text/80">
-                  Port: <span className="font-mono text-xs text-white-text font-bold select-all">19138</span>
+                  Port: <span className="font-mono text-xs text-white-text font-bold select-all">{bedrockPort}</span>
                 </div>
               </div>
             </div>
             <button
-              onClick={() => copyIpText("play.bongcraftssmp.in:19138", "bedrock")}
+              onClick={() => copyIpText(`${bedrockIP}:${bedrockPort}`, "bedrock")}
               className="mt-5 flex items-center gap-1.5 px-4.5 py-2.5 bg-gold-accent/15 hover:bg-gold-accent border border-gold-accent/30 hover:border-gold-accent text-gold-accent hover:text-[#09090B] rounded-xl font-inter text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer w-full justify-center"
             >
               {copiedBedrock ? (
@@ -209,7 +239,7 @@ export const Hero: React.FC = () => {
 
           {/* Join Discord */}
           <a
-            href="https://discord.gg/WzDAzMYwGX"
+            href={discordUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4.5 bg-card-bg hover:bg-secondary-bg/60 border border-border-custom hover:border-gold-accent/40 text-white-text font-inter font-bold text-sm tracking-wider uppercase rounded-2xl transition-all duration-300 cursor-pointer"

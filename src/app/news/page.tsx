@@ -23,6 +23,22 @@ interface NewsArticle {
 }
 
 export default function NewsPage() {
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
+  React.useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        if (res.ok) {
+          const config = await res.json();
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadConfig();
+  }, []);
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
@@ -177,7 +193,7 @@ export default function NewsPage() {
                   </p>
                 </div>
                 <a
-                  href="https://discord.gg/WzDAzMYwGX"
+                  href={discordUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-bold uppercase text-[10px] tracking-wider rounded-xl transition-colors cursor-pointer shadow-lg shadow-indigo-600/10"

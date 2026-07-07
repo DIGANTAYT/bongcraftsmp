@@ -6,9 +6,27 @@ import { Copy, Check, MessageSquare, ShieldAlert } from "lucide-react";
 
 export const Footer: React.FC = () => {
   const [copied, setCopied] = useState(false);
+  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
+  React.useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        if (res.ok) {
+          const config = await res.json();
+          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+        }
+      } catch (e) {
+        console.error("Failed to load footer config:", e);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const copyIp = () => {
-    navigator.clipboard.writeText("play.bongcraftsmp.in");
+    navigator.clipboard.writeText(javaIP);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -28,14 +46,14 @@ export const Footer: React.FC = () => {
         { name: "Server Rules", href: "/rules" },
         { name: "Terms of Service", href: "/terms" },
         { name: "Privacy Policy", href: "/privacy" },
-        { name: "Support Ticket", href: "https://discord.gg/WzDAzMYwGX" },
+        { name: "Support Ticket", href: discordUrl },
       ],
     },
     {
       title: "Vote & Connect",
       links: [
         { name: "Vote for Server", href: "/vote" },
-        { name: "Official Discord", href: "https://discord.gg/WzDAzMYwGX" },
+        { name: "Official Discord", href: discordUrl },
         { name: "Staff Application (Coming Soon)", href: "#" },
         { name: "About Us", href: "/about" },
       ],
@@ -76,7 +94,7 @@ export const Footer: React.FC = () => {
 
           {/* IP Copy Widget */}
           <div className="inline-flex items-center gap-3 bg-[#111217] border border-border-custom p-1.5 px-3.5 rounded-xl">
-            <span className="font-mono text-[10px] text-secondary-text">play.bongcraftsmp.in</span>
+            <span className="font-mono text-[10px] text-secondary-text">{javaIP}</span>
             <button
               onClick={copyIp}
               className="p-1.5 hover:bg-card-bg text-secondary-text hover:text-gold-accent rounded-lg cursor-pointer transition-colors duration-300"
@@ -127,7 +145,7 @@ export const Footer: React.FC = () => {
         {/* Social CTAs */}
         <div className="flex items-center gap-4">
           <a
-            href="https://discord.gg/WzDAzMYwGX"
+            href={discordUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center p-2.5 bg-card-bg hover:bg-[#5865F2] border border-border-custom hover:border-[#5865F2] text-secondary-text hover:text-white transition-all duration-300 rounded-xl"

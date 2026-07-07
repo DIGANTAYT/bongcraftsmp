@@ -92,6 +92,17 @@ export default function AdminPage() {
   const [adminCouponCode, setAdminCouponCode] = useState("");
   const [adminDiscountPercentage, setAdminDiscountPercentage] = useState("0");
 
+  // General Storefront Configurations
+  const [serverIpJava, setServerIpJava] = useState("play.bongcraftsmp.in");
+  const [serverPortJava, setServerPortJava] = useState("25565");
+  const [serverIpBedrock, setServerIpBedrock] = useState("play.bongcraftsmp.in");
+  const [serverPortBedrock, setServerPortBedrock] = useState("19132");
+  const [communityGoalTarget, setCommunityGoalTarget] = useState("10000");
+  const [heroTitle, setHeroTitle] = useState("BONGCRAFT");
+  const [heroSubtitle, setHeroSubtitle] = useState("Bengal's Ultimate Survival Experience");
+  const [heroTagline, setHeroTagline] = useState("Bangalir Nijer Survival Server");
+  const [discordInvite, setDiscordInvite] = useState("https://discord.gg/WzDAzMYwGX");
+
   const loadGlobalConfig = async () => {
     try {
       const authHeader = "Basic " + btoa("admin:bongcraftadmin");
@@ -120,13 +131,23 @@ export default function AdminPage() {
         setSalesText(config.salesText ?? "🔥 Grand Launch Sale: 25% OFF ALL RANKS & COINS!");
         setAdminCouponCode(config.couponCode ?? "");
         setAdminDiscountPercentage(String(config.discountPercentage ?? 0));
+
+        setServerIpJava(config.serverIpJava ?? "play.bongcraftsmp.in");
+        setServerPortJava(config.serverPortJava ?? "25565");
+        setServerIpBedrock(config.serverIpBedrock ?? "play.bongcraftsmp.in");
+        setServerPortBedrock(config.serverPortBedrock ?? "19132");
+        setCommunityGoalTarget(String(config.communityGoalTarget ?? 10000));
+        setHeroTitle(config.heroTitle ?? "BONGCRAFT");
+        setHeroSubtitle(config.heroSubtitle ?? "Bengal's Ultimate Survival Experience");
+        setHeroTagline(config.heroTagline ?? "Bangalir Nijer Survival Server");
+        setDiscordInvite(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
       }
     } catch (e) {
       console.error("Failed to load global config:", e);
     }
   };
 
-  const handleSaveSalesSettings = async () => {
+  const handleSaveStoreSettings = async () => {
     try {
       const authHeader = "Basic " + btoa("admin:bongcraftadmin");
       const res = await fetch("/api/config/admin", {
@@ -139,14 +160,23 @@ export default function AdminPage() {
         salesActive,
         salesText,
         couponCode: adminCouponCode.toUpperCase().trim(),
-        discountPercentage: parseInt(adminDiscountPercentage) || 0
+        discountPercentage: parseInt(adminDiscountPercentage) || 0,
+        serverIpJava,
+        serverPortJava,
+        serverIpBedrock,
+        serverPortBedrock,
+        communityGoalTarget: parseInt(communityGoalTarget) || 10000,
+        heroTitle,
+        heroSubtitle,
+        heroTagline,
+        discordInvite
       };
 
       await saveFullConfig(updatedConfig);
-      alert("Sales & Coupon configuration saved successfully to Supabase!");
+      alert("All Storefront Configurations saved successfully to Supabase!");
     } catch (e) {
       console.error(e);
-      alert("Failed to save sales configuration");
+      alert("Failed to save storefront configuration");
     }
   };
 
@@ -1500,7 +1530,7 @@ export default function AdminPage() {
 
                               <div className="flex justify-end pt-1">
                                 <button
-                                  onClick={handleSaveSalesSettings}
+                                  onClick={handleSaveStoreSettings}
                                   className="px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
                                 >
                                   Save Sales Configuration
@@ -1508,6 +1538,132 @@ export default function AdminPage() {
                               </div>
                             </div>
                           )}
+                        </div>
+
+                        {/* Connection Server & Funding Goal Settings */}
+                        <div className="bg-[#111217] border border-border-custom p-5 rounded-2xl space-y-4">
+                          <h3 className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider flex items-center gap-2 border-b border-border-custom/30 pb-2">
+                            <Server className="w-4 h-4 text-emerald-500" />
+                            Server IP Details & Goal Configuration
+                          </h3>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Java Edition IP</label>
+                              <input
+                                type="text"
+                                value={serverIpJava}
+                                onChange={(e) => setServerIpJava(e.target.value)}
+                                className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Java Default Port</label>
+                              <input
+                                type="text"
+                                value={serverPortJava}
+                                onChange={(e) => setServerPortJava(e.target.value)}
+                                className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Bedrock Edition IP</label>
+                              <input
+                                type="text"
+                                value={serverIpBedrock}
+                                onChange={(e) => setServerIpBedrock(e.target.value)}
+                                className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Bedrock Port</label>
+                              <input
+                                type="text"
+                                value={serverPortBedrock}
+                                onChange={(e) => setServerPortBedrock(e.target.value)}
+                                className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Community Upgrades Goal Target (₹)</label>
+                            <input
+                              type="number"
+                              value={communityGoalTarget}
+                              onChange={(e) => setCommunityGoalTarget(e.target.value)}
+                              className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60 font-mono"
+                            />
+                          </div>
+
+                          <div className="flex justify-end pt-1">
+                            <button
+                              onClick={handleSaveStoreSettings}
+                              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
+                            >
+                              Save Connection & Goal Settings
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Copywriting & Branding Options */}
+                        <div className="bg-[#111217] border border-border-custom p-5 rounded-2xl space-y-4">
+                          <h3 className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider flex items-center gap-2 border-b border-border-custom/30 pb-2">
+                            <FileText className="w-4 h-4 text-cyan-400" />
+                            Storefront Branding & Media Override
+                          </h3>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Hero Heading Title</label>
+                            <input
+                              type="text"
+                              value={heroTitle}
+                              onChange={(e) => setHeroTitle(e.target.value)}
+                              className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Hero Subtitle</label>
+                            <input
+                              type="text"
+                              value={heroSubtitle}
+                              onChange={(e) => setHeroSubtitle(e.target.value)}
+                              className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Tagline Badge Text</label>
+                            <input
+                              type="text"
+                              value={heroTagline}
+                              onChange={(e) => setHeroTagline(e.target.value)}
+                              className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Discord Invite Link URL</label>
+                            <input
+                              type="text"
+                              value={discordInvite}
+                              onChange={(e) => setDiscordInvite(e.target.value)}
+                              className="w-full bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs focus:border-primary-accent/60"
+                            />
+                          </div>
+
+                          <div className="flex justify-end pt-1">
+                            <button
+                              onClick={handleSaveStoreSettings}
+                              className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-[#09090B] font-extrabold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
+                            >
+                              Save Branding Settings
+                            </button>
+                          </div>
                         </div>
 
                         {/* Reset Local Storage database */}

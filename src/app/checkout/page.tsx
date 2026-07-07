@@ -28,6 +28,22 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<"summary" | "processing" | "success">("summary");
   const [orderId, setOrderId] = useState("");
   const [utrNumber, setUtrNumber] = useState("");
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        if (res.ok) {
+          const config = await res.json();
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadConfig();
+  }, []);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
   const [receiptItems, setReceiptItems] = useState<any[]>([]);
@@ -279,7 +295,7 @@ export default function CheckoutPage() {
         origin: { y: 0.5 }
       });
       clearCart();
-      window.open("https://discord.gg/WzDAzMYwGX", "_blank");
+      window.open(discordUrl, "_blank");
     }, 1500);
   };
 
@@ -796,7 +812,7 @@ export default function CheckoutPage() {
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <a
-                  href="https://discord.gg/WzDAzMYwGX"
+                  href={discordUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 py-4 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10"

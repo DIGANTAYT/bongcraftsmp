@@ -12,9 +12,27 @@ import { Crown, Check, Copy, Sparkles, Server, Terminal, Shield, Star, Globe, Me
 export default function AboutPage() {
   const [copied, setCopied] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
+  React.useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/config/public");
+        if (res.ok) {
+          const config = await res.json();
+          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const copyIp = () => {
-    navigator.clipboard.writeText("play.bongcraftsmp.in");
+    navigator.clipboard.writeText(javaIP);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -105,7 +123,7 @@ export default function AboutPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 pt-4">
                 <div className="flex items-center gap-3 bg-[#111217] border border-border-custom px-4 py-2.5 rounded-xl w-full sm:w-auto justify-between">
                   <span className="font-mono text-sm text-white-text tracking-wider select-all">
-                    play.bongcraftsmp.in
+                    {javaIP}
                   </span>
                   <button
                     onClick={copyIp}
@@ -117,7 +135,7 @@ export default function AboutPage() {
                 </div>
 
                 <a
-                  href="https://discord.gg/WzDAzMYwGX"
+                  href={discordUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white-text font-inter font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer shadow-md"

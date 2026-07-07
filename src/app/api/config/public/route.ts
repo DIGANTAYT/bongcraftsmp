@@ -39,7 +39,16 @@ const defaultPublicConfig = {
   salesActive: false,
   salesText: "🔥 Grand Launch Sale: 25% OFF ALL RANKS & COINS!",
   couponCode: "",
-  discountPercentage: 0
+  discountPercentage: 0,
+  serverIpJava: "play.bongcraftsmp.in",
+  serverPortJava: "25565",
+  serverIpBedrock: "play.bongcraftsmp.in",
+  serverPortBedrock: "19132",
+  communityGoalTarget: 10000,
+  heroTitle: "BONGCRAFT",
+  heroSubtitle: "Bengal's Ultimate Survival Experience",
+  heroTagline: "Bangalir Nijer Survival Server",
+  discordInvite: "https://discord.gg/WzDAzMYwGX"
 };
 
 export async function GET() {
@@ -68,7 +77,16 @@ export async function GET() {
       salesActive: value.salesActive ?? false,
       salesText: value.salesText ?? defaultPublicConfig.salesText,
       couponCode: value.couponCode ?? defaultPublicConfig.couponCode,
-      discountPercentage: value.discountPercentage ?? defaultPublicConfig.discountPercentage
+      discountPercentage: value.discountPercentage ?? defaultPublicConfig.discountPercentage,
+      serverIpJava: value.serverIpJava ?? defaultPublicConfig.serverIpJava,
+      serverPortJava: value.serverPortJava ?? defaultPublicConfig.serverPortJava,
+      serverIpBedrock: value.serverIpBedrock ?? defaultPublicConfig.serverIpBedrock,
+      serverPortBedrock: value.serverPortBedrock ?? defaultPublicConfig.serverPortBedrock,
+      communityGoalTarget: value.communityGoalTarget ?? defaultPublicConfig.communityGoalTarget,
+      heroTitle: value.heroTitle ?? defaultPublicConfig.heroTitle,
+      heroSubtitle: value.heroSubtitle ?? defaultPublicConfig.heroSubtitle,
+      heroTagline: value.heroTagline ?? defaultPublicConfig.heroTagline,
+      discordInvite: value.discordInvite ?? defaultPublicConfig.discordInvite
     };
 
     return NextResponse.json(publicConfig);

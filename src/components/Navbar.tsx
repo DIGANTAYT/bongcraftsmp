@@ -47,10 +47,26 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
+  const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
+
   useEffect(() => {
     const fetchServerStatus = async () => {
+      let targetIp = "play.bongcraftsmp.in";
       try {
-        const res = await fetch("https://api.mcsrvstat.us/3/play.bongcraftsmp.in");
+        const configRes = await fetch("/api/config/public");
+        if (configRes.ok) {
+          const config = await configRes.json();
+          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
+          setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
+          targetIp = config.serverIpJava ?? "play.bongcraftsmp.in";
+        }
+      } catch (e) {
+        console.error("Failed to load configs inside Navbar status fetcher", e);
+      }
+
+      try {
+        const res = await fetch(`https://api.mcsrvstat.us/3/${targetIp}`);
         if (res.ok) {
           const data = await res.json();
           if (data.online) {
@@ -72,7 +88,7 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const copyIp = () => {
-    navigator.clipboard.writeText("play.bongcraftsmp.in");
+    navigator.clipboard.writeText(javaIP);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -168,7 +184,7 @@ export const Navbar: React.FC = () => {
             onClick={copyIp}
             className="flex items-center gap-1.5 font-inter text-[10px] text-secondary-text hover:text-gold-accent transition-colors duration-300 font-semibold uppercase tracking-wider cursor-pointer"
           >
-            play.bongcraftsmp.in
+            {javaIP}
             {copied ? (
               <Check className="w-3.5 h-3.5 text-gold-accent" />
             ) : (
@@ -181,7 +197,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-3">
           {/* Discord CTA */}
           <a
-            href="https://discord.gg/WzDAzMYwGX"
+            href={discordUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:flex items-center justify-center p-2.5 bg-[#5865F2]/10 hover:bg-[#5865F2]/20 border border-[#5865F2]/30 hover:border-[#5865F2]/50 text-[#5865F2] hover:text-white transition-all duration-300 rounded-xl"
@@ -381,14 +397,14 @@ export const Navbar: React.FC = () => {
               onClick={copyIp}
               className="flex items-center gap-1.5 font-inter text-[10px] text-gold-accent font-semibold uppercase tracking-wider cursor-pointer max-w-[170px] truncate"
             >
-              play.bongcraftsmp.in
+              {javaIP}
               {copied ? <Check className="w-3.5 h-3.5 flex-shrink-0" /> : <Copy className="w-3.5 h-3.5 flex-shrink-0" />}
             </button>
           </div>
 
           {/* Mobile Discord CTA */}
           <a
-            href="https://discord.gg/WzDAzMYwGX"
+            href={discordUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setIsMobileMenuOpen(false)}
