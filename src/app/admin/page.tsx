@@ -839,7 +839,7 @@ export default function AdminPage() {
                 <div className="lg:col-span-9 space-y-6">
                   
                   {/* TAB 1: DASHBOARD OVERVIEW */}
-                  {activeTab === "dashboard" && (
+                  {activeTab === "dashboard" && isAuthenticated && (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                       
                       {/* Left: General info */}
@@ -899,7 +899,7 @@ export default function AdminPage() {
                   )}
 
                   {/* TAB 2: VERIFY CLAIMS */}
-                  {activeTab === "orders" && (
+                  {activeTab === "orders" && isAuthenticated && (
                     <div className="space-y-6">
                       <div className="glass-panel p-6 rounded-3xl border border-border-custom space-y-4">
                         <h2 className="font-cinzel text-lg font-bold text-white-text uppercase tracking-wider border-b border-border-custom pb-4 flex justify-between items-center">
@@ -1033,7 +1033,7 @@ export default function AdminPage() {
                   )}
 
                   {/* TAB 3: CATALOG PRICING */}
-                  {activeTab === "pricing" && (
+                  {activeTab === "pricing" && isAuthenticated && (
                     <div className="glass-panel p-6 md:p-8 rounded-3xl border border-border-custom space-y-6">
                       <h2 className="font-cinzel text-lg font-bold text-white-text uppercase tracking-wider border-b border-border-custom pb-4 flex items-center gap-2">
                         <DollarSign className="w-5 h-5 text-gold-accent text-glow-gold" />
@@ -1200,7 +1200,7 @@ export default function AdminPage() {
                   )}
 
                   {/* TAB 4: MOCK SERVER CONSOLE & SANDBOX */}
-                  {activeTab === "sandbox" && (
+                  {activeTab === "sandbox" && isAuthenticated && (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                       
                       {/* Left: Console CLI Terminal */}
@@ -1354,7 +1354,7 @@ export default function AdminPage() {
                   )}
 
                   {/* TAB 5: SYSTEM SETTINGS */}
-                  {activeTab === "system" && (
+                  {activeTab === "system" && isAuthenticated && (
                     <div className="glass-panel p-6 md:p-8 rounded-3xl border border-border-custom space-y-6">
                       <h2 className="font-cinzel text-lg font-bold text-white-text uppercase tracking-wider border-b border-border-custom pb-4">
                         Web Setting Overrides
