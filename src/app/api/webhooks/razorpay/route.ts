@@ -5,14 +5,18 @@ import { executeRcon } from "@/lib/rcon";
 import { getDeliveryCommands } from "@/lib/commands";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 const isSupabaseConfigured = 
   supabaseUrl.startsWith("https://") && 
-  supabaseAnonKey.length > 10;
+  supabaseKey.length > 10;
 
 const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false
+      }
+    })
   : null;
 
 export async function POST(req: Request) {
