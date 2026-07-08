@@ -16,8 +16,10 @@ import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import Script from "next/script";
 import { audioSynth } from "@/lib/audio";
+import { useToast } from "@/context/ToastContext";
 
 export default function CheckoutPage() {
+  const toast = useToast();
   const { 
     cart, cartTotal, minecraftUsername, clearCart,
     couponCode, discountPercentage, discountAmount, rawTotal, applyCoupon, removeCoupon
@@ -96,7 +98,7 @@ export default function CheckoutPage() {
 
       if (res.status === 501) {
         // If not configured, automatically switch to manual UPI and notify the user
-        alert("🔒 Razorpay is currently not configured on this server. Please use the Manual UPI payment option instead!");
+        toast.warning("🔒 Razorpay is currently not configured on this server. Please use the Manual UPI payment option instead!");
         setPaymentMethod("manual");
         setIsRazorpayLoading(false);
         return;
@@ -177,7 +179,7 @@ export default function CheckoutPage() {
       rzp.open();
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Something went wrong initiating automatic checkout.");
+      toast.error(err.message || "Something went wrong initiating automatic checkout.");
       setIsRazorpayLoading(false);
     }
   };
@@ -185,7 +187,7 @@ export default function CheckoutPage() {
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!utrNumber.trim()) {
-      alert("Please enter a valid Transaction UTR / Ref Number.");
+      toast.error("Please enter a valid Transaction UTR / Ref Number.");
       return;
     }
 
@@ -617,10 +619,10 @@ export default function CheckoutPage() {
                             if (e.key === "Enter") {
                               const val = (e.target as HTMLInputElement).value;
                               if (applyCoupon(val)) {
-                                audioSynth.playLevelUp(); // Synthesize XP sound!
+                                toast.success("Coupon code applied successfully!");
                                 (e.target as HTMLInputElement).value = "";
                               } else {
-                                alert("Invalid coupon code! Try code: AKASH");
+                                toast.error("Invalid coupon code! Please check the code and try again.");
                               }
                             }
                           }}
@@ -629,10 +631,10 @@ export default function CheckoutPage() {
                           onClick={() => {
                             const input = document.getElementById("couponInput") as HTMLInputElement;
                             if (input && applyCoupon(input.value)) {
-                              audioSynth.playLevelUp(); // Synthesize XP sound!
+                              toast.success("Coupon code applied successfully!");
                               input.value = "";
                             } else {
-                              alert("Invalid coupon code! Try code: AKASH");
+                              toast.error("Invalid coupon code! Please check the code and try again.");
                             }
                           }}
                           className="px-4 py-2 bg-secondary-bg hover:bg-secondary-bg/80 border border-border-custom text-white rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer"

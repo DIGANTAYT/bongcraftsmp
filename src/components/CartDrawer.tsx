@@ -8,12 +8,14 @@ import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from "lu
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { audioSynth } from "@/lib/audio";
+import { useToast } from "@/context/ToastContext";
 
 interface CartDrawerProps {
   onOpenCheckout: () => void;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
+  const toast = useToast();
   const {
     cart,
     isCartOpen,
@@ -280,13 +282,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                       className="flex-1 bg-[#09090B] border border-border-custom px-3 py-2 rounded-xl text-white-text outline-none text-xs font-mono uppercase tracking-wider"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          const val = (e.target as HTMLInputElement).value;
-                          if (applyCoupon(val)) {
-                            audioSynth.playLevelUp(); // Synthesize XP level-up chime!
-                            (e.target as HTMLInputElement).value = "";
-                          } else {
-                            alert("Invalid code! Try: AKASH");
-                          }
+                           const val = (e.target as HTMLInputElement).value;
+                           if (applyCoupon(val)) {
+                             toast.success("Coupon code applied successfully!");
+                             (e.target as HTMLInputElement).value = "";
+                           } else {
+                             toast.error("Invalid coupon code! Please check the code and try again.");
+                           }
                         }
                       }}
                     />
@@ -294,10 +296,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                       onClick={() => {
                         const input = document.getElementById("drawerCouponInput") as HTMLInputElement;
                         if (input && applyCoupon(input.value)) {
-                          audioSynth.playLevelUp(); // Synthesize XP level-up chime!
-                          input.value = "";
+                           toast.success("Coupon code applied successfully!");
+                           input.value = "";
                         } else {
-                          alert("Invalid code! Try: AKASH");
+                           toast.error("Invalid coupon code! Please check the code and try again.");
                         }
                       }}
                       className="px-3.5 py-2 bg-[#18181b] hover:bg-[#27272a] border border-border-custom text-white-text rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer"

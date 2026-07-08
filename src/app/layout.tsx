@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Space_Grotesk } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
 import { CursorFollower } from "@/components/CursorFollower";
 import "./globals.css";
 
@@ -43,7 +44,9 @@ export default function RootLayout({
         <CursorFollower />
         <AuthProvider>
           <CartProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </CartProvider>
         </AuthProvider>
       </body>

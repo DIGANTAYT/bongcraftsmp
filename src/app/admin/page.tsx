@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getDeliveryCommands as sharedGetDeliveryCommands } from "@/lib/commands";
+import { useToast } from "@/context/ToastContext";
 
 interface Order {
   id: string;
@@ -29,6 +30,7 @@ interface AuditLog {
 }
 
 export default function AdminPage() {
+  const toast = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -150,13 +152,13 @@ export default function AdminPage() {
   const handleSaveStoreSettings = async () => {
     const inviteUrl = discordInvite.trim();
     if (!inviteUrl.startsWith("https://discord.gg/") && !inviteUrl.startsWith("https://discord.com/invite/")) {
-      alert("Error: Invalid Discord Invite URL! It must be a secure link starting with https://discord.gg/ or https://discord.com/invite/");
+      toast.error("Invalid Discord Invite URL! It must be a secure link starting with https://discord.gg/ or https://discord.com/invite/");
       return;
     }
 
     const webhookUrl = webhookInput.trim();
     if (webhookUrl !== "" && !webhookUrl.startsWith("https://discord.com/api/webhooks/") && !webhookUrl.startsWith("https://discordapp.com/api/webhooks/")) {
-      alert("Error: Invalid Discord Webhook URL! It must be a secure link starting with https://discord.com/api/webhooks/");
+      toast.error("Invalid Discord Webhook URL! It must be a secure link starting with https://discord.com/api/webhooks/");
       return;
     }
 
@@ -185,10 +187,10 @@ export default function AdminPage() {
       };
 
       await saveFullConfig(updatedConfig);
-      alert("All Storefront Configurations saved successfully to Supabase!");
+      toast.success("All Storefront Configurations saved successfully!");
     } catch (e) {
       console.error(e);
-      alert("Failed to save storefront configuration");
+      toast.error("Failed to save storefront configuration.");
     }
   };
 
@@ -208,7 +210,7 @@ export default function AdminPage() {
       addAuditLog("Global configuration synced to Supabase database", "success");
     } catch (e: any) {
       console.error("Failed to save config:", e);
-      alert("Error saving configuration to database: " + e.message);
+      toast.error("Error saving configuration to database: " + e.message);
     }
   };
 
@@ -350,7 +352,7 @@ export default function AdminPage() {
         if (error) throw error;
 
         if (!data || data.length === 0) {
-          alert(`Warning: The order was NOT updated. This is likely due to Supabase Row Level Security (RLS) policies blocking anonymous updates on the 'orders' table. Please check your Supabase dashboard and add a policy allowing updates.`);
+          toast.warning(`Warning: The order was NOT updated. This is likely due to Supabase Row Level Security (RLS) policies blocking anonymous updates on the 'orders' table. Please check your Supabase dashboard and add a policy allowing updates.`);
           addAuditLog(`RLS policy blocked verification for Order ${orderId}`, "warning");
           return;
         }
@@ -358,20 +360,20 @@ export default function AdminPage() {
         addAuditLog(`Order ${orderId} approved in database`, "success");
         if (rconEnabled) {
           if (rconSuccess) {
-            alert(`Order Approved & Packages Delivered Live!\n\nRCON Output:\n${rconLogOutput}`);
+            toast.success(`Order Approved & Packages Delivered Live!\n\nRCON Output:\n${rconLogOutput}`);
             addAuditLog(`RCON Delivery completed for Order ${orderId}`, "success");
           } else {
-            alert(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}\n\nPlease verify commands manually.`);
+            toast.warning(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}\n\nPlease verify commands manually.`);
             addAuditLog(`RCON Delivery failed for some commands on Order ${orderId}`, "warning");
           }
         } else {
-          alert(`Order ${orderId} has been successfully verified and marked as Completed!`);
+          toast.success(`Order ${orderId} has been successfully verified and marked as Completed!`);
         }
         loadOrders();
         setSelectedOrder(prev => prev ? { ...prev, status: "Completed" } : null);
       } catch (e: any) {
         console.error("Failed to approve order in Supabase:", e);
-        alert(`Error verifying claim: ${e.message || JSON.stringify(e)}`);
+        toast.error(`Error verifying claim: ${e.message || JSON.stringify(e)}`);
       }
     } else {
       const updated = orders.map(o => {
@@ -381,12 +383,12 @@ export default function AdminPage() {
           addAuditLog(`Order ${orderId} verified and approved`, "success");
           if (rconEnabled) {
             if (rconSuccess) {
-              alert(`Order Approved & Packages Delivered Live!\n\nRCON Output:\n${rconLogOutput}`);
+              toast.success(`Order Approved & Packages Delivered Live!\n\nRCON Output:\n${rconLogOutput}`);
             } else {
-              alert(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}`);
+              toast.warning(`Order Approved, but live RCON delivery encountered issues:\n\n${rconLogOutput}`);
             }
           } else {
-            alert(`Order ${orderId} has been successfully verified and marked as Completed!`);
+            toast.success(`Order ${orderId} has been successfully verified and marked as Completed!`);
           }
           return approvedOrder;
         }
@@ -397,39 +399,44 @@ export default function AdminPage() {
     }
   };
 
-  const handleDelete = async (orderId: string) => {
-    if (confirm("Are you sure you want to delete this order?")) {
-      if (isSupabaseConfigured) {
-        try {
-          const { data, error } = await supabase
-            .from("orders")
-            .delete()
-            .eq("order_id", orderId)
-            .select();
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-          if (error) throw error;
+  const handleDelete = (orderId: string) => {
+    setOrderToDelete(orderId);
+  };
 
-          if (!data || data.length === 0) {
-            alert(`Warning: The order was NOT deleted. This is likely due to Supabase Row Level Security (RLS) policies blocking anonymous deletes on the 'orders' table. Please check your Supabase dashboard.`);
-            return;
-          }
+  const confirmDeleteOrder = async (orderId: string) => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from("orders")
+          .delete()
+          .eq("order_id", orderId)
+          .select();
 
-          alert(`Order ${orderId} has been deleted successfully.`);
-          addAuditLog(`Order ${orderId} deleted from database`, "warning");
-          loadOrders();
-          if (selectedOrder?.id === orderId) setSelectedOrder(null);
-        } catch (e: any) {
-          console.error("Failed to delete order in Supabase:", e);
-          alert(`Failed to delete order from database: ${e.message || JSON.stringify(e)}`);
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          toast.warning(`Warning: The order was NOT deleted. This is likely due to Supabase Row Level Security (RLS) policies blocking anonymous deletes on the 'orders' table. Please check your Supabase dashboard.`);
+          return;
         }
-      } else {
-        const filtered = orders.filter(o => o.id !== orderId);
-        setOrders(filtered);
-        localStorage.setItem("bongcraft_orders", JSON.stringify(filtered));
-        alert(`Order ${orderId} has been deleted successfully.`);
-        addAuditLog(`Order log ${orderId} deleted from database`, "warning");
+
+        toast.success(`Order ${orderId} has been deleted successfully.`);
+        addAuditLog(`Order ${orderId} deleted from database`, "warning");
+        loadOrders();
         if (selectedOrder?.id === orderId) setSelectedOrder(null);
+      } catch (e: any) {
+        console.error("Failed to delete order in Supabase:", e);
+        toast.error(`Failed to delete order from database: ${e.message || JSON.stringify(e)}`);
       }
+    } else {
+      const filtered = orders.filter(o => o.id !== orderId);
+      setOrders(filtered);
+      localStorage.setItem("bongcraft_orders", JSON.stringify(filtered));
+      toast.success(`Order ${orderId} has been deleted successfully.`);
+      addAuditLog(`Order log ${orderId} deleted from database`, "warning");
+      if (selectedOrder?.id === orderId) setSelectedOrder(null);
     }
   };
 
@@ -469,7 +476,7 @@ export default function AdminPage() {
   const handleSaveDiscordWebhook = async () => {
     const cleanUrl = webhookInput.trim();
     if (cleanUrl !== "" && !cleanUrl.startsWith("https://discord.com/api/webhooks/") && !cleanUrl.startsWith("https://discordapp.com/api/webhooks/")) {
-      alert("Error: Invalid Discord Webhook URL! It must be a secure link starting with https://discord.com/api/webhooks/");
+      toast.error("Invalid Discord Webhook URL! It must be a secure link starting with https://discord.com/api/webhooks/");
       return;
     }
 
@@ -480,7 +487,7 @@ export default function AdminPage() {
       rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword }
     };
     await saveFullConfig(fullConfig);
-    alert("Discord Webhook saved successfully!");
+    toast.success("Discord Webhook saved successfully!");
     addAuditLog("Discord Webhook endpoint updated", "info");
   };
 
@@ -492,7 +499,7 @@ export default function AdminPage() {
       rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword }
     };
     await saveFullConfig(fullConfig);
-    alert("RCON configuration saved successfully!");
+    toast.success("RCON configuration saved successfully!");
     addAuditLog("RCON server settings updated", "info");
   };
 
@@ -1696,12 +1703,7 @@ export default function AdminPage() {
                           </div>
                           <button
                             onClick={() => {
-                              if (confirm("Reset order cache database? This clears all logs.")) {
-                                localStorage.removeItem("bongcraft_orders");
-                                setOrders([]);
-                                setSelectedOrder(null);
-                                addAuditLog("Clear command: reset order cache database completed", "warning");
-                              }
+                              setShowResetConfirm(true);
                             }}
                             className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
                           >
@@ -1722,6 +1724,77 @@ export default function AdminPage() {
       </main>
 
       <Footer />
+
+      {/* CONFIRM DELETE MODAL */}
+      {orderToDelete && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#09090B]/80 backdrop-blur-sm" onClick={() => setOrderToDelete(null)} />
+          <div className="relative glass-panel p-6 rounded-3xl border border-border-custom max-w-sm w-full space-y-4 shadow-2xl animate-scale z-10">
+            <h3 className="font-cinzel text-base font-bold text-rose-500 flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-rose-500" />
+              Confirm Deletion
+            </h3>
+            <p className="font-inter text-xs text-secondary-text leading-relaxed">
+              Are you absolutely sure you want to delete order <strong className="text-white-text">{orderToDelete}</strong>? This action is irreversible.
+            </p>
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                onClick={() => setOrderToDelete(null)}
+                className="px-4 py-2 border border-border-custom hover:border-white/10 text-secondary-text hover:text-white-text rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  const id = orderToDelete;
+                  setOrderToDelete(null);
+                  await confirmDeleteOrder(id);
+                }}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white-text rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM RESET CACHE MODAL */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#09090B]/80 backdrop-blur-sm" onClick={() => setShowResetConfirm(false)} />
+          <div className="relative glass-panel p-6 rounded-3xl border border-border-custom max-w-sm w-full space-y-4 shadow-2xl animate-scale z-10">
+            <h3 className="font-cinzel text-base font-bold text-rose-500 flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-rose-500" />
+              Reset Cache Database
+            </h3>
+            <p className="font-inter text-xs text-secondary-text leading-relaxed">
+              Are you sure you want to reset the order cache database? This clears all logs from your local storage references.
+            </p>
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="px-4 py-2 border border-border-custom hover:border-white/10 text-secondary-text hover:text-white-text rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowResetConfirm(false);
+                  localStorage.removeItem("bongcraft_orders");
+                  setOrders([]);
+                  setSelectedOrder(null);
+                  addAuditLog("Clear command: reset order cache database completed", "warning");
+                  toast.success("Order cache has been successfully reset!");
+                }}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white-text rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Confirm Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
