@@ -148,6 +148,18 @@ export default function AdminPage() {
   };
 
   const handleSaveStoreSettings = async () => {
+    const inviteUrl = discordInvite.trim();
+    if (!inviteUrl.startsWith("https://discord.gg/") && !inviteUrl.startsWith("https://discord.com/invite/")) {
+      alert("Error: Invalid Discord Invite URL! It must be a secure link starting with https://discord.gg/ or https://discord.com/invite/");
+      return;
+    }
+
+    const webhookUrl = webhookInput.trim();
+    if (webhookUrl !== "" && !webhookUrl.startsWith("https://discord.com/api/webhooks/") && !webhookUrl.startsWith("https://discordapp.com/api/webhooks/")) {
+      alert("Error: Invalid Discord Webhook URL! It must be a secure link starting with https://discord.com/api/webhooks/");
+      return;
+    }
+
     try {
       const authHeader = "Basic " + btoa("admin:bongcraftadmin");
       const res = await fetch("/api/config/admin", {
@@ -169,7 +181,7 @@ export default function AdminPage() {
         heroTitle,
         heroSubtitle,
         heroTagline,
-        discordInvite
+        discordInvite: inviteUrl
       };
 
       await saveFullConfig(updatedConfig);
@@ -455,9 +467,15 @@ export default function AdminPage() {
   };
 
   const handleSaveDiscordWebhook = async () => {
+    const cleanUrl = webhookInput.trim();
+    if (cleanUrl !== "" && !cleanUrl.startsWith("https://discord.com/api/webhooks/") && !cleanUrl.startsWith("https://discordapp.com/api/webhooks/")) {
+      alert("Error: Invalid Discord Webhook URL! It must be a secure link starting with https://discord.com/api/webhooks/");
+      return;
+    }
+
     const fullConfig = {
       maintenanceMode,
-      discordWebhook: webhookInput,
+      discordWebhook: cleanUrl,
       prices,
       rcon: { enabled: rconEnabled, host: rconHost, port: rconPort, password: rconPassword }
     };
