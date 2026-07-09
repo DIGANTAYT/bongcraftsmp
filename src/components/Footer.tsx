@@ -37,7 +37,6 @@ export const Footer: React.FC = () => {
       links: [
         { name: "Premium Ranks", href: "/ranks" },
         { name: "Crate Keys", href: "/crates" },
-        { name: "Server Coins", href: "/coins" },
       ],
     },
     {
