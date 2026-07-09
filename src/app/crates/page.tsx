@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { useCart } from "@/context/CartContext";
-import { Key, Check, ShoppingCart, Star, X, Info } from "lucide-react";
+import { Key, Check, ShoppingCart, Star, X, Info, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface CrateItemType {
@@ -202,6 +202,65 @@ export default function CratesPage() {
   const [activeModalTab, setActiveModalTab] = useState<"drops" | "screenshot">("drops");
 
   const [crates, setCrates] = useState<CrateItemType[]>([]);
+
+  // Mystery Crate Simulator States
+  const [spinningCrate, setSpinningCrate] = useState<CrateItemType | null>(null);
+  const [spinRibbon, setSpinRibbon] = useState<{ name: string; type: string; count?: string }[]>([]);
+  const [winnerIdx, setWinnerIdx] = useState(0);
+  const [translateX, setTranslateX] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [spinResult, setSpinResult] = useState<{ name: string; type: string; count?: string } | null>(null);
+
+  const playTickSounds = () => {
+    let delay = 60;
+    const maxDelay = 450;
+    const step = 1.07;
+    const triggerTick = () => {
+      audioSynth.playClick();
+      delay = delay * step;
+      if (delay < maxDelay) {
+        setTimeout(triggerTick, delay);
+      }
+    };
+    setTimeout(triggerTick, delay);
+  };
+
+  const handleStartTestSpin = (crate: CrateItemType) => {
+    const pool = crate.rewards;
+    if (!pool || pool.length === 0) return;
+
+    const ribbonList: typeof pool = [];
+    const itemsCount = 65;
+    for (let i = 0; i < itemsCount; i++) {
+      const randIdx = Math.floor(Math.random() * pool.length);
+      ribbonList.push(pool[randIdx]);
+    }
+    
+    const targetWinnerIdx = 50;
+    
+    setSpinRibbon(ribbonList);
+    setWinnerIdx(targetWinnerIdx);
+    setSpinningCrate(crate);
+    setIsSpinning(true);
+    setSpinResult(null);
+    setTranslateX(0);
+
+    setTimeout(() => {
+      const randomOffset = Math.floor(Math.random() * 40) - 20;
+      // Lands winner index 50 centered in viewport
+      setTranslateX(targetWinnerIdx * 88 - 200 + randomOffset);
+    }, 100);
+
+    playTickSounds();
+
+    setTimeout(() => {
+      setIsSpinning(false);
+      setSpinResult(ribbonList[targetWinnerIdx]);
+    }, 5000);
+  };
+
+  // Audio helper import check
+  const { audioSynth } = require("@/lib/audio");
 
   const [customPrices, setCustomPrices] = useState({
     common: 20,
@@ -447,13 +506,21 @@ export default function CratesPage() {
                     <div className="h-px bg-border-custom mb-5" />
 
                     {/* Preview Trigger */}
-                    <div className="mb-6">
+                    <div className="mb-6 flex flex-wrap items-center gap-4">
                       <button
                         onClick={() => setSelectedCrate(item)}
                         className="inline-flex items-center gap-1.5 font-inter text-xs text-primary-accent hover:text-gold-accent font-bold uppercase tracking-wider cursor-pointer transition-colors duration-300"
                       >
-                        <Info className="w-4 h-4" />
-                        Preview Crate Drops
+                        <Info className="w-4.5 h-4.5" />
+                        Preview
+                      </button>
+                      <span className="text-secondary-text/30">|</span>
+                      <button
+                        onClick={() => handleStartTestSpin(item)}
+                        className="inline-flex items-center gap-1.5 font-inter text-xs text-[#10B981] hover:text-[#34D399] font-bold uppercase tracking-wider cursor-pointer transition-colors duration-300"
+                      >
+                        <Sparkles className="w-4.5 h-4.5" />
+                        Test Spin
                       </button>
                     </div>
                   </div>
@@ -674,6 +741,17 @@ export default function CratesPage() {
                 </div>
                 <div className="flex gap-3 w-full sm:w-auto">
                   <button
+                    onClick={() => {
+                      const crate = selectedCrate;
+                      setSelectedCrate(null);
+                      handleStartTestSpin(crate);
+                    }}
+                    className="flex-1 sm:flex-initial px-5 py-3 border border-[#10B981]/40 hover:bg-[#10B981]/10 text-[#10B981] hover:text-[#34D399] rounded-xl font-inter text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                    Test Spin
+                  </button>
+                  <button
                     onClick={() => setSelectedCrate(null)}
                     className="flex-1 sm:flex-initial px-5 py-3 border border-border-custom text-secondary-text hover:text-white-text hover:bg-card-bg rounded-xl font-inter text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                   >
@@ -719,6 +797,136 @@ export default function CratesPage() {
       <Footer />
       <CartDrawer onOpenCheckout={() => setIsCheckoutOpen(true)} />
       <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
+
+      {/* MYSTERY CRATE SIMULATOR MODAL */}
+      <AnimatePresence>
+        {spinningCrate && (
+          <div className="fixed inset-0 z-55 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-[#09090B]/90 backdrop-blur-md" onClick={() => !isSpinning && setSpinningCrate(null)} />
+            <div className="relative w-full max-w-lg glass-panel rounded-3xl border border-border-custom shadow-2xl overflow-hidden z-10 flex flex-col p-6 md:p-8 space-y-6">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-border-custom pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-gold-accent/10 border border-gold-accent/30 flex items-center justify-center text-gold-accent">
+                    <Sparkles className="w-4.5 h-4.5 animate-spin" />
+                  </div>
+                  <div>
+                    <h3 className="font-cinzel text-sm font-black text-white-text uppercase tracking-wider">
+                      Crate Test Spin
+                    </h3>
+                    <span className="font-inter text-[9px] text-[#10B981] font-bold uppercase tracking-wider block">
+                      {spinningCrate.name} Simulator
+                    </span>
+                  </div>
+                </div>
+                <button
+                  disabled={isSpinning}
+                  onClick={() => setSpinningCrate(null)}
+                  className={`p-1.5 hover:bg-white/5 rounded-lg text-secondary-text hover:text-white transition-colors cursor-pointer ${
+                    isSpinning ? "opacity-30 pointer-events-none" : ""
+                  }`}
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
+              </div>
+
+              {/* Viewport Roll Panel */}
+              <div className="relative w-full overflow-hidden h-28 bg-[#0B0C10] border border-border-custom/80 rounded-2xl flex items-center p-2 shadow-inner shadow-black">
+                {/* Horizontal central indicator line */}
+                <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-gold-accent z-20 shadow-[0_0_12px_rgba(212,163,89,0.9)] flex flex-col justify-between items-center pointer-events-none">
+                  <div className="w-3 h-3 bg-gold-accent rotate-45 -translate-y-1.5 border border-black/40" />
+                  <div className="w-3 h-3 bg-gold-accent rotate-45 translate-y-1.5 border border-black/40" />
+                </div>
+                
+                {/* Rolling track strip */}
+                <div 
+                  className="flex gap-2 transition-transform duration-[5000ms] cubic-bezier(0.12, 0.8, 0.15, 1) px-[50%]"
+                  style={{
+                    transform: `translateX(-${translateX}px)`,
+                    width: `${spinRibbon.length * 88}px`
+                  }}
+                >
+                  {spinRibbon.map((item, idx) => (
+                    <div 
+                      key={idx}
+                      className={`w-20 h-20 bg-[#8B8B8B] border-[3px] border-t-[#373737] border-l-[#373737] border-r-[#FFFFFF] border-b-[#FFFFFF] rounded flex flex-col items-center justify-center shrink-0 p-1 relative select-none ${
+                        !isSpinning && winnerIdx === idx ? "shadow-[0_0_15px_rgba(212,163,89,0.4)] scale-105 border-gold-accent" : ""
+                      }`}
+                    >
+                      <div className="w-8 h-8 flex items-center justify-center p-0.5">
+                        <MinecraftItemIcon name={item.name} type={item.type} />
+                      </div>
+                      <span className="text-[7px] font-mono text-white text-shadow-sm text-center truncate max-w-full font-black mt-1 uppercase">
+                        {item.name.replace(" Crate Key", "").replace("Crate Key", "")}
+                      </span>
+                      {item.count && (
+                        <span className="absolute bottom-0.5 right-1 font-mono text-[9px] font-black text-white text-shadow-sm">
+                          {item.count.replace("x", "")}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reward Reveal and Action Board */}
+              <div className="w-full">
+                {isSpinning ? (
+                  <div className="text-center py-6 text-secondary-text animate-pulse font-mono text-xs tracking-wider flex items-center justify-center gap-2">
+                    <span>🎰 Rolling loot table... Good luck! 🎰</span>
+                  </div>
+                ) : spinResult ? (
+                  <motion.div 
+                    initial={{ scale: 0.85, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-center py-6 border border-[#10B981]/25 bg-[#10B981]/5 rounded-2xl space-y-3.5 p-5"
+                  >
+                    <div className="inline-flex w-16 h-16 bg-[#8B8B8B] border-[4px] border-t-[#373737] border-l-[#373737] border-r-[#FFFFFF] border-b-[#FFFFFF] rounded-xl flex items-center justify-center mb-1 relative shadow-xl">
+                      <div className="w-9 h-9 flex items-center justify-center p-0.5">
+                        <MinecraftItemIcon name={spinResult.name} type={spinResult.type} />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-cinzel text-[10px] font-black uppercase tracking-widest text-[#10B981]">Roll Outcome</h4>
+                      <h3 className="font-cinzel text-lg font-black text-white-text leading-tight">
+                        {spinResult.name} {spinResult.count && `(${spinResult.count})`}
+                      </h3>
+                    </div>
+                    
+                    <div className="flex gap-3 justify-center pt-2 max-w-sm mx-auto">
+                      <button
+                        onClick={() => handleStartTestSpin(spinningCrate)}
+                        className="flex-1 py-3 border border-[#10B981]/30 hover:bg-[#10B981]/15 text-[#10B981] hover:text-[#34D399] rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Spin Again
+                      </button>
+                      <button
+                        onClick={() => {
+                          addToCart({
+                            id: spinningCrate.id,
+                            name: spinningCrate.name,
+                            price: spinningCrate.price,
+                            category: "Crate Keys",
+                            accentColor: spinningCrate.accentColor,
+                          });
+                          setSpinningCrate(null);
+                        }}
+                        className="flex-1 py-3 bg-primary-accent hover:bg-primary-accent/90 text-white-text rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-violet-600/10"
+                      >
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        Buy Key
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </div>
+
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
