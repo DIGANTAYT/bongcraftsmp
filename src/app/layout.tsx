@@ -4,6 +4,7 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { CursorFollower } from "@/components/CursorFollower";
+import { FloatingCart } from "@/components/FloatingCart";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -46,6 +47,7 @@ export default function RootLayout({
           <CartProvider>
             <ToastProvider>
               {children}
+              <FloatingCart />
             </ToastProvider>
           </CartProvider>
         </AuthProvider>
