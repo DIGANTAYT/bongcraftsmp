@@ -526,7 +526,8 @@ export default function AdminPage() {
           excerpt: newsExcerpt.trim(),
           category: newsCategory,
           date: newsDate.trim(),
-          webhookUrl: webhookInput.trim()
+          webhookUrl: webhookInput.trim(),
+          siteUrl: window.location.origin
         })
       });
 

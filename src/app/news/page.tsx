@@ -263,7 +263,8 @@ export default function NewsPage() {
               title: latestArticle.title,
               excerpt: latestArticle.excerpt,
               category: latestArticle.category,
-              date: latestArticle.date
+              date: latestArticle.date,
+              siteUrl: window.location.origin
             })
           });
           if (res.ok) {

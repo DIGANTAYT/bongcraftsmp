@@ -2,13 +2,34 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { title, excerpt, category, date, webhookUrl } = await req.json();
+    const { title, excerpt, category, date, webhookUrl, siteUrl } = await req.json();
 
     const targetWebhook = webhookUrl || "https://discord.com/api/webhooks/1528861150572318871/IL8MdBNfi-n9O_I8qQ8in4ZZ6Z4h4UkVgWIuUpheZm53PX3h59UmvR3cWWEvKvd_ManX";
 
     if (!targetWebhook || !targetWebhook.startsWith("https://discord.com/api/webhooks/")) {
       return NextResponse.json({ error: "No valid Discord webhook URL configured" }, { status: 400 });
     }
+
+    // Dynamically detect website domain from request headers or passed siteUrl
+    const requestOrigin = req.headers.get("origin") || req.headers.get("referer") || "";
+    let baseUrl = siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "";
+    
+    if (!baseUrl && requestOrigin) {
+      try {
+        const parsed = new URL(requestOrigin);
+        baseUrl = `${parsed.protocol}//${parsed.host}`;
+      } catch (e) {
+        console.error("Failed to parse request origin:", e);
+      }
+    }
+
+    if (!baseUrl) {
+      baseUrl = "https://bongcraft.in";
+    }
+
+    // Strip trailing slash
+    baseUrl = baseUrl.replace(/\/$/, "");
+    const newsLink = `${baseUrl}/news`;
 
     const categoryColor = 
       category === "event" ? 3884790 : // Blue
@@ -18,12 +39,12 @@ export async function POST(req: Request) {
 
     const payload = {
       username: "BongCraft SMP News",
-      avatar_url: "https://bongcraft.in/icon.png",
+      avatar_url: `${baseUrl}/icon.png`,
       embeds: [
         {
           title: `📰 ${title}`,
-          description: `${excerpt}\n\n[👉 Read Full Announcement on Website](https://bongcraft.in/news)`,
-          url: "https://bongcraft.in/news",
+          description: `${excerpt}\n\n[👉 Read Full Announcement on Website](${newsLink})`,
+          url: newsLink,
           color: categoryColor,
           fields: [
             {
