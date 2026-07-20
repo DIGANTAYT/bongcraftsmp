@@ -55,6 +55,75 @@ export default function NewsPage() {
   // Professional announcements populate array
   const articles: NewsArticle[] = [
     {
+      id: "rank-prices-revised-notice",
+      title: "Official Store Update: Rank Prices Revised",
+      excerpt: "To make BongCraft SMP more accessible for everyone while continuing to support the server's growth, we have officially revised the prices of all premium ranks available in our store.",
+      category: "notice",
+      date: "Jul 20, 2026",
+      image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop",
+      tagLabel: "Notice",
+      tagColor: "#fbbf24",
+      content: (
+        <div className="space-y-5 text-secondary-text leading-relaxed text-sm">
+          <p className="font-semibold text-white-text">
+            Jul 20, 2026
+          </p>
+
+          <p>
+            To make BongCraft SMP more accessible for everyone while continuing to support the server's growth, we have officially revised the prices of all premium ranks available in our store.
+          </p>
+
+          <p>
+            After reviewing community feedback and our long-term plans, we've introduced a new pricing structure that offers better value without compromising the premium experience our players enjoy.
+          </p>
+
+          <div className="bg-primary-bg/50 border border-gold-accent/30 rounded-2xl p-5 space-y-3 my-4">
+            <h4 className="font-cinzel text-xs font-bold text-gold-accent uppercase tracking-wider flex items-center gap-2">
+              ✨ What's Changed?
+            </h4>
+            <ul className="space-y-2 text-xs text-secondary-text">
+              <li className="flex items-center gap-2">
+                <span className="text-emerald-400 font-bold">💎</span>
+                <span><strong>Updated pricing</strong> for all premium ranks (Lord ₹249, Paladin ₹449, Duke ₹749, King ₹999).</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-emerald-400 font-bold">📉</span>
+                <span><strong>More affordable options</strong> for new and returning players.</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-emerald-400 font-bold">⚖️</span>
+                <span><strong>Better value</strong> across every single rank tier.</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-emerald-400 font-bold">✅</span>
+                <span><strong>Existing rank perks and benefits</strong> remain 100% unchanged.</span>
+              </li>
+            </ul>
+          </div>
+
+          <p>
+            If you've been thinking about purchasing or upgrading your rank, now is the perfect time to take advantage of the new pricing.
+          </p>
+
+          <p>
+            Every purchase directly supports the development of BongCraft SMP, helping us deliver new features, exciting events, regular updates, and a better gameplay experience for the entire community.
+          </p>
+
+          <p>
+            Thank you for being part of our journey and for continuing to support BongCraft SMP.
+          </p>
+
+          <p className="font-extrabold text-gold-accent text-sm pt-2">
+            Visit the Store today and check out the updated rank prices!
+          </p>
+
+          <p className="font-bold text-secondary-text text-xs italic">
+            — BongCraft SMP Management Team
+          </p>
+        </div>
+      )
+    },
+    {
       id: "major-community-event-announced",
       title: "Major Community Event Announced for BongCraft SMP",
       excerpt: "The BongCraft SMP team is excited to announce that preparations are underway for one of the largest community events ever hosted on the server.",
