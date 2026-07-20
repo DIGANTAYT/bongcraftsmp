@@ -8,7 +8,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { 
   Lock, LayoutDashboard, CheckSquare, Terminal, Settings, 
   TrendingUp, Clock, CheckCircle2, ShieldAlert, Copy, Check, LogOut,
-  RefreshCw, Server, Trash2, Edit3, DollarSign, FileText, Sparkles
+  RefreshCw, Server, Trash2, Edit3, DollarSign, FileText, Sparkles, MessageSquare
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getDeliveryCommands as sharedGetDeliveryCommands } from "@/lib/commands";
@@ -35,12 +35,19 @@ export default function AdminPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "orders" | "pricing" | "sandbox" | "system">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "orders" | "pricing" | "sandbox" | "system" | "news">("dashboard");
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   
+  // News Broadcaster State
+  const [newsTitle, setNewsTitle] = useState("");
+  const [newsCategory, setNewsCategory] = useState("event");
+  const [newsExcerpt, setNewsExcerpt] = useState("");
+  const [newsDate, setNewsDate] = useState("Jul 20, 2026");
+  const [isBroadcastingNews, setIsBroadcastingNews] = useState(false);
+
   // Audit Logs
   const [logs, setLogs] = useState<AuditLog[]>([]);
 
@@ -503,6 +510,41 @@ export default function AdminPage() {
     addAuditLog("RCON server settings updated", "info");
   };
 
+  const handleBroadcastNews = async () => {
+    if (!newsTitle.trim() || !newsExcerpt.trim()) {
+      toast.error("Please enter a valid title and summary for the announcement.");
+      return;
+    }
+
+    setIsBroadcastingNews(true);
+    try {
+      const res = await fetch("/api/admin/news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newsTitle.trim(),
+          excerpt: newsExcerpt.trim(),
+          category: newsCategory,
+          date: newsDate.trim(),
+          webhookUrl: webhookInput.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to broadcast news");
+
+      toast.success("📢 Announcement successfully pushed to Discord channel!");
+      addAuditLog(`Broadcast news to Discord: "${newsTitle.trim()}"`, "success");
+      setNewsTitle("");
+      setNewsExcerpt("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to broadcast news to Discord.");
+    } finally {
+      setIsBroadcastingNews(false);
+    }
+  };
+
   const executeRconCommand = async (command: string): Promise<string> => {
     try {
       const authHeader = "Basic " + btoa("admin:bongcraftadmin");
@@ -838,6 +880,27 @@ export default function AdminPage() {
                     <span className="relative z-10 flex items-center gap-3 w-full">
                       <Settings className="w-4 h-4" />
                       <span className="font-inter text-xs uppercase tracking-wider font-semibold">System Settings</span>
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("news")}
+                    className={`relative w-full flex items-center gap-3 px-5 py-4.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                      activeTab === "news"
+                        ? "border-primary-accent text-primary-accent font-bold"
+                        : "border-border-custom text-secondary-text hover:border-white/10 hover:text-white"
+                    }`}
+                  >
+                    {activeTab === "news" && (
+                      <motion.span
+                        layoutId="activeAdminTabBackground"
+                        className="absolute inset-0 bg-primary-accent/10 rounded-2xl -z-1"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3 w-full">
+                      <MessageSquare className="w-4 h-4" />
+                      <span className="font-inter text-xs uppercase tracking-wider font-semibold">Discord Broadcaster</span>
                     </span>
                   </button>
                 </div>
@@ -1708,6 +1771,84 @@ export default function AdminPage() {
                             className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white-text font-bold uppercase text-[10px] rounded-xl cursor-pointer transition-colors"
                           >
                             Reset Data
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 6: DISCORD NEWS BROADCASTER */}
+                  {activeTab === "news" && isAuthenticated && (
+                    <div className="glass-panel p-6 md:p-8 rounded-3xl border border-border-custom space-y-6">
+                      <h2 className="font-cinzel text-lg font-bold text-white-text uppercase tracking-wider border-b border-border-custom pb-4 flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-indigo-400" />
+                        Discord News & Announcement Broadcaster
+                      </h2>
+
+                      <div className="space-y-5 font-inter text-xs">
+                        <p className="text-secondary-text leading-relaxed">
+                          Broadcast announcements directly to your Discord server channel via Webhooks. When you hit publish, Discord will post a styled Rich Embed card with a direct link to the news page.
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Announcement Title</label>
+                            <input
+                              type="text"
+                              value={newsTitle}
+                              onChange={(e) => setNewsTitle(e.target.value)}
+                              placeholder="e.g. Major Community Event Announced for BongCraft SMP"
+                              className="w-full bg-[#09090B] border border-border-custom px-3.5 py-2.5 rounded-xl text-white-text outline-none focus:border-indigo-500/60"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Category Tag</label>
+                              <select
+                                value={newsCategory}
+                                onChange={(e) => setNewsCategory(e.target.value)}
+                                className="w-full bg-[#09090B] border border-border-custom px-3 py-2.5 rounded-xl text-white-text outline-none focus:border-indigo-500/60 cursor-pointer"
+                              >
+                                <option value="event">Event (Blue)</option>
+                                <option value="update">Update (Rose)</option>
+                                <option value="patch">Patch Notes (Green)</option>
+                                <option value="notice">Notice (Gold)</option>
+                              </select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Publication Date</label>
+                              <input
+                                type="text"
+                                value={newsDate}
+                                onChange={(e) => setNewsDate(e.target.value)}
+                                placeholder="Jul 20, 2026"
+                                className="w-full bg-[#09090B] border border-border-custom px-3 py-2.5 rounded-xl text-white-text outline-none focus:border-indigo-500/60"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold uppercase tracking-wider block text-white-text">Announcement Summary / Excerpt</label>
+                          <textarea
+                            rows={4}
+                            value={newsExcerpt}
+                            onChange={(e) => setNewsExcerpt(e.target.value)}
+                            placeholder="Provide a summary of the announcement that will be displayed inside the Discord Embed message..."
+                            className="w-full bg-[#09090B] border border-border-custom p-3.5 rounded-xl text-white-text outline-none focus:border-indigo-500/60 leading-relaxed"
+                          />
+                        </div>
+
+                        <div className="pt-2 flex justify-end gap-3">
+                          <button
+                            disabled={isBroadcastingNews}
+                            onClick={handleBroadcastNews}
+                            className="px-6 py-3 bg-[#5865F2] hover:bg-[#5865F2]/90 text-white font-extrabold uppercase text-[10px] tracking-wider rounded-xl cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/10 disabled:opacity-50"
+                          >
+                            <MessageSquare className="w-4 h-4 fill-current" />
+                            {isBroadcastingNews ? "Pinging Discord..." : "Broadcast to Discord Channel"}
                           </button>
                         </div>
                       </div>

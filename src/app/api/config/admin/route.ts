@@ -18,7 +18,7 @@ const supabase = isSupabaseConfigured
 
 const defaultFullConfig = {
   maintenanceMode: false,
-  discordWebhook: "",
+  discordWebhook: "https://discord.com/api/webhooks/1528861150572318871/IL8MdBNfi-n9O_I8qQ8in4ZZ6Z4h4UkVgWIuUpheZm53PX3h59UmvR3cWWEvKvd_ManX",
   prices: {
     knight: 99,
     lord: 249,
