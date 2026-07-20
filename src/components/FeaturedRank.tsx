@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 export const FeaturedRank: React.FC = () => {
   const { addToCart } = useCart();
-  const [price, setPrice] = React.useState(1499);
+  const [price, setPrice] = React.useState(999);
 
   React.useEffect(() => {
     const loadPrice = async () => {

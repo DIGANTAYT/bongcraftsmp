@@ -13,10 +13,10 @@ export const StoreSection: React.FC = () => {
   
   const [customPrices, setCustomPrices] = useState({
     knight: 99,
-    lord: 399,
-    paladin: 699,
-    duke: 999,
-    king: 1499,
+    lord: 249,
+    paladin: 449,
+    duke: 749,
+    king: 999,
     common_crate: 20,
     rare_crate: 30,
     epic_crate: 50,
