@@ -55,6 +55,47 @@ export default function NewsPage() {
   // Professional announcements populate array
   const articles: NewsArticle[] = [
     {
+      id: "major-community-event-announced",
+      title: "Major Community Event Announced for BongCraft SMP",
+      excerpt: "The BongCraft SMP team is excited to announce that preparations are underway for one of the largest community events ever hosted on the server.",
+      category: "event",
+      date: "Jul 20, 2026",
+      image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=600&auto=format&fit=crop",
+      tagLabel: "Event",
+      tagColor: "#3b82f6",
+      content: (
+        <div className="space-y-5 text-secondary-text leading-relaxed text-sm">
+          <p className="font-semibold text-white-text">
+            Jul 20, 2026
+          </p>
+
+          <p>
+            The BongCraft SMP team is excited to announce that preparations are underway for one of the <strong>largest community events</strong> ever hosted on the server.
+          </p>
+
+          <p>
+            While full details are still under wraps, players can expect a unique experience featuring exclusive activities, limited-time rewards, and exciting challenges for the entire community. This upcoming event has been in development for several weeks and is designed to bring players together like never before.
+          </p>
+
+          <p>
+            Although the official event date has not yet been revealed, the announcement, schedule, and participation details will be shared soon.
+          </p>
+
+          <p>
+            Players are encouraged to stay active, prepare their gear, and keep an eye on our announcements so they don't miss what's coming next.
+          </p>
+
+          <p>
+            More information will be released in the coming days.
+          </p>
+
+          <p className="font-bold text-gold-accent pt-2">
+            — BongCraft SMP Team
+          </p>
+        </div>
+      )
+    },
+    {
       id: "sponsorship-announcement",
       title: "BongCraft SMP Official Launch — Sponsored by Akash Samanta!",
       excerpt: "We are thrilled to announce that BongCraft SMP has partnered with Akash Samanta as our official sponsor! This collaboration secures the server nodes for a 100% lag-free experience.",
