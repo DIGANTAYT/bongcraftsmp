@@ -173,6 +173,42 @@ export default function NewsPage() {
     }
   ];
 
+  // Automatic Discord Webhook Trigger when a new news article is added
+  React.useEffect(() => {
+    const autoBroadcastLatestNews = async () => {
+      if (!articles || articles.length === 0) return;
+      const latestArticle = articles[0];
+      const lastSentId = localStorage.getItem("bongcraft_last_sent_discord_news_id");
+
+      if (!lastSentId) {
+        localStorage.setItem("bongcraft_last_sent_discord_news_id", latestArticle.id);
+        return;
+      }
+
+      if (lastSentId !== latestArticle.id) {
+        try {
+          const res = await fetch("/api/admin/news", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: latestArticle.title,
+              excerpt: latestArticle.excerpt,
+              category: latestArticle.category,
+              date: latestArticle.date
+            })
+          });
+          if (res.ok) {
+            localStorage.setItem("bongcraft_last_sent_discord_news_id", latestArticle.id);
+          }
+        } catch (e) {
+          console.error("Auto Discord news trigger error:", e);
+        }
+      }
+    };
+
+    autoBroadcastLatestNews();
+  }, []);
+
   const filteredArticles = articles.filter(
     (art) => activeCategory === "all" || art.category === activeCategory
   );
