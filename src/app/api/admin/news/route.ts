@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     }
 
     if (!baseUrl) {
-      baseUrl = "https://bongcraft.in";
+      baseUrl = "https://store.bongcraftsmp.in";
     }
 
     // Strip trailing slash
