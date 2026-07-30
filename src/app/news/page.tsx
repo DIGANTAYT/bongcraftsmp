@@ -60,7 +60,7 @@ export default function NewsPage() {
       excerpt: "Dekhte dekhte BongCraft SMP pray 1 month complete korte jacche. With 450+ players registered, the journey has officially begun. Special thanks to our sponsor Akash Samanta!",
       category: "community",
       date: "Jul 30, 2026",
-      image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800&auto=format&fit=crop",
+      image: "/images/1month_banner.jpg",
       tagLabel: "Community",
       tagColor: "#a855f7",
       content: (
