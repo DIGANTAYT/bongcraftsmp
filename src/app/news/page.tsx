@@ -55,6 +55,80 @@ export default function NewsPage() {
   // Professional announcements populate array
   const articles: NewsArticle[] = [
     {
+      id: "bongcraft-smp-1-month-celebration",
+      title: "BongCraft SMP: Celebrating 1 Month Strong! 🎉",
+      excerpt: "Dekhte dekhte BongCraft SMP pray 1 month complete korte jacche. With 450+ players registered, the journey has officially begun. Special thanks to our sponsor Akash Samanta!",
+      category: "community",
+      date: "Jul 30, 2026",
+      image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800&auto=format&fit=crop",
+      tagLabel: "Community",
+      tagColor: "#a855f7",
+      content: (
+        <div className="space-y-5 text-secondary-text leading-relaxed text-sm">
+          <p className="font-semibold text-white-text">
+            Jul 30, 2026
+          </p>
+
+          <p>
+            Dekhte dekhte <strong>BongCraft SMP</strong> pray <strong>1 month</strong> complete korte jacche. Ei 1 monthe amra onek challenges face korechi, onek new experiences gather korechi, ar protidin chesta korechi server-ke aro stable, enjoyable ar better banate.
+          </p>
+
+          <p>
+            Ei khub e sholpo shomoyer moddhe amader active community <strong>450+ registered players</strong> cross koreche! Eta shudhu amader kache ekta number noy, eta tomader trust, continuous support ar bhalobashar boro prodorshoni. 💛
+          </p>
+
+          <p>
+            Jara prothom din theke amader sathe acho, jara recently join korecho, jara building korecho, grinding korecho, bugs report korecho suggestions diyecho ar protidin server improve korte help korcho—tomader prottekjon ke internal team-er torof theke onek dhonnobad. ❤️
+          </p>
+
+          <div className="bg-primary-bg/50 border border-primary-accent/30 rounded-2xl p-5 space-y-3.5 my-4">
+            <h4 className="font-cinzel text-xs font-bold text-primary-accent uppercase tracking-wider flex items-center gap-2">
+              🤝 Special Thanks & Acknowledgements
+            </h4>
+            <p>
+              Amra special appreciation and gratitude janate chai <strong className="text-gold-accent">@akashsamanta0114_79845</strong> ke, official-bhabe <strong>BongCraft SMP</strong> ke sponsor korar jonno.
+            </p>
+            <p className="text-xs">
+              Tomar ongoing support chara amader ei journey smoothly run kora complete possible hoto na. Tomar trust and cooperation amader complete developer & admin team-er jonno active motivation. 🤝💙
+            </p>
+          </div>
+
+          <h4 className="font-cinzel text-xs font-bold text-white-text uppercase tracking-wider">
+            🚀 Current Progress & Future Roadmap
+          </h4>
+          <p>
+            Amra continuous performance upgrades, stability improvements and feature requests processing-e active kaj kore jacchi. Tomader feedback are extremely valuable to us.
+          </p>
+          <p>
+            Samne asteche:
+          </p>
+          <ul className="list-disc list-inside space-y-1.5 pl-2 text-xs">
+            <li>✨ **New Gameplay Features & Items**</li>
+            <li>🎯 **Exciting In-Game Events**</li>
+            <li>🎁 **Exclusive Giveaways & Rewards**</li>
+            <li>⚙️ **Quality of Life (QoL) Updates & bug fixes**</li>
+            <li>🎊 **Surprise announcement details very soon!**</li>
+          </ul>
+
+          <p>
+            Amader main objective holo BongCraft SMP-ke ekta safe, fun, friendly ar long-term interactive Minecraft RPG survival community toiri kora.
+          </p>
+
+          <p className="font-extrabold text-gold-accent text-sm pt-2">
+            1 Month done... ekhono onek dur jawa baki. See you all in-game! ⚔️
+          </p>
+
+          <div className="flex gap-4 pt-2 border-t border-border-custom text-[10px] uppercase font-bold text-secondary-text">
+            <span>💛 450+ Active Players</span>
+            <span>•</span>
+            <span>🎉 1 Month Strong</span>
+            <span>•</span>
+            <span>🚀 The Journey Continues</span>
+          </div>
+        </div>
+      )
+    },
+    {
       id: "rank-prices-revised-notice",
       title: "Official Store Update: Rank Prices Revised",
       excerpt: "To make BongCraft SMP more accessible for everyone while continuing to support the server's growth, we have officially revised the prices of all premium ranks available in our store.",
