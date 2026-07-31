@@ -260,9 +260,8 @@ export default function NewsPage() {
               🎮 Connection Information:
             </h4>
             <ul className="list-disc list-inside space-y-1.5 text-xs text-secondary-text pl-1">
-              <li><strong>Java Server IP:</strong> <code className="text-primary-accent">play.bongcraftssmp.in</code></li>
-              <li><strong>Bedrock Server IP:</strong> <code className="text-primary-accent">play.bongcraftssmp.in</code> (Port: <code className="text-primary-accent">19132</code>)</li>
-              <li className="text-[10px] text-amber-500/70 list-none mt-1">💡 Note: You can also connect via <code className="text-secondary-text/80">play.bongcraftsmp.in</code></li>
+              <li><strong>Java Server IP:</strong> <code className="text-primary-accent">india-09.powerdown.group:25662</code></li>
+              <li><strong>Bedrock Server IP:</strong> <code className="text-primary-accent">india-09.powerdown.group</code> (Port: <code className="text-primary-accent">25662</code>)</li>
             </ul>
           </div>
 

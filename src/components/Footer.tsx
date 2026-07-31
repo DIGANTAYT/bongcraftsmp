@@ -6,7 +6,7 @@ import { Copy, Check, MessageSquare, ShieldAlert } from "lucide-react";
 
 export const Footer: React.FC = () => {
   const [copied, setCopied] = useState(false);
-  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
+  const [javaIP, setJavaIP] = useState("india-09.powerdown.group:25662");
   const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
 
   React.useEffect(() => {
@@ -15,7 +15,9 @@ export const Footer: React.FC = () => {
         const res = await fetch("/api/config/public");
         if (res.ok) {
           const config = await res.json();
-          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
+          const host = config.serverIpJava ?? "india-09.powerdown.group";
+          const port = config.serverPortJava ?? "25662";
+          setJavaIP(port === "25565" || !port ? host : `${host}:${port}`);
           setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
         }
       } catch (e) {

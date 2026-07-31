@@ -12,7 +12,7 @@ import { Crown, Check, Copy, Sparkles, Server, Terminal, Shield, Star, Globe, Me
 export default function AboutPage() {
   const [copied, setCopied] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
+  const [javaIP, setJavaIP] = useState("india-09.powerdown.group:25662");
   const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
 
   React.useEffect(() => {
@@ -21,7 +21,9 @@ export default function AboutPage() {
         const res = await fetch("/api/config/public");
         if (res.ok) {
           const config = await res.json();
-          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
+          const host = config.serverIpJava ?? "india-09.powerdown.group";
+          const port = config.serverPortJava ?? "25662";
+          setJavaIP(port === "25565" || !port ? host : `${host}:${port}`);
           setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
         }
       } catch (e) {
@@ -216,15 +218,9 @@ export default function AboutPage() {
 
                 <div className="space-y-3.5 font-inter text-xs">
                   <div className="flex justify-between items-center gap-2">
-                    <span className="text-secondary-text">Java IP Address</span>
+                    <span className="text-secondary-text">Server Address</span>
                     <span className="font-mono font-bold text-white-text text-right select-all">
-                      play.bongcraftsmp.in
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center gap-2">
-                    <span className="text-secondary-text">Bedrock Port</span>
-                    <span className="font-mono font-bold text-white-text text-right">
-                      19138
+                      {javaIP}
                     </span>
                   </div>
                   <div className="flex justify-between items-center gap-2">

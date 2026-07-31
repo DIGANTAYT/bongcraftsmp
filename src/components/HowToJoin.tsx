@@ -7,9 +7,9 @@ export const HowToJoin: React.FC = () => {
   const [copiedJava, setCopiedJava] = useState(false);
   const [copiedBedrock, setCopiedBedrock] = useState(false);
 
-  const javaIP = "play.bongcraftssmp.in";
-  const bedrockIP = "play.bongcraftssmp.in";
-  const bedrockPort = "19132";
+  const javaIP = "india-09.powerdown.group:25662";
+  const bedrockIP = "india-09.powerdown.group";
+  const bedrockPort = "25662";
 
   const handleCopyJava = () => {
     navigator.clipboard.writeText(javaIP);

@@ -88,7 +88,7 @@ export default function AdminPage() {
   const [webhookInput, setWebhookInput] = useState("");
 
   // RCON Config state
-  const [rconHost, setRconHost] = useState("play.bongcraftsmp.in");
+  const [rconHost, setRconHost] = useState("india-09.powerdown.group");
   const [rconPort, setRconPort] = useState("25575");
   const [rconPassword, setRconPassword] = useState("");
   const [rconEnabled, setRconEnabled] = useState(false);
@@ -102,10 +102,10 @@ export default function AdminPage() {
   const [adminDiscountPercentage, setAdminDiscountPercentage] = useState("0");
 
   // General Storefront Configurations
-  const [serverIpJava, setServerIpJava] = useState("play.bongcraftsmp.in");
-  const [serverPortJava, setServerPortJava] = useState("25565");
-  const [serverIpBedrock, setServerIpBedrock] = useState("play.bongcraftsmp.in");
-  const [serverPortBedrock, setServerPortBedrock] = useState("19132");
+  const [serverIpJava, setServerIpJava] = useState("india-09.powerdown.group");
+  const [serverPortJava, setServerPortJava] = useState("25662");
+  const [serverIpBedrock, setServerIpBedrock] = useState("india-09.powerdown.group");
+  const [serverPortBedrock, setServerPortBedrock] = useState("25662");
   const [communityGoalTarget, setCommunityGoalTarget] = useState("10000");
   const [heroTitle, setHeroTitle] = useState("BONGCRAFT");
   const [heroSubtitle, setHeroSubtitle] = useState("Bengal's Ultimate Survival Experience");

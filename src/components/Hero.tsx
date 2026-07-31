@@ -11,10 +11,10 @@ export const Hero: React.FC = () => {
   const [isServerOnline, setIsServerOnline] = useState(true);
 
   // Dynamic Branding and Connection Details
-  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
-  const [javaPort, setJavaPort] = useState("25565");
-  const [bedrockIP, setBedrockIP] = useState("play.bongcraftsmp.in");
-  const [bedrockPort, setBedrockPort] = useState("19132");
+  const [javaIP, setJavaIP] = useState("india-09.powerdown.group");
+  const [javaPort, setJavaPort] = useState("25662");
+  const [bedrockIP, setBedrockIP] = useState("india-09.powerdown.group");
+  const [bedrockPort, setBedrockPort] = useState("25662");
   const [title, setTitle] = useState("BONGCRAFT");
   const [subtitle, setSubtitle] = useState("Bengal's Ultimate Survival Experience");
   const [tagline, setTagline] = useState("Bangalir Nijer Survival Server");
@@ -22,20 +22,20 @@ export const Hero: React.FC = () => {
 
   useEffect(() => {
     const loadConfigAndStatus = async () => {
-      let targetIp = "play.bongcraftsmp.in";
+      let targetIp = "india-09.powerdown.group";
       try {
         const configRes = await fetch("/api/config/public");
         if (configRes.ok) {
           const config = await configRes.json();
-          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
-          setJavaPort(config.serverPortJava ?? "25565");
-          setBedrockIP(config.serverIpBedrock ?? "play.bongcraftsmp.in");
-          setBedrockPort(config.serverPortBedrock ?? "19132");
+          setJavaIP(config.serverIpJava ?? "india-09.powerdown.group");
+          setJavaPort(config.serverPortJava ?? "25662");
+          setBedrockIP(config.serverIpBedrock ?? "india-09.powerdown.group");
+          setBedrockPort(config.serverPortBedrock ?? "25662");
           setTitle(config.heroTitle ?? "BONGCRAFT");
           setSubtitle(config.heroSubtitle ?? "Bengal's Ultimate Survival Experience");
           setTagline(config.heroTagline ?? "Bangalir Nijer Survival Server");
           setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
-          targetIp = config.serverIpJava ?? "play.bongcraftsmp.in";
+          targetIp = config.serverIpJava ?? "india-09.powerdown.group";
         }
       } catch (e) {
         console.error("Failed to load public config in Hero:", e);

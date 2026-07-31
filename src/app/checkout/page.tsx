@@ -382,7 +382,7 @@ export default function CheckoutPage() {
                       <div className="flex items-center gap-1.5 mt-1">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                         <span className="font-inter text-[10px] text-secondary-text">
-                          Delivery will be dispatched on play.bongcraftsmp.in
+                          Delivery will be dispatched on BongCraft SMP
                         </span>
                       </div>
                     </div>

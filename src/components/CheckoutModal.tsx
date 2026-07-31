@@ -278,7 +278,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                     <span className="font-inter text-[10px] text-secondary-text">
-                      Active receiver on play.bongcraftsmp.in
+                      Active receiver on BongCraft SMP
                     </span>
                   </div>
                 </div>

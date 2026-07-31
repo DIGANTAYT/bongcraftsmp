@@ -47,19 +47,21 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const [javaIP, setJavaIP] = useState("play.bongcraftsmp.in");
+  const [javaIP, setJavaIP] = useState("india-09.powerdown.group:25662");
   const [discordUrl, setDiscordUrl] = useState("https://discord.gg/WzDAzMYwGX");
 
   useEffect(() => {
     const fetchServerStatus = async () => {
-      let targetIp = "play.bongcraftsmp.in";
+      let targetIp = "india-09.powerdown.group";
       try {
         const configRes = await fetch("/api/config/public");
         if (configRes.ok) {
           const config = await configRes.json();
-          setJavaIP(config.serverIpJava ?? "play.bongcraftsmp.in");
+          const host = config.serverIpJava ?? "india-09.powerdown.group";
+          const port = config.serverPortJava ?? "25662";
+          setJavaIP(port === "25565" || !port ? host : `${host}:${port}`);
           setDiscordUrl(config.discordInvite ?? "https://discord.gg/WzDAzMYwGX");
-          targetIp = config.serverIpJava ?? "play.bongcraftsmp.in";
+          targetIp = config.serverIpJava ?? "india-09.powerdown.group";
         }
       } catch (e) {
         console.error("Failed to load configs inside Navbar status fetcher", e);
