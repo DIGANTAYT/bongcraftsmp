@@ -14,7 +14,7 @@ export const Hero: React.FC = () => {
   const [javaIP, setJavaIP] = useState("india-09.powerdown.group");
   const [javaPort, setJavaPort] = useState("25662");
   const [bedrockIP, setBedrockIP] = useState("india-09.powerdown.group");
-  const [bedrockPort, setBedrockPort] = useState("25662");
+  const [bedrockPort, setBedrockPort] = useState("30388");
   const [title, setTitle] = useState("BONGCRAFT");
   const [subtitle, setSubtitle] = useState("Bengal's Ultimate Survival Experience");
   const [tagline, setTagline] = useState("Bangalir Nijer Survival Server");
@@ -30,7 +30,7 @@ export const Hero: React.FC = () => {
           setJavaIP(config.serverIpJava ?? "india-09.powerdown.group");
           setJavaPort(config.serverPortJava ?? "25662");
           setBedrockIP(config.serverIpBedrock ?? "india-09.powerdown.group");
-          setBedrockPort(config.serverPortBedrock ?? "25662");
+          setBedrockPort(config.serverPortBedrock ?? "30388");
           setTitle(config.heroTitle ?? "BONGCRAFT");
           setSubtitle(config.heroSubtitle ?? "Bengal's Ultimate Survival Experience");
           setTagline(config.heroTagline ?? "Bangalir Nijer Survival Server");

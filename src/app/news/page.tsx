@@ -261,7 +261,7 @@ export default function NewsPage() {
             </h4>
             <ul className="list-disc list-inside space-y-1.5 text-xs text-secondary-text pl-1">
               <li><strong>Java Server IP:</strong> <code className="text-primary-accent">india-09.powerdown.group:25662</code></li>
-              <li><strong>Bedrock Server IP:</strong> <code className="text-primary-accent">india-09.powerdown.group</code> (Port: <code className="text-primary-accent">25662</code>)</li>
+              <li><strong>Bedrock Server IP:</strong> <code className="text-primary-accent">india-09.powerdown.group</code> (Port: <code className="text-primary-accent">30388</code>)</li>
             </ul>
           </div>
 

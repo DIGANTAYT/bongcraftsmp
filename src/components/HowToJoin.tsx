@@ -9,7 +9,7 @@ export const HowToJoin: React.FC = () => {
 
   const javaIP = "india-09.powerdown.group:25662";
   const bedrockIP = "india-09.powerdown.group";
-  const bedrockPort = "25662";
+  const bedrockPort = "30388";
 
   const handleCopyJava = () => {
     navigator.clipboard.writeText(javaIP);

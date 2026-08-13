@@ -53,7 +53,7 @@ const defaultFullConfig = {
   serverIpJava: "india-09.powerdown.group",
   serverPortJava: "25662",
   serverIpBedrock: "india-09.powerdown.group",
-  serverPortBedrock: "25662",
+  serverPortBedrock: "30388",
   communityGoalTarget: 10000,
   heroTitle: "BONGCRAFT",
   heroSubtitle: "Bengal's Ultimate Survival Experience",

@@ -105,7 +105,7 @@ export default function AdminPage() {
   const [serverIpJava, setServerIpJava] = useState("india-09.powerdown.group");
   const [serverPortJava, setServerPortJava] = useState("25662");
   const [serverIpBedrock, setServerIpBedrock] = useState("india-09.powerdown.group");
-  const [serverPortBedrock, setServerPortBedrock] = useState("25662");
+  const [serverPortBedrock, setServerPortBedrock] = useState("30388");
   const [communityGoalTarget, setCommunityGoalTarget] = useState("10000");
   const [heroTitle, setHeroTitle] = useState("BONGCRAFT");
   const [heroSubtitle, setHeroSubtitle] = useState("Bengal's Ultimate Survival Experience");
